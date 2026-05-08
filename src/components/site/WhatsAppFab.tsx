@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
+import { useStoreSettings } from "@/lib/settings";
 
-const WhatsAppFab = () => (
+const WhatsAppFab = () => {
+  const { phone } = useStoreSettings();
+  return (
   <motion.a
-    href="https://wa.me/919999999999"
+    href={`https://wa.me/${phone}`}
     target="_blank"
     rel="noopener noreferrer"
     aria-label="Chat on WhatsApp"
@@ -24,6 +27,7 @@ const WhatsAppFab = () => (
       Chat with Mohika
     </span>
   </motion.a>
-);
+  );
+};
 
 export default WhatsAppFab;

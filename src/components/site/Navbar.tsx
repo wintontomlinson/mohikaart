@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Menu, X, ShoppingBag, ChevronDown, Heart, Briefcase, BookOpen, HelpCircle, Truck, ArrowRight, Sparkles } from "lucide-react";
+import {
+  Menu, X, ShoppingBag, ChevronDown, Heart, Briefcase,
+  BookOpen, HelpCircle, Truck, ArrowRight, Sparkles, Star,
+} from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
+import { useStoreSettings } from "@/lib/settings";
 import logo from "@/assets/mohika-logo.png";
 
+/* ── nav links ── */
 const links = [
   { to: "/",        label: "Home" },
   { to: "/shop",    label: "Shop" },
@@ -14,103 +19,149 @@ const links = [
 ];
 
 const moreLinks = [
-  { to: "/wedding",    label: "Wedding",    icon: Heart,      desc: "Bridal bouquet preservation" },
-  { to: "/corporate",  label: "Corporate",  icon: Briefcase,  desc: "Bulk & branded gifts" },
-  { to: "/care-guide", label: "Care Guide", icon: BookOpen,   desc: "Keep your piece timeless" },
-  { to: "/faq",        label: "FAQ",        icon: HelpCircle, desc: "Common questions answered" },
-  { to: "/shipping",   label: "Shipping",   icon: Truck,      desc: "Delivery & returns" },
+  { to: "/wedding",    label: "Wedding",    icon: Heart,      desc: "Bridal bouquet preservation",  tag: "Popular" },
+  { to: "/corporate",  label: "Corporate",  icon: Briefcase,  desc: "Bulk & branded gifts",         tag: "" },
+  { to: "/care-guide", label: "Care Guide", icon: BookOpen,   desc: "Keep your piece timeless",     tag: "" },
+  { to: "/faq",        label: "FAQ",        icon: HelpCircle, desc: "Common questions answered",    tag: "" },
+  { to: "/shipping",   label: "Shipping",   icon: Truck,      desc: "Delivery & returns info",      tag: "" },
 ];
 
+
+function AnnouncementTicker({ threshold }: { threshold: number }) {
+  const [idx, setIdx] = useState(0);
+  const msgs = [
+    `✦  FREE SHIPPING on orders above ₹${threshold}`,
+    "✦  Handcrafted with Love — Since 2021",
+    "✦  2000+ Happy Customers across India",
+    "✦  Customized resin gifts for every occasion",
+  ];
+  useEffect(() => {
+    const id = setInterval(() => setIdx(v => (v + 1) % msgs.length), 3800);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <AnimatePresence mode="wait">
+      <motion.span
+        key={idx}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ fontSize: "10px", letterSpacing: "0.2em", color: "white", fontWeight: 500 }}
+      >
+        {msgs[idx]}
+      </motion.span>
+    </AnimatePresence>
+  );
+}
+
+
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [scrolled, setScrolled]           = useState(false);
+  const [scrollDir, setScrollDir]         = useState<"up" | "down">("up");
+  const [open, setOpen]                   = useState(false);
+  const [moreOpen, setMoreOpen]           = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
-  const moreRef = useRef<HTMLDivElement>(null);
+  const moreRef     = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+
   const { count, setOpen: setCartOpen } = useCart();
   const { pathname } = useLocation();
+  const { free_shipping_threshold } = useStoreSettings();
 
+  /* scroll tracking */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 28);
+      setScrollDir(y > lastScrollY.current + 4 ? "down" : "up");
+      lastScrollY.current = y;
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* close on route change */
   useEffect(() => {
     setOpen(false);
     setMoreOpen(false);
     setMobileMoreOpen(false);
   }, [pathname]);
 
+  /* close More dropdown on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setMoreOpen(false);
-      }
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
     };
     if (moreOpen) document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [moreOpen]);
 
   const isMoreActive = moreLinks.some((l) => pathname === l.to);
+  const hide = scrolled && scrollDir === "down" && !open;
 
   return (
     <motion.header
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ y: -120, opacity: 0 }}
+      animate={{ y: hide ? -120 : 0, opacity: 1 }}
+      transition={{ duration: hide ? 0.3 : 0.8, ease: [0.22, 1, 0.36, 1] }}
       className="fixed top-0 inset-x-0 z-50"
     >
-      {/* Announcement bar */}
+      {/* ── Announcement bar ── */}
       <AnimatePresence>
         {!scrolled && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 32, opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden relative"
             style={{
-              background: "linear-gradient(90deg, hsl(34 58% 52%), hsl(28 65% 55%), hsl(34 58% 52%))",
+              background: "linear-gradient(90deg, hsl(22 20% 14%), hsl(28 22% 18%) 40%, hsl(34 42% 28%) 70%, hsl(22 20% 14%))",
             }}
           >
-            <div className="flex items-center justify-center gap-2 py-[7px] px-4">
-              <Sparkles className="w-2.5 h-2.5 text-white/80 shrink-0" />
-              <span style={{ fontSize: "10px", letterSpacing: "0.18em", color: "white", fontWeight: 500 }}>
-                FREE SHIPPING on orders above ₹499 · Handcrafted with Love
-              </span>
-              <Sparkles className="w-2.5 h-2.5 text-white/80 shrink-0" />
+            <AnnouncementTicker threshold={free_shipping_threshold} />
+            {/* decorative sparkle dots */}
+            <div className="absolute left-6 top-1/2 -translate-y-1/2 opacity-30">
+              <Sparkles className="w-3 h-3 text-amber-300" />
+            </div>
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-30">
+              <Star className="w-2.5 h-2.5 text-amber-300 fill-amber-300" />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main nav bar */}
+      {/* ── Main nav bar ── */}
       <div
         className="transition-all duration-500"
         style={{
-          background: scrolled ? "hsl(36 42% 99%/0.96)" : "hsl(36 42% 99%/0.82)",
-          backdropFilter: "blur(20px) saturate(160%)",
-          WebkitBackdropFilter: "blur(20px) saturate(160%)",
+          background: scrolled
+            ? "hsl(36 42% 99%/0.98)"
+            : "hsl(36 42% 99%/0.78)",
+          backdropFilter: "blur(24px) saturate(180%)",
+          WebkitBackdropFilter: "blur(24px) saturate(180%)",
           boxShadow: scrolled
-            ? "0 1px 0 hsl(34 30% 86%/0.8), 0 4px 24px -4px hsl(22 22% 22%/0.08)"
-            : "0 1px 0 hsl(34 30% 88%/0.4)",
+            ? "0 1px 0 hsl(34 30% 86%/0.9), 0 6px 28px -6px hsl(22 22% 22%/0.1)"
+            : "0 1px 0 hsl(34 30% 88%/0.35)",
         }}
       >
-        <nav className="max-w-[1320px] mx-auto px-5 md:px-10 flex items-center justify-between h-[64px] md:h-[72px]">
+        <nav className="max-w-[1360px] mx-auto px-5 md:px-10 flex items-center justify-between h-[62px] md:h-[70px]">
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center shrink-0 group">
+          {/* ── LOGO ── */}
+          <Link to="/" className="flex items-center shrink-0 group relative">
             <img
               src={logo}
               alt="Mohika Art"
-              className="h-[38px] md:h-[46px] w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+              className="h-[36px] md:h-[44px] w-auto object-contain transition-all duration-400 group-hover:scale-[1.04]"
+              style={{ transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1), filter 0.4s ease" }}
             />
           </Link>
 
-          {/* Desktop Nav */}
-          <ul className="hidden lg:flex items-center gap-0.5">
+          {/* ── DESKTOP NAV ── */}
+          <ul className="hidden lg:flex items-center gap-0">
             {links.map((l) => {
               const isActive = l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
               return (
@@ -118,94 +169,169 @@ const Navbar = () => {
                   <NavLink
                     to={l.to}
                     end={l.to === "/"}
-                    className={`relative px-4 py-2.5 text-[11.5px] tracking-[0.08em] uppercase font-medium transition-all duration-200 rounded-lg inline-block ${
-                      isActive ? "text-foreground" : "text-foreground/50 hover:text-foreground"
-                    }`}
+                    className="group relative px-[14px] py-2.5 inline-flex flex-col items-center"
                   >
-                    {l.label}
-                    {isActive && (
-                      <motion.span
-                        layoutId="nav-indicator"
-                        className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-4 h-[2px] rounded-full"
-                        style={{ background: "hsl(34 58% 52%)" }}
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
+                    <span
+                      className="text-[11px] tracking-[0.09em] uppercase font-semibold transition-all duration-250"
+                      style={{
+                        color: isActive ? "hsl(var(--foreground))" : "hsl(var(--foreground)/0.45)",
+                        letterSpacing: "0.09em",
+                      }}
+                    >
+                      {l.label}
+                    </span>
+                    {/* active pill underline */}
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"
+                      animate={{
+                        width: isActive ? "20px" : "0px",
+                        opacity: isActive ? 1 : 0,
+                      }}
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                      style={{ height: "2px", background: "hsl(34 58% 52%)" }}
+                    />
+                    {/* hover underline */}
+                    <span
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full opacity-0 group-hover:opacity-40 transition-all duration-250"
+                      style={{ height: "2px", width: "12px", background: "hsl(34 58% 52%)" }}
+                    />
                   </NavLink>
                 </li>
               );
             })}
 
-            {/* More dropdown */}
+            {/* ── More dropdown ── */}
             <li className="relative" ref={moreRef}>
               <button
                 onClick={() => setMoreOpen((v) => !v)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-[11.5px] tracking-[0.08em] uppercase font-medium transition-all duration-200 rounded-lg ${
-                  isMoreActive || moreOpen ? "text-foreground" : "text-foreground/50 hover:text-foreground"
-                }`}
+                className="group relative px-[14px] py-2.5 inline-flex flex-col items-center"
               >
-                More
-                <motion.span
-                  animate={{ rotate: moreOpen ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center"
+                <span
+                  className="flex items-center gap-1 text-[11px] tracking-[0.09em] uppercase font-semibold transition-all duration-250"
+                  style={{ color: isMoreActive || moreOpen ? "hsl(var(--foreground))" : "hsl(var(--foreground)/0.45)" }}
                 >
-                  <ChevronDown className="w-3 h-3" />
-                </motion.span>
+                  More
+                  <motion.span
+                    animate={{ rotate: moreOpen ? 180 : 0 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="flex items-center"
+                  >
+                    <ChevronDown className="w-3 h-3" />
+                  </motion.span>
+                </span>
               </button>
 
+              {/* ── MEGA DROPDOWN ── */}
               <AnimatePresence>
                 {moreOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 12, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute top-[calc(100%+10px)] right-0 w-[270px] rounded-2xl overflow-hidden"
+                    exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute top-[calc(100%+8px)] right-0 w-[290px] rounded-2xl overflow-hidden"
                     style={{
-                      background: "hsl(36 42% 99%/0.98)",
-                      backdropFilter: "blur(24px)",
-                      border: "1px solid hsl(34 30% 88%/0.7)",
-                      boxShadow: "0 24px 64px -16px hsl(22 22% 22%/0.18), 0 8px 24px -8px hsl(22 22% 22%/0.08)",
+                      background: "hsl(36 42% 99%/0.99)",
+                      backdropFilter: "blur(28px) saturate(170%)",
+                      border: "1px solid hsl(34 30% 88%/0.65)",
+                      boxShadow:
+                        "0 32px 80px -20px hsl(22 22% 22%/0.2), " +
+                        "0 8px 24px -8px hsl(22 22% 22%/0.07), " +
+                        "inset 0 1px 0 hsl(36 50% 100%/0.9)",
                     }}
                   >
-                    <div className="px-4 pt-3 pb-2" style={{ borderBottom: "1px solid hsl(34 30% 88%/0.5)" }}>
-                      <span style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "hsl(25 10% 52%)", fontWeight: 600 }}>
-                        Explore
+                    {/* Header */}
+                    <div
+                      className="px-4 pt-3.5 pb-2.5 flex items-center gap-2"
+                      style={{ borderBottom: "1px solid hsl(34 28% 90%/0.7)" }}
+                    >
+                      <Sparkles className="w-3 h-3" style={{ color: "hsl(34 58% 52%)" }} />
+                      <span style={{ fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: "hsl(25 10% 48%)", fontWeight: 700 }}>
+                        Explore More
                       </span>
                     </div>
+
+                    {/* Links */}
                     <div className="p-2">
-                      {moreLinks.map((l) => {
+                      {moreLinks.map((l, i) => {
                         const active = pathname === l.to;
                         return (
-                          <Link
+                          <motion.div
                             key={l.to}
-                            to={l.to}
-                            className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                              active ? "bg-amber-50" : "hover:bg-foreground/[0.03]"
-                            }`}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.04, duration: 0.2 }}
                           >
-                            <span
-                              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 ${
-                                active ? "bg-amber-100" : "bg-foreground/[0.04] group-hover:bg-amber-50"
+                            <Link
+                              to={l.to}
+                              className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-220 ${
+                                active ? "bg-amber-50/70" : "hover:bg-foreground/[0.03]"
                               }`}
                             >
-                              <l.icon className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                                active ? "text-amber-600" : "text-foreground/35 group-hover:text-amber-500"
-                              }`} />
-                            </span>
-                            <div className="min-w-0">
-                              <div className={`text-[11.5px] font-semibold leading-none mb-0.5 transition-colors duration-200 ${
-                                active ? "text-foreground" : "text-foreground/65 group-hover:text-foreground"
-                              }`}>
-                                {l.label}
+                              <span
+                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all duration-220 ${
+                                  active
+                                    ? "bg-amber-100"
+                                    : "bg-foreground/[0.04] group-hover:bg-amber-50"
+                                }`}
+                              >
+                                <l.icon
+                                  className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                                    active ? "text-amber-600" : "text-foreground/30 group-hover:text-amber-500"
+                                  }`}
+                                />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className={`text-[11.5px] font-semibold leading-none transition-colors duration-200 ${
+                                      active ? "text-foreground" : "text-foreground/60 group-hover:text-foreground"
+                                    }`}
+                                  >
+                                    {l.label}
+                                  </span>
+                                  {l.tag && (
+                                    <span
+                                      className="text-[7.5px] font-bold tracking-wider rounded-full px-1.5 py-0.5"
+                                      style={{
+                                        background: "hsl(34 58% 52%/0.1)",
+                                        color: "hsl(34 58% 46%)",
+                                        letterSpacing: "0.15em",
+                                        textTransform: "uppercase",
+                                      }}
+                                    >
+                                      {l.tag}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[10px] leading-[1.4] text-foreground/35 mt-0.5">
+                                  {l.desc}
+                                </div>
                               </div>
-                              <div className="text-[10px] leading-[1.4] text-foreground/38">{l.desc}</div>
-                            </div>
-                            <ArrowRight className="w-3 h-3 ml-auto shrink-0 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 text-foreground/30 transition-all duration-200" />
-                          </Link>
+                              <ArrowRight className="w-3 h-3 ml-auto shrink-0 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 text-foreground/25 transition-all duration-200" />
+                            </Link>
+                          </motion.div>
                         );
                       })}
+                    </div>
+
+                    {/* Footer promo row */}
+                    <div
+                      className="mx-3 mb-3 mt-1 rounded-xl px-3 py-2.5 flex items-center gap-2.5"
+                      style={{
+                        background: "linear-gradient(135deg, hsl(34 58% 52%/0.08), hsl(348 55% 90%/0.3))",
+                        border: "1px solid hsl(34 58% 52%/0.12)",
+                      }}
+                    >
+                      <span className="flex h-6 w-6 items-center justify-center rounded-lg shrink-0" style={{ background: "hsl(34 58% 52%/0.12)" }}>
+                        <Sparkles className="w-3 h-3" style={{ color: "hsl(34 58% 50%)" }} />
+                      </span>
+                      <div>
+                        <div style={{ fontSize: "10px", fontWeight: 700, color: "hsl(34 52% 40%)" }}>Customize Your Gift</div>
+                        <div style={{ fontSize: "9px", color: "hsl(25 10% 46%)" }}>Personal touches, perfect every time</div>
+                      </div>
+                      <ArrowRight className="w-3 h-3 ml-auto shrink-0" style={{ color: "hsl(34 52% 48%)" }} />
                     </div>
                   </motion.div>
                 )}
@@ -213,17 +339,19 @@ const Navbar = () => {
             </li>
           </ul>
 
-          {/* Right side */}
-          <div className="flex items-center gap-2">
+          {/* ── RIGHT ACTIONS ── */}
+          <div className="flex items-center gap-1.5 md:gap-2">
 
-            {/* Cart button */}
-            <button
+            {/* Cart */}
+            <motion.button
               onClick={() => setCartOpen(true)}
               aria-label="Open cart"
-              className="relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-foreground/[0.05]"
-              style={{ color: "hsl(var(--foreground)/0.6)" }}
+              className="relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
+              style={{ color: "hsl(var(--foreground)/0.55)" }}
+              whileHover={{ backgroundColor: "hsl(var(--foreground)/0.05)", color: "hsl(var(--foreground))" }}
+              whileTap={{ scale: 0.92 }}
             >
-              <ShoppingBag className="w-[19px] h-[19px]" strokeWidth={1.5} />
+              <ShoppingBag className="w-[18px] h-[18px]" strokeWidth={1.6} />
               <AnimatePresence>
                 {count > 0 && (
                   <motion.span
@@ -231,117 +359,130 @@ const Navbar = () => {
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
-                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
+                    transition={{ type: "spring", stiffness: 520, damping: 22 }}
+                    className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-0.5 rounded-full flex items-center justify-center text-[8.5px] font-bold text-white"
                     style={{ background: "hsl(34 58% 52%)" }}
                   >
                     {count}
                   </motion.span>
                 )}
               </AnimatePresence>
-            </button>
+            </motion.button>
 
-            <div className="hidden md:block w-px h-5 bg-foreground/10 mx-1" />
+            {/* Divider */}
+            <div className="hidden md:block w-px h-4 rounded-full bg-foreground/10 mx-0.5" />
 
-            {/* CTA — desktop */}
-            <Link
-              to="/shop"
-              className="hidden md:inline-flex items-center gap-2 rounded-full text-[10.5px] tracking-[0.1em] uppercase font-semibold transition-all duration-300 group"
-              style={{
-                padding: "0.55rem 1.4rem",
-                background: "hsl(var(--foreground))",
-                color: "hsl(var(--background))",
-                boxShadow: "0 2px 12px -3px hsl(34 58% 52%/0.35)",
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.boxShadow = "0 8px 28px -6px hsl(34 58% 52%/0.45)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = "";
-                e.currentTarget.style.boxShadow = "0 2px 12px -3px hsl(34 58% 52%/0.35)";
-              }}
+            {/* Shop CTA — desktop */}
+            <motion.div
+              className="hidden md:block"
+              whileHover={{ y: -1.5 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
-              Shop Now
-              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
+              <Link
+                to="/shop"
+                className="relative overflow-hidden inline-flex items-center gap-2 rounded-full text-[10px] tracking-[0.1em] uppercase font-semibold group"
+                style={{
+                  padding: "0.52rem 1.35rem",
+                  background: "hsl(var(--foreground))",
+                  color: "hsl(var(--background))",
+                  boxShadow: "0 4px 16px -4px hsl(34 58% 38%/0.4)",
+                }}
+              >
+                {/* shimmer */}
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  animate={{ x: ["-120%", "120%"] }}
+                  transition={{ duration: 2.8, repeat: Infinity, repeatDelay: 7, ease: "easeInOut" }}
+                />
+                <span className="relative z-10 flex items-center gap-1.5">
+                  Shop Now
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                </span>
+              </Link>
+            </motion.div>
 
             {/* Hamburger — mobile */}
-            <button
+            <motion.button
               onClick={() => setOpen((v) => !v)}
-              className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-foreground/[0.05] transition-all duration-200"
+              className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center text-foreground/55 hover:text-foreground transition-all duration-200"
               aria-label="Toggle menu"
+              whileTap={{ scale: 0.9 }}
+              style={{ background: open ? "hsl(var(--foreground)/0.06)" : "transparent" }}
             >
               <AnimatePresence mode="wait">
                 {open
-                  ? <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}><X className="w-5 h-5" /></motion.div>
-                  : <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}><Menu className="w-5 h-5" /></motion.div>
+                  ? <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.14 }}><X className="w-[18px] h-[18px]" /></motion.div>
+                  : <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.14 }}><Menu className="w-[18px] h-[18px]" /></motion.div>
                 }
               </AnimatePresence>
-            </button>
+            </motion.button>
           </div>
         </nav>
       </div>
 
-      {/* Mobile drawer */}
+      {/* ── MOBILE DRAWER ── */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="lg:hidden overflow-hidden"
             style={{
-              background: "hsl(36 42% 99%/0.97)",
-              backdropFilter: "blur(24px)",
+              background: "hsl(36 42% 99%/0.98)",
+              backdropFilter: "blur(28px) saturate(170%)",
               borderBottom: "1px solid hsl(34 30% 88%/0.6)",
-              boxShadow: "0 16px 40px -8px hsl(22 22% 22%/0.1)",
+              boxShadow: "0 24px 56px -12px hsl(22 22% 22%/0.14)",
             }}
           >
-            <div className="max-w-[1320px] mx-auto px-5 py-3 pb-5">
+            <div className="max-w-[1360px] mx-auto px-4 py-2 pb-4">
               <ul className="flex flex-col gap-0.5">
                 {links.map((l, i) => {
                   const isActive = l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
                   return (
                     <motion.li
                       key={l.to}
-                      initial={{ opacity: 0, x: -10 }}
+                      initial={{ opacity: 0, x: -14 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.04, duration: 0.22 }}
+                      transition={{ delay: i * 0.045, duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
                     >
                       <NavLink
                         to={l.to}
                         end={l.to === "/"}
-                        className={`flex items-center justify-between px-4 py-3 rounded-xl text-[14px] font-medium transition-all duration-200 ${
+                        className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-[14px] font-medium transition-all duration-200 ${
                           isActive
-                            ? "text-foreground bg-amber-50/60"
-                            : "text-foreground/55 hover:text-foreground hover:bg-foreground/[0.025]"
+                            ? "text-foreground bg-amber-50/50"
+                            : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.025]"
                         }`}
                       >
-                        {l.label}
+                        <span>{l.label}</span>
                         {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "hsl(34 58% 52%)" }} />
+                          <span
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ background: "hsl(34 58% 52%)" }}
+                          />
                         )}
                       </NavLink>
                     </motion.li>
                   );
                 })}
 
-                {/* Mobile More */}
+                {/* Mobile More toggle */}
                 <motion.li
-                  initial={{ opacity: 0, x: -10 }}
+                  initial={{ opacity: 0, x: -14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: links.length * 0.04, duration: 0.22 }}
+                  transition={{ delay: links.length * 0.045, duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <button
                     onClick={() => setMobileMoreOpen((v) => !v)}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-[14px] font-medium text-foreground/55 hover:text-foreground hover:bg-foreground/[0.025] transition-colors"
+                    className="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[14px] font-medium text-foreground/50 hover:text-foreground hover:bg-foreground/[0.025] transition-colors"
                   >
                     <span>More</span>
                     <motion.span
                       animate={{ rotate: mobileMoreOpen ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.22 }}
                       className="flex items-center"
                     >
                       <ChevronDown className="w-4 h-4" />
@@ -354,8 +495,12 @@ const Navbar = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden ml-2"
+                        transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden ml-2.5 mt-0.5 rounded-xl"
+                        style={{
+                          background: "hsl(36 42% 98%/0.6)",
+                          border: "1px solid hsl(34 28% 90%/0.5)",
+                        }}
                       >
                         {moreLinks.map((l) => {
                           const active = pathname === l.to;
@@ -363,16 +508,23 @@ const Navbar = () => {
                             <li key={l.to}>
                               <NavLink
                                 to={l.to}
-                                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] transition-colors ${
+                                className={`flex items-center gap-3 px-3.5 py-2.5 text-[13px] transition-colors ${
                                   active ? "text-foreground bg-amber-50/50" : "text-foreground/45 hover:text-foreground/75"
                                 }`}
                               >
-                                <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${active ? "bg-amber-100" : "bg-foreground/[0.04]"}`}>
+                                <span
+                                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                                    active ? "bg-amber-100" : "bg-foreground/[0.04]"
+                                  }`}
+                                >
                                   <l.icon className={`w-3.5 h-3.5 ${active ? "text-amber-600" : "text-foreground/40"}`} />
                                 </span>
                                 <span className="font-medium">{l.label}</span>
                                 {active && (
-                                  <span className="w-1.5 h-1.5 rounded-full ml-auto shrink-0" style={{ background: "hsl(34 58% 52%)" }} />
+                                  <span
+                                    className="w-1.5 h-1.5 rounded-full ml-auto shrink-0"
+                                    style={{ background: "hsl(34 58% 52%)" }}
+                                  />
                                 )}
                               </NavLink>
                             </li>
@@ -384,20 +536,37 @@ const Navbar = () => {
                 </motion.li>
               </ul>
 
-              <div className="mt-4 pt-4 flex gap-2.5" style={{ borderTop: "1px solid hsl(34 30% 88%/0.5)" }}>
+              {/* Mobile CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.28, duration: 0.28 }}
+                className="mt-3.5 pt-3.5 flex gap-2.5"
+                style={{ borderTop: "1px solid hsl(34 30% 88%/0.5)" }}
+              >
                 <Link
                   to="/shop"
-                  className="flex items-center justify-center gap-2 flex-1 px-5 py-3 rounded-full text-[11px] tracking-[0.1em] uppercase font-semibold"
+                  className="flex items-center justify-center gap-2 flex-1 px-5 py-3 rounded-full text-[10.5px] tracking-[0.1em] uppercase font-semibold"
                   style={{
                     background: "hsl(var(--foreground))",
                     color: "hsl(var(--background))",
-                    boxShadow: "0 4px 16px -4px hsl(34 58% 52%/0.3)",
+                    boxShadow: "0 6px 20px -6px hsl(34 58% 38%/0.35)",
                   }}
                 >
                   Shop Collection
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
-              </div>
+                <Link
+                  to="/contact"
+                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-full text-[10.5px] tracking-[0.1em] uppercase font-semibold"
+                  style={{
+                    border: "1.5px solid hsl(var(--foreground)/0.14)",
+                    color: "hsl(var(--foreground)/0.65)",
+                  }}
+                >
+                  Custom
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         )}

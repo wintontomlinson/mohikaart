@@ -15,14 +15,17 @@ const ProductPage = () => {
   const [related, setRelated] = useState<Product[]>([]);
   const [active, setActive] = useState(0);
   const [qty, setQty] = useState(1);
+  const [notFound, setNotFound] = useState(false);
   const { add } = useCart();
 
   useEffect(() => {
     setQty(1);
     setActive(0);
+    setP(null);
+    setNotFound(false);
     supabase.from("products").select("*").eq("slug", slug).maybeSingle()
-      .then(({ data }) => {
-        if (!data) return;
+      .then(({ data, error }) => {
+        if (error || !data) { setNotFound(true); return; }
         const gallery = Array.isArray(data.gallery) ? (data.gallery as string[]) : [];
         setP({ ...(data as any), gallery });
         if (data.category_slug) {
@@ -33,6 +36,20 @@ const ProductPage = () => {
         }
       });
   }, [slug]);
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-hero">
+        <div className="text-center px-6">
+          <p className="font-serif text-2xl mb-3">Product not found</p>
+          <p className="text-muted-foreground text-sm mb-6">This product may have been removed or the link is incorrect.</p>
+          <Link to="/shop" className="px-7 py-3 rounded-full bg-foreground text-background text-xs tracking-[0.15em] uppercase btn-glow">
+            Browse Shop
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!p) {
     return (
@@ -54,7 +71,7 @@ const ProductPage = () => {
 
   return (
     <>
-      <section className="relative pt-28 md:pt-32 pb-16 md:pb-24 bg-hero noise-overlay overflow-hidden">
+      <section className="relative pt-10 md:pt-14 pb-16 md:pb-24 bg-hero noise-overlay overflow-hidden">
         {/* Background blobs */}
         <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-blush/30 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -right-20 w-[30rem] h-[30rem] rounded-full bg-champagne/25 blur-3xl pointer-events-none" />

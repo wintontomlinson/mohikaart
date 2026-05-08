@@ -1,11 +1,21 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, Instagram, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useStoreSettings } from "@/lib/settings";
+
+type Cat = { id: string; name: string };
 
 const Contact = () => {
   const [sending, setSending] = useState(false);
+  const [categories, setCategories] = useState<Cat[]>([]);
+  const { phone, phone_display, email, instagram } = useStoreSettings();
+
+  useEffect(() => {
+    supabase.from("categories").select("id,name").order("sort_order")
+      .then(({ data }) => { if (data) setCategories(data as Cat[]); });
+  }, []);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,33 +56,33 @@ const Contact = () => {
           </p>
 
           <div className="mt-12 space-y-4">
-            <a href="https://wa.me/919999999999" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
+            <a href={`https://wa.me/${phone}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
               <div className="w-14 h-14 rounded-2xl bg-blush-grad flex items-center justify-center">
                 <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
               </div>
               <div>
                 <div className="font-serif text-xl">WhatsApp Order</div>
-                <div className="text-sm text-muted-foreground">Fastest replies · +91 99999 99999</div>
+                <div className="text-sm text-muted-foreground">Fastest replies · {phone_display}</div>
               </div>
               <span className="ml-auto text-2xl text-gold opacity-0 group-hover:opacity-100 transition">→</span>
             </a>
-            <a href="https://instagram.com/mohikaart" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
+            <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
               <div className="w-14 h-14 rounded-2xl bg-blush-grad flex items-center justify-center">
                 <Instagram className="w-6 h-6" strokeWidth={1.5} />
               </div>
               <div>
                 <div className="font-serif text-xl">Instagram DM</div>
-                <div className="text-sm text-muted-foreground">@mohikaart · daily updates</div>
+                <div className="text-sm text-muted-foreground">@{instagram} · daily updates</div>
               </div>
               <span className="ml-auto text-2xl text-gold opacity-0 group-hover:opacity-100 transition">→</span>
             </a>
-            <a href="mailto:hello@mohikaart.com" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
+            <a href={`mailto:${email}`} className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
               <div className="w-14 h-14 rounded-2xl bg-blush-grad flex items-center justify-center">
                 <Mail className="w-6 h-6" strokeWidth={1.5} />
               </div>
               <div>
                 <div className="font-serif text-xl">Email</div>
-                <div className="text-sm text-muted-foreground">hello@mohikaart.com</div>
+                <div className="text-sm text-muted-foreground">{email}</div>
               </div>
               <span className="ml-auto text-2xl text-gold opacity-0 group-hover:opacity-100 transition">→</span>
             </a>
@@ -97,7 +107,7 @@ const Contact = () => {
             </div>
             <div>
               <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Phone</label>
-              <input required name="phone" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
+              <input required type="tel" name="phone" placeholder="+91 98765 43210" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
             </div>
           </div>
           <div>
@@ -107,12 +117,20 @@ const Contact = () => {
           <div>
             <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Product of Interest</label>
             <select name="product" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition">
-              <option>Name Keychain</option>
-              <option>Photo Frame</option>
-              <option>Wedding Keepsake</option>
-              <option>Coaster Set</option>
-              <option>Bookmark</option>
-              <option>Custom Hamper</option>
+              <option value="">Select a category…</option>
+              {categories.length > 0
+                ? categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)
+                : (
+                  <>
+                    <option>Name Keychain</option>
+                    <option>Photo Frame</option>
+                    <option>Wedding Keepsake</option>
+                    <option>Coaster Set</option>
+                    <option>Bookmark</option>
+                    <option>Custom Hamper</option>
+                  </>
+                )
+              }
               <option>Something Unique</option>
             </select>
           </div>

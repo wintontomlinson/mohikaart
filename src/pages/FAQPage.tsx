@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useStoreSettings } from "@/lib/settings";
 
 const faqGroups = [
   {
@@ -68,7 +69,9 @@ const faqGroups = [
   },
 ];
 
-const FAQPage = () => (
+const FAQPage = () => {
+  const { phone } = useStoreSettings();
+  return (
   <>
     <PageHeader
       eyebrow="Frequently Asked"
@@ -122,7 +125,9 @@ const FAQPage = () => (
           <p className="text-muted-foreground text-sm mb-6">We usually reply in under 2 hours on WhatsApp.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="https://wa.me/919999999999"
+              href={`https://wa.me/${phone}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-foreground text-background btn-glow text-xs tracking-[0.15em] uppercase"
             >
               <MessageCircle className="w-4 h-4" />
@@ -139,6 +144,7 @@ const FAQPage = () => (
       </div>
     </section>
   </>
-);
+  );
+};
 
 export default FAQPage;

@@ -14,17 +14,22 @@ const ShopPage = () => {
   const [sort, setSort] = useState<"featured" | "price-asc" | "price-desc">("featured");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
+    setLoading(true);
+    setError(false);
     Promise.all([
       supabase.from("products").select("id,slug,name,price,original_price,image_url,badge,short_description,category_slug").order("sort_order"),
       supabase.from("categories").select("id,name,slug").order("sort_order"),
-    ]).then(([{ data: prods }, { data: catData }]) => {
+    ]).then(([{ data: prods, error: e1 }, { data: catData, error: e2 }]) => {
+      if (e1 || e2) { setError(true); setLoading(false); return; }
       setProducts((prods ?? []) as Product[]);
       setCats((catData ?? []) as Cat[]);
       setLoading(false);
-    });
-  }, []);
+    }).catch(() => { setError(true); setLoading(false); });
+  }, [retryCount]);
 
   const filtered = useMemo(() => {
     let list = active === "all" ? products : products.filter((p) => p.category_slug === active);
@@ -108,7 +113,23 @@ const ShopPage = () => {
 
           {/* Products grid */}
           <AnimatePresence mode="wait">
-            {loading ? (
+            {error ? (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-24"
+              >
+                <p className="font-serif text-xl text-muted-foreground mb-2">Couldn't load products</p>
+                <p className="text-sm text-muted-foreground/70 mb-6">Please check your connection and try again.</p>
+                <button
+                  onClick={() => setRetryCount(c => c + 1)}
+                  className="px-6 py-3 rounded-full bg-foreground text-background text-xs tracking-[0.1em] uppercase"
+                >
+                  Retry
+                </button>
+              </motion.div>
+            ) : loading ? (
               <motion.div
                 key="loading"
                 initial={{ opacity: 0 }}

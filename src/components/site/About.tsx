@@ -1,10 +1,12 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import { ArrowRight, Award, Heart, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import workspace from "@/assets/gallery-workspace.jpg";
-import pouring from "@/assets/gallery-pouring.jpg";
-import flatlay from "@/assets/gallery-flatlay.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveImage } from "@/lib/site";
+import workspaceFallback from "@/assets/gallery-workspace.jpg";
+import pouringFallback from "@/assets/gallery-pouring.jpg";
+import flatlayFallback from "@/assets/gallery-flatlay.jpg";
 
 const stats = [
   { value: "3+",   label: "Years of Craft" },
@@ -19,6 +21,24 @@ const About = () => {
   const y2     = useTransform(scrollYProgress, [0, 1], [75, -35]);
   const y3     = useTransform(scrollYProgress, [0, 1], [30, -45]);
   const rotate = useTransform(scrollYProgress, [0, 1], [-2, 2]);
+
+  const [img1, setImg1] = useState(pouringFallback);
+  const [img2, setImg2] = useState(workspaceFallback);
+  const [img3, setImg3] = useState(flatlayFallback);
+
+  useEffect(() => {
+    supabase
+      .from("site_images")
+      .select("key,image_url")
+      .in("key", ["about_1", "about_2", "about_3"])
+      .then(({ data }) => {
+        (data ?? []).forEach((row) => {
+          if (row.key === "about_1") setImg1(resolveImage(row.image_url));
+          if (row.key === "about_2") setImg2(resolveImage(row.image_url));
+          if (row.key === "about_3") setImg3(resolveImage(row.image_url));
+        });
+      });
+  }, []);
 
   return (
     <section ref={sectionRef} id="about" className="relative py-28 md:py-40 overflow-hidden">
@@ -42,7 +62,7 @@ const About = () => {
             transition={{ duration: 1.1 }}
             className="absolute top-0 left-0 w-[72%] h-[72%] rounded-[2.2rem] overflow-hidden shadow-luxe"
           >
-            <img src={pouring} alt="Artisan pouring resin" loading="lazy" className="w-full h-full object-cover" />
+            <img src={img1} alt="Artisan pouring resin" loading="lazy" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-br from-gold/10 via-transparent to-blush/15" />
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
@@ -60,7 +80,7 @@ const About = () => {
             transition={{ duration: 1.1, delay: 0.18 }}
             className="absolute bottom-0 right-0 w-[60%] h-[58%] rounded-[2.2rem] overflow-hidden shadow-card border-4 border-background"
           >
-            <img src={workspace} alt="Resin studio workspace" loading="lazy" className="w-full h-full object-cover" />
+            <img src={img2} alt="Resin studio workspace" loading="lazy" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-tl from-blush/20 to-transparent" />
           </motion.div>
 
@@ -73,7 +93,7 @@ const About = () => {
             transition={{ duration: 0.9, delay: 0.35 }}
             className="absolute top-[36%] right-0 w-[28%] h-[26%] rounded-[1.6rem] overflow-hidden shadow-soft border-2 border-background hidden md:block"
           >
-            <img src={flatlay} alt="Resin flatlay" loading="lazy" className="w-full h-full object-cover" />
+            <img src={img3} alt="Resin flatlay" loading="lazy" className="w-full h-full object-cover" />
           </motion.div>
 
           {/* Decorative blobs */}

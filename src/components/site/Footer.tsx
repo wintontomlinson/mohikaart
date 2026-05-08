@@ -1,8 +1,11 @@
 import { Instagram, Mail, MessageCircle, MapPin, ArrowUpRight, Heart, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import mark from "@/assets/mohika-mark.png";
+import { useStoreSettings } from "@/lib/settings";
 
-const Footer = () => (
+const Footer = () => {
+  const { phone, phone_display, email, instagram } = useStoreSettings();
+  return (
   <footer className="relative bg-foreground text-background overflow-hidden">
 
     {/* Ambient glows */}
@@ -62,9 +65,9 @@ const Footer = () => (
           {/* Social icons */}
           <div className="flex items-center gap-2.5">
             {[
-              { href: "https://instagram.com/mohikaart", Icon: Instagram, label: "Instagram" },
-              { href: "https://wa.me/919999999999",      Icon: MessageCircle, label: "WhatsApp" },
-              { href: "mailto:hello@mohikaart.com",      Icon: Mail, label: "Email" },
+              { href: `https://instagram.com/${instagram}`, Icon: Instagram, label: "Instagram" },
+              { href: `https://wa.me/${phone}`,             Icon: MessageCircle, label: "WhatsApp" },
+              { href: `mailto:${email}`,                    Icon: Mail, label: "Email" },
             ].map(({ href, Icon, label }) => (
               <a
                 key={label}
@@ -134,22 +137,22 @@ const Footer = () => (
           <ul className="space-y-4">
             {[
               {
-                href: "https://wa.me/919999999999",
+                href: `https://wa.me/${phone}`,
                 Icon: MessageCircle,
-                text: "+91 99999 99999",
+                text: phone_display,
                 label: "WhatsApp",
               },
               {
-                href: "https://instagram.com/mohikaart",
+                href: `https://instagram.com/${instagram}`,
                 Icon: Instagram,
-                text: "@mohikaart",
+                text: `@${instagram}`,
                 external: true,
                 label: "Instagram",
               },
               {
-                href: "mailto:hello@mohikaart.com",
+                href: `mailto:${email}`,
                 Icon: Mail,
-                text: "hello@mohikaart.com",
+                text: email,
                 label: "Email",
               },
             ].map(({ href, Icon, text, external, label }) => (
@@ -205,6 +208,7 @@ const Footer = () => (
 
     </div>
   </footer>
-);
+  );
+};
 
 export default Footer;

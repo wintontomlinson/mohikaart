@@ -2,6 +2,7 @@ import PageHeader from "@/components/site/PageHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Briefcase, Award, Users, Package, ArrowRight, CheckCircle, Mail, MessageCircle } from "lucide-react";
+import { useStoreSettings } from "@/lib/settings";
 
 const features = [
   { icon: Briefcase, title: "Branded Corporate Gifts",  desc: "Logo-embedded resin paperweights, desk accessories and pen holders for client gifting & onboarding hampers." },
@@ -24,7 +25,9 @@ const benefits = [
   "Volume discounts from 25 pieces",
 ];
 
-const CorporatePage = () => (
+const CorporatePage = () => {
+  const { phone, email } = useStoreSettings();
+  return (
   <>
     <PageHeader
       eyebrow="Corporate & Bulk Orders"
@@ -151,14 +154,16 @@ const CorporatePage = () => (
             {/* Contact options */}
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href="https://wa.me/919999999999"
+                href={`https://wa.me/${phone}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 px-6 py-3 rounded-full bg-foreground text-background text-xs tracking-[0.1em] uppercase btn-glow"
               >
                 <MessageCircle className="w-4 h-4" />
                 WhatsApp Us
               </a>
               <a
-                href="mailto:hello@mohikaart.com"
+                href={`mailto:${email}`}
                 className="flex items-center gap-2 px-6 py-3 rounded-full glass border border-foreground/12 text-xs tracking-[0.1em] uppercase hover:bg-foreground hover:text-background transition-all duration-400"
               >
                 <Mail className="w-4 h-4" />
@@ -170,6 +175,7 @@ const CorporatePage = () => (
       </div>
     </section>
   </>
-);
+  );
+};
 
 export default CorporatePage;

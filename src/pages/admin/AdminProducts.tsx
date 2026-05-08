@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
-import { Pencil, Trash2, Plus, X, Save } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Save, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
 
@@ -15,6 +15,7 @@ type Product = {
   original_price: number | null;
   category_slug: string | null;
   image_url: string | null;
+  gallery: string[];
   badge: string | null;
   featured: boolean;
   in_stock: boolean;
@@ -24,7 +25,7 @@ type Product = {
 const empty: Product = {
   name: "", slug: "", short_description: "", description: "",
   price: 0, original_price: null, category_slug: null, image_url: null,
-  badge: null, featured: false, in_stock: true, sort_order: 0,
+  gallery: [], badge: null, featured: false, in_stock: true, sort_order: 0,
 };
 
 const slugify = (s: string) =>
@@ -38,7 +39,10 @@ const AdminProducts = () => {
 
   const load = async () => {
     const { data } = await supabase.from("products").select("*").order("sort_order");
-    setProducts((data ?? []) as Product[]);
+    setProducts((data ?? []).map((p: any) => ({
+      ...p,
+      gallery: Array.isArray(p.gallery) ? p.gallery : [],
+    })) as Product[]);
   };
 
   useEffect(() => {
@@ -83,7 +87,7 @@ const AdminProducts = () => {
           <h1 className="font-display text-4xl">Products</h1>
           <p className="text-sm text-muted-foreground mt-1">{products.length} total</p>
         </div>
-        <button onClick={() => setEditing({ ...empty })} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm">
+        <button onClick={() => setEditing({ ...empty, gallery: [] })} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm">
           <Plus className="w-4 h-4" /> New Product
         </button>
       </div>
@@ -120,7 +124,7 @@ const AdminProducts = () => {
                   </div>
                 </td>
                 <td className="p-4 text-right">
-                  <button onClick={() => setEditing(p)} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => setEditing({ ...p, gallery: p.gallery ?? [] })} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted"><Pencil className="w-4 h-4" /></button>
                   <button onClick={() => onDelete(p.id!)} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-destructive/10 text-destructive ml-1"><Trash2 className="w-4 h-4" /></button>
                 </td>
               </tr>
@@ -141,6 +145,28 @@ const AdminProducts = () => {
             </div>
             <div className="p-6 space-y-5">
               <ImageUpload value={editing.image_url} onChange={(url) => setEditing({ ...editing, image_url: url })} label="Main image" />
+
+              {/* Gallery images */}
+              <div>
+                <label className="block text-xs uppercase tracking-widest mb-3 text-muted-foreground">Gallery images</label>
+                <div className="flex flex-wrap gap-3">
+                  {(editing.gallery ?? []).map((url, i) => (
+                    <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border group">
+                      <img src={resolveImage(url)} alt="" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setEditing({ ...editing, gallery: editing.gallery.filter((_, j) => j !== i) })}
+                        className="absolute inset-0 bg-foreground/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove"
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                  <GalleryUpload onUploaded={(url) => setEditing({ ...editing, gallery: [...(editing.gallery ?? []), url] })} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Additional images shown in the product page gallery. Click × to remove.</p>
+              </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <Field label="Name">
@@ -213,5 +239,35 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
     {children}
   </div>
 );
+
+const GalleryUpload = ({ onUploaded }: { onUploaded: (url: string) => void }) => {
+  const [busy, setBusy] = useState(false);
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const name = `gallery-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+      const { error } = await supabase.storage.from("product-images").upload(name, file, { cacheControl: "3600", upsert: false });
+      if (error) throw error;
+      const { data } = supabase.storage.from("product-images").getPublicUrl(name);
+      onUploaded(data.publicUrl);
+      toast.success("Image added to gallery");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setBusy(false);
+      e.target.value = "";
+    }
+  };
+  return (
+    <label className={`w-20 h-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all ${busy ? "opacity-60 pointer-events-none" : ""}`}>
+      <ImagePlus className="w-5 h-5 text-muted-foreground" />
+      <span className="text-[9px] text-muted-foreground">{busy ? "…" : "Add"}</span>
+      <input type="file" accept="image/*" onChange={onFile} className="hidden" disabled={busy} />
+    </label>
+  );
+};
 
 export default AdminProducts;

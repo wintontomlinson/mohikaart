@@ -12,7 +12,7 @@ const PageHeader = ({
   subtitle?: ReactNode;
   children?: ReactNode;
 }) => (
-  <section className="relative pt-32 pb-14 md:pt-40 md:pb-24 bg-hero overflow-hidden noise-overlay">
+  <section className="relative pt-10 pb-14 md:pt-14 md:pb-24 bg-hero overflow-hidden noise-overlay">
     {/* Blobs */}
     <motion.div
       className="absolute -top-24 -left-24 w-[30rem] h-[30rem] rounded-full bg-blush/40 blur-3xl pointer-events-none blob-morph"

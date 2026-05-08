@@ -1,16 +1,9 @@
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import mark from "@/assets/mohika-mark.png";
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
-
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-hero overflow-hidden">
       {/* Background blobs */}

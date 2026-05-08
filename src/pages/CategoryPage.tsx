@@ -11,21 +11,30 @@ const CategoryPage = () => {
   const { slug = "" } = useParams();
   const [cat, setCat] = useState<Cat | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    supabase.from("categories").select("name,description").eq("slug", slug).maybeSingle()
-      .then(({ data }) => setCat(data));
-    supabase.from("products")
-      .select("id,slug,name,price,original_price,image_url,badge,short_description,category_slug")
-      .eq("category_slug", slug).order("sort_order")
-      .then(({ data }) => setProducts((data ?? []) as Product[]));
+    setLoading(true);
+    setError(false);
+    Promise.all([
+      supabase.from("categories").select("name,description").eq("slug", slug).maybeSingle(),
+      supabase.from("products")
+        .select("id,slug,name,price,original_price,image_url,badge,short_description,category_slug")
+        .eq("category_slug", slug).order("sort_order"),
+    ]).then(([{ data: catData, error: e1 }, { data: prods, error: e2 }]) => {
+      if (e1 || e2) { setError(true); setLoading(false); return; }
+      setCat(catData);
+      setProducts((prods ?? []) as Product[]);
+      setLoading(false);
+    }).catch(() => { setError(true); setLoading(false); });
   }, [slug]);
 
   return (
     <>
       <PageHeader
         eyebrow="Category"
-        title={cat?.name ?? "Category"}
+        title={cat?.name ?? "Collection"}
         subtitle={cat?.description ?? "Browse this collection."}
       >
         <Link
@@ -39,7 +48,15 @@ const CategoryPage = () => {
 
       <section className="py-12 md:py-16">
         <div className="container">
-          {products.length === 0 ? (
+          {error ? (
+            <p className="text-center text-muted-foreground py-20">Couldn't load products. Please try again.</p>
+          ) : loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-3xl bg-muted/40 aspect-[4/5] animate-pulse" />
+              ))}
+            </div>
+          ) : products.length === 0 ? (
             <p className="text-center text-muted-foreground py-20">No products in this category yet.</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">

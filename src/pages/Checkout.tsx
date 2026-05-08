@@ -6,6 +6,7 @@ import { resolveImage, formatINR } from "@/lib/site";
 import { Minus, Plus, Trash2, CreditCard, MessageCircle, CheckCircle2, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useStoreSettings } from "@/lib/settings";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -35,6 +36,7 @@ const CheckoutPage = () => {
   const [processing, setProcessing] = useState(false);
   const [razorpayKeyId, setRazorpayKeyId] = useState<string>("");
   const [orderNumber, setOrderNumber] = useState<string>("");
+  const { phone } = useStoreSettings();
 
   useEffect(() => {
     supabase.from("app_settings").select("value").eq("key", "razorpay").maybeSingle()
@@ -96,7 +98,7 @@ const CheckoutPage = () => {
       setOrderNumber(order.order_number);
       clear();
       setStep("success");
-      window.open(`https://wa.me/919999999999?text=${text}`, "_blank");
+      window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");
     } finally {

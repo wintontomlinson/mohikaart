@@ -1,6 +1,8 @@
 import { motion, useInView } from "framer-motion";
 import { Instagram, ExternalLink, Camera, Heart } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveImage } from "@/lib/site";
 import g1 from "@/assets/gallery-pouring.jpg";
 import g2 from "@/assets/gallery-packing.jpg";
 import g3 from "@/assets/gallery-flatlay.jpg";
@@ -8,13 +10,33 @@ import g4 from "@/assets/gallery-workspace.jpg";
 import g5 from "@/assets/gallery-customer.jpg";
 import g6 from "@/assets/cat-couple.jpg";
 
-const imgs = [g1, g2, g3, g4, g5, g6];
+const GALLERY_KEYS = ["gallery_1", "gallery_2", "gallery_3", "gallery_4", "gallery_5", "gallery_6"];
+const FALLBACKS = [g1, g2, g3, g4, g5, g6];
 const labels = ["Pouring", "Packaging", "Flat Lay", "Workspace", "Customer", "Couple Frame"];
 const heights = ["aspect-[4/5]", "aspect-square", "aspect-[4/5]", "aspect-[4/5]", "aspect-square", "aspect-[4/5]"];
 
 const Gallery = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const [imgs, setImgs] = useState<string[]>(FALLBACKS);
+
+  useEffect(() => {
+    supabase
+      .from("site_images")
+      .select("key,image_url")
+      .in("key", GALLERY_KEYS)
+      .then(({ data }) => {
+        if (!data?.length) return;
+        setImgs((prev) => {
+          const next = [...prev];
+          data.forEach((row) => {
+            const idx = GALLERY_KEYS.indexOf(row.key);
+            if (idx >= 0 && row.image_url) next[idx] = resolveImage(row.image_url);
+          });
+          return next;
+        });
+      });
+  }, []);
 
   return (
     <section id="gallery" className="relative py-28 md:py-40 overflow-hidden">
