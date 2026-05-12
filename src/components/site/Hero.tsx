@@ -88,7 +88,6 @@ const Hero = () => {
       id="top"
       className="relative overflow-hidden noise-overlay"
       style={{
-        marginTop: "-94px",
         minHeight: "100svh",
         background:
           "radial-gradient(ellipse 90% 70% at 5% 0%, hsl(348 55% 93%/0.95), transparent 55%)," +
@@ -177,8 +176,8 @@ const Hero = () => {
 
       {/* ── MAIN LAYOUT ── */}
       <motion.div
-        style={{ opacity: fadeOp, scale: scaleContent, paddingTop: "94px" }}
-        className="relative mx-auto flex w-full max-w-[1360px] flex-col items-start gap-8 px-5 pb-16 md:flex-row md:items-start md:gap-0 md:px-10 md:pb-16"
+        style={{ opacity: fadeOp, scale: scaleContent }}
+        className="relative mx-auto flex w-full max-w-[1360px] flex-col items-start gap-8 px-5 pb-16 pt-[94px] md:flex-row md:items-start md:gap-0 md:px-10 md:pb-16 md:pt-[104px]"
       >
 
         {/* ══ LEFT (45%) ══ */}

@@ -23,7 +23,7 @@ const SiteLayout = () => (
     <ScrollProgress />
     <ScrollTop />
     <Navbar />
-    <main className="relative pt-[98px] md:pt-[106px]">
+    <main className="relative">
       <Outlet />
     </main>
     <Footer />
