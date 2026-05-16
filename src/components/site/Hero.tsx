@@ -1,9 +1,10 @@
 import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
-import { ArrowRight, Sparkles, Star, Package2, Truck, ChevronRight, Instagram, Heart } from "lucide-react";
+import { ArrowRight, Sparkles, Star, Package2, Truck, ChevronRight, Instagram, Heart, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
+import { useHeroContent } from "@/lib/cms";
 import heroFallback from "@/assets/hero-resin-tray.jpg";
 import keychain from "@/assets/cat-keychain.jpg";
 import bookmark from "@/assets/cat-bookmark.jpg";
@@ -12,6 +13,7 @@ import bookmark from "@/assets/cat-bookmark.jpg";
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const [val, setVal] = useState(0);
   useEffect(() => {
+    if (!to) return;
     let start = 0;
     const step = to / 60;
     const id = setInterval(() => {
@@ -29,8 +31,8 @@ function TiltCard({ children, className = "", style = {} }: { children: React.Re
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [6, -6]), { stiffness: 280, damping: 28 });
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), { stiffness: 280, damping: 28 });
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [5, -5]), { stiffness: 280, damping: 28 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-7, 7]), { stiffness: 280, damping: 28 });
 
   const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = ref.current?.getBoundingClientRect();
@@ -53,23 +55,17 @@ function TiltCard({ children, className = "", style = {} }: { children: React.Re
   );
 }
 
-const STATS = [
-  { value: 2000, suffix: "+", label: "Orders Crafted" },
-  { value: 4.9, suffix: "★", label: "Avg. Rating", isDecimal: true },
-  { value: 3, suffix: "yrs", label: "Of Artistry" },
-];
-
 const Hero = () => {
+  const { data: content } = useHeroContent();
   const [hero, setHero] = useState<string>(heroFallback);
-  const [loaded, setLoaded] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const yLeft  = useTransform(scrollYProgress, [0, 1], [0, -70]);
-  const yRight = useTransform(scrollYProgress, [0, 1], [0, -35]);
-  const yImage = useTransform(scrollYProgress, [0, 1], [0, 60]);
-  const fadeOp = useTransform(scrollYProgress, [0, 0.65], [1, 0]);
-  const scaleContent = useTransform(scrollYProgress, [0, 0.5], [1, 0.96]);
+  const yLeft  = useTransform(scrollYProgress, [0, 1], [0, -60]);
+  const yRight = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const yImage = useTransform(scrollYProgress, [0, 1], [0, 50]);
+  const fadeOp = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const scaleContent = useTransform(scrollYProgress, [0, 0.5], [1, 0.97]);
 
   useEffect(() => {
     supabase
@@ -81,6 +77,9 @@ const Hero = () => {
         if (data?.image_url) setHero(resolveImage(data.image_url));
       });
   }, []);
+
+  // Stat values: support both numeric and pre-formatted strings
+  const stat2Numeric = !isNaN(Number(content.stat2_value));
 
   return (
     <section
@@ -117,15 +116,15 @@ const Hero = () => {
         />
 
         {/* Gold dust particles */}
-        {[...Array(18)].map((_, i) => (
+        {[...Array(14)].map((_, i) => (
           <motion.span
             key={i}
             className="absolute rounded-full"
             style={{
-              width:  `${1.2 + (i % 5) * 1.6}px`,
-              height: `${1.2 + (i % 5) * 1.6}px`,
-              left:   `${3 + i * 5.4}%`,
-              top:    `${8 + (i % 7) * 12.5}%`,
+              width:  `${1.2 + (i % 4) * 1.6}px`,
+              height: `${1.2 + (i % 4) * 1.6}px`,
+              left:   `${5 + i * 6.5}%`,
+              top:    `${10 + (i % 7) * 11}%`,
               background: i % 3 === 0
                 ? `hsl(34 58% 52%/0.35)`
                 : i % 3 === 1
@@ -134,8 +133,8 @@ const Hero = () => {
             }}
             animate={{
               y: [0, -(18 + (i % 4) * 8), 0],
-              opacity: [0.15, 0.8, 0.15],
-              scale: [1, 1.6, 1],
+              opacity: [0.15, 0.7, 0.15],
+              scale: [1, 1.5, 1],
             }}
             transition={{
               duration: 4 + i * 0.55,
@@ -147,7 +146,7 @@ const Hero = () => {
         ))}
 
         {/* Decorative concentric rings */}
-        {[22, 15, 9].map((size, i) => (
+        {[20, 14, 8].map((size, i) => (
           <motion.div
             key={i}
             className="absolute top-[14%] right-[8%] rounded-full hidden lg:block"
@@ -162,22 +161,12 @@ const Hero = () => {
             transition={{ duration: 30 + i * 8, repeat: Infinity, ease: "linear" }}
           />
         ))}
-
-        {/* Fine crosshair accent */}
-        <div
-          className="absolute hidden xl:block"
-          style={{ top: "18%", right: "14%", width: "1px", height: "48px", background: "linear-gradient(to bottom, transparent, hsl(34 58% 52%/0.3), transparent)" }}
-        />
-        <div
-          className="absolute hidden xl:block"
-          style={{ top: "20.5%", right: "13%", width: "48px", height: "1px", background: "linear-gradient(to right, transparent, hsl(34 58% 52%/0.3), transparent)" }}
-        />
       </div>
 
       {/* ── MAIN LAYOUT ── */}
       <motion.div
         style={{ opacity: fadeOp, scale: scaleContent }}
-        className="relative mx-auto flex w-full max-w-[1360px] flex-col items-start gap-8 px-5 pb-16 pt-[94px] md:flex-row md:items-start md:gap-0 md:px-10 md:pb-16 md:pt-[104px]"
+        className="relative mx-auto flex w-full max-w-[1360px] flex-col items-start gap-8 px-5 pb-16 pt-[92px] md:flex-row md:items-start md:gap-0 md:px-10 md:pb-16 md:pt-[104px]"
       >
 
         {/* ══ LEFT (45%) ══ */}
@@ -187,10 +176,10 @@ const Hero = () => {
         >
           {/* Eyebrow breadcrumb */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="mb-3 flex items-center gap-1.5"
+            className="mb-3 flex items-center gap-1.5 flex-wrap"
             style={{ fontSize: "10px", color: "hsl(25 10% 50%)", letterSpacing: "0.06em" }}
           >
             <span className="inline-flex items-center gap-1">
@@ -205,7 +194,7 @@ const Hero = () => {
 
           {/* Brand pill */}
           <motion.div
-            initial={{ opacity: 0, y: 14, filter: "blur(6px)" }}
+            initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.8, delay: 0.08 }}
             className="mb-7 inline-flex w-fit items-center gap-2.5 rounded-full"
@@ -230,25 +219,25 @@ const Hero = () => {
             >
               <Sparkles className="h-2.5 w-2.5" style={{ color: "hsl(34 58% 52%)" }} />
             </motion.span>
-            Resin Art &nbsp;·&nbsp; Personalized Gifts &nbsp;·&nbsp; Memory Keepsakes
+            <span className="line-clamp-1">{content.eyebrow}</span>
           </motion.div>
 
           {/* ── HEADLINE ── */}
           <div className="overflow-hidden">
             <motion.h1
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 36 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.15, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 1.05, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
               className="font-display"
               style={{
                 fontWeight: 300,
-                fontSize: "clamp(3rem, 5.4vw, 5rem)",
-                lineHeight: 1.01,
+                fontSize: "clamp(2.85rem, 5.2vw, 4.85rem)",
+                lineHeight: 1.02,
                 letterSpacing: "-0.03em",
                 color: "hsl(var(--foreground))",
               }}
             >
-              Turn{" "}
+              {content.headline_part1}{" "}
               <motion.em
                 initial={{ backgroundPosition: "200% center" }}
                 animate={{ backgroundPosition: "0% center" }}
@@ -264,24 +253,27 @@ const Hero = () => {
                   backgroundClip: "text",
                   display: "inline-block",
                 }}
-  
               >
-                Memories
+                {content.headline_highlight}
               </motion.em>
               <br />
-              <span style={{ fontWeight: 300 }}>Into Timeless</span>
-              <br />
-              <span
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontStyle: "italic",
-                  fontWeight: 300,
-                  fontSize: "1.1em",
-                  letterSpacing: "-0.04em",
-                }}
-              >
-                Art.
-              </span>
+              <span style={{ fontWeight: 300 }}>{content.headline_part2}</span>
+              {content.headline_part3 && (
+                <>
+                  <br />
+                  <span
+                    style={{
+                      fontFamily: "var(--font-serif)",
+                      fontStyle: "italic",
+                      fontWeight: 300,
+                      fontSize: "1.1em",
+                      letterSpacing: "-0.04em",
+                    }}
+                  >
+                    {content.headline_part3}
+                  </span>
+                </>
+              )}
             </motion.h1>
           </div>
 
@@ -294,28 +286,26 @@ const Hero = () => {
               marginTop: "1.5rem",
               color: "hsl(25 10% 40%)",
               fontSize: "clamp(0.875rem, 1.15vw, 0.975rem)",
-              lineHeight: 1.9,
-              maxWidth: "26rem",
+              lineHeight: 1.85,
+              maxWidth: "27rem",
               fontWeight: 380,
             }}
           >
-            Customized handcrafted resin creations that preserve your most
-            precious moments in luxurious, gallery-worthy keepsakes — each
-            piece poured with love and intention.
+            {content.subheadline}
           </motion.p>
 
           {/* ── CTA BUTTONS ── */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.85, delay: 0.5 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
             className="mt-9 flex flex-wrap items-center gap-3"
           >
             <Link
-              to="/shop"
+              to={content.cta_primary_link}
               className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full"
               style={{
-                padding: "0.95rem 2.4rem",
+                padding: "0.92rem 2.3rem",
                 fontSize: "0.78rem",
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -327,30 +317,29 @@ const Hero = () => {
               }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 24px 52px -12px hsl(34 58% 38%/0.65), 0 2px 0 hsl(var(--foreground)/0.08) inset";
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 22px 50px -12px hsl(34 58% 38%/0.65), 0 2px 0 hsl(var(--foreground)/0.08) inset";
               }}
               onMouseLeave={e => {
                 (e.currentTarget as HTMLElement).style.transform = "";
                 (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 36px -10px hsl(34 58% 38%/0.55), 0 2px 0 hsl(var(--foreground)/0.08) inset";
               }}
             >
-              {/* Shimmer sweep on primary btn */}
               <motion.span
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/12 to-transparent"
                 animate={{ x: ["-120%", "120%"] }}
                 transition={{ duration: 3, repeat: Infinity, repeatDelay: 6, ease: "easeInOut" }}
               />
               <span className="relative z-10 flex items-center gap-2.5">
-                Shop Collection
+                {content.cta_primary_label}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
               </span>
             </Link>
 
             <Link
-              to="/contact"
+              to={content.cta_secondary_link}
               className="group inline-flex items-center gap-2 rounded-full transition-all duration-400"
               style={{
-                padding: "0.95rem 2rem",
+                padding: "0.92rem 2rem",
                 fontSize: "0.78rem",
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -374,7 +363,7 @@ const Hero = () => {
                 el.style.transform = "";
               }}
             >
-              Custom Order
+              {content.cta_secondary_label}
             </Link>
           </motion.div>
 
@@ -382,37 +371,24 @@ const Hero = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
+            transition={{ delay: 0.85, duration: 0.8 }}
             className="mt-10 flex items-center gap-6 flex-wrap"
           >
-            {STATS.map((s, i) => (
-              <motion.div
-                key={s.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.95 + i * 0.12, duration: 0.5 }}
-                className="flex flex-col"
-              >
-                <span
-                  className="font-display"
-                  style={{
-                    fontSize: "clamp(1.35rem, 2.2vw, 1.7rem)",
-                    fontWeight: 400,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                    background: "linear-gradient(135deg, hsl(34 52% 42%), hsl(38 72% 62%))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  {s.isDecimal ? `${s.value}${s.suffix}` : <Counter to={s.value} suffix={s.suffix} />}
-                </span>
-                <span style={{ fontSize: "10px", color: "hsl(25 10% 50%)", letterSpacing: "0.06em", marginTop: "2px" }}>
-                  {s.label}
-                </span>
-              </motion.div>
-            ))}
+            <Stat
+              value={<Counter to={content.stat1_value} suffix={content.stat1_suffix} />}
+              label={content.stat1_label}
+              delay={0}
+            />
+            <Stat
+              value={stat2Numeric ? <Counter to={Number(content.stat2_value)} /> : content.stat2_value}
+              label={content.stat2_label}
+              delay={0.12}
+            />
+            <Stat
+              value={<Counter to={content.stat3_value} suffix={content.stat3_suffix} />}
+              label={content.stat3_label}
+              delay={0.24}
+            />
 
             {/* Dividers */}
             <div style={{ width: "1px", height: "28px", background: "hsl(34 28% 82%/0.8)" }} className="hidden sm:block" />
@@ -424,9 +400,14 @@ const Hero = () => {
               transition={{ delay: 1.3, duration: 0.5 }}
               className="flex items-center gap-1.5"
             >
-              {[Package2, Truck, Star].map((Icon, i) => (
+              {[
+                { Icon: Package2, label: "Premium packaging" },
+                { Icon: Truck, label: "Pan-India shipping" },
+                { Icon: ShieldCheck, label: "Quality guaranteed" },
+              ].map(({ Icon, label }, i) => (
                 <span
                   key={i}
+                  title={label}
                   className="flex h-7 w-7 items-center justify-center rounded-full"
                   style={{
                     background: "hsl(36 50% 99%/0.9)",
@@ -437,12 +418,12 @@ const Hero = () => {
                 >
                   <Icon
                     className="h-3 w-3"
-                    style={{ color: "hsl(34 58% 50%)", fill: i === 2 ? "hsl(34 58% 52%)" : "none" }}
+                    style={{ color: "hsl(34 58% 50%)" }}
                   />
                 </span>
               ))}
               <span style={{ fontSize: "10px", color: "hsl(25 10% 44%)", marginLeft: "4px" }}>
-                Handmade &middot; Delivered India-wide
+                Handmade · Delivered India-wide
               </span>
             </motion.div>
           </motion.div>
@@ -463,28 +444,25 @@ const Hero = () => {
                   "inset 0 1px 0 hsl(36 50% 100%/0.65)",
               }}
             >
-              {/* Image with parallax */}
               <motion.div className="absolute inset-0 scale-[1.08]" style={{ y: yImage }}>
                 <img
                   src={hero}
                   alt="Luxury pressed-rose resin tray"
-                  onLoad={() => setLoaded(true)}
                   className="h-full w-full object-cover"
                 />
               </motion.div>
 
-              {/* Animated shimmer */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent pointer-events-none"
                 animate={{ x: ["-130%", "130%"] }}
                 transition={{ duration: 4.5, repeat: Infinity, repeatDelay: 12, ease: "easeInOut" }}
               />
 
-              {/* ── In-image label: Bestseller ── */}
+              {/* Bestseller chip */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.6, duration: 0.6 }}
+                transition={{ delay: 1.5, duration: 0.6 }}
                 className="absolute bottom-4 left-4 flex items-center gap-2.5 rounded-2xl"
                 style={{
                   padding: "0.55rem 0.9rem",
@@ -499,15 +477,15 @@ const Hero = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "hsl(34 58% 44%)", lineHeight: 1 }}>
-                    Bestseller
+                    {content.badge_text}
                   </div>
                   <div className="font-serif" style={{ fontSize: "12.5px", marginTop: "3px", fontWeight: 400, color: "hsl(25 10% 28%)" }}>
-                    Resin Trays
+                    {content.badge_subtext}
                   </div>
                 </div>
               </motion.div>
 
-              {/* ── In-image: Instagram reel button ── */}
+              {/* Instagram link */}
               <motion.a
                 href="https://instagram.com/mohikaart"
                 target="_blank"
@@ -532,7 +510,7 @@ const Hero = () => {
               </motion.a>
             </TiltCard>
 
-            {/* ── Floating card: NEW IN (top-right) ── */}
+            {/* Floating cards */}
             <motion.div
               initial={{ opacity: 0, x: 28, y: -20 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
@@ -573,7 +551,6 @@ const Hero = () => {
               </TiltCard>
             </motion.div>
 
-            {/* ── Floating card: BESTSELLER (center-left) ── */}
             <motion.div
               initial={{ opacity: 0, x: -28, y: 20 }}
               animate={{ opacity: 1, x: 0, y: 0 }}
@@ -679,5 +656,33 @@ const Hero = () => {
     </section>
   );
 };
+
+const Stat = ({ value, label, delay }: { value: React.ReactNode; label: string; delay: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.95 + delay, duration: 0.5 }}
+    className="flex flex-col"
+  >
+    <span
+      className="font-display"
+      style={{
+        fontSize: "clamp(1.35rem, 2.2vw, 1.7rem)",
+        fontWeight: 400,
+        letterSpacing: "-0.03em",
+        lineHeight: 1,
+        background: "linear-gradient(135deg, hsl(34 52% 42%), hsl(38 72% 62%))",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+      }}
+    >
+      {value}
+    </span>
+    <span style={{ fontSize: "10px", color: "hsl(25 10% 50%)", letterSpacing: "0.06em", marginTop: "2px" }}>
+      {label}
+    </span>
+  </motion.div>
+);
 
 export default Hero;
