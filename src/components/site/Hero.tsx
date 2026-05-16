@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useReducedMotion } from "framer-motion";
 import { ArrowRight, Sparkles, Star, Package2, Truck, ChevronRight, Instagram, Heart, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -59,6 +59,7 @@ const Hero = () => {
   const { data: content } = useHeroContent();
   const [hero, setHero] = useState<string>(heroFallback);
   const ref = useRef<HTMLElement>(null);
+  const reduceMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const yLeft  = useTransform(scrollYProgress, [0, 1], [0, -60]);
@@ -80,6 +81,15 @@ const Hero = () => {
 
   // Stat values: support both numeric and pre-formatted strings
   const stat2Numeric = !isNaN(Number(content.stat2_value));
+
+  // Sanitize admin-controlled CTA links: only allow same-site paths.
+  const safePath = (p: string, fallback: string) => {
+    if (!p) return fallback;
+    const t = p.trim();
+    return t.startsWith("/") ? t : fallback;
+  };
+  const ctaPrimary   = safePath(content.cta_primary_link,   "/shop");
+  const ctaSecondary = safePath(content.cta_secondary_link, "/contact");
 
   return (
     <section
@@ -116,7 +126,7 @@ const Hero = () => {
         />
 
         {/* Gold dust particles */}
-        {[...Array(14)].map((_, i) => (
+        {!reduceMotion && [...Array(8)].map((_, i) => (
           <motion.span
             key={i}
             className="absolute rounded-full"
@@ -302,7 +312,7 @@ const Hero = () => {
             className="mt-9 flex flex-wrap items-center gap-3"
           >
             <Link
-              to={content.cta_primary_link}
+              to={ctaPrimary}
               className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full"
               style={{
                 padding: "0.92rem 2.3rem",
@@ -336,7 +346,7 @@ const Hero = () => {
             </Link>
 
             <Link
-              to={content.cta_secondary_link}
+              to={ctaSecondary}
               className="group inline-flex items-center gap-2 rounded-full transition-all duration-400"
               style={{
                 padding: "0.92rem 2rem",
@@ -449,6 +459,8 @@ const Hero = () => {
                   src={hero}
                   alt="Luxury pressed-rose resin tray"
                   className="h-full w-full object-cover"
+                  fetchPriority="high"
+                  decoding="async"
                 />
               </motion.div>
 

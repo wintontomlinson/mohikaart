@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Save, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { DEFAULT_SETTINGS, StoreSettings, invalidateSettingsCache } from "@/lib/settings";
-import { DEFAULT_SEO, SeoSettings, fetchSetting, saveSetting, invalidateCmsCache } from "@/lib/cms";
+import { DEFAULT_SETTINGS, StoreSettings, useInvalidateStoreSettings } from "@/lib/settings";
+import { DEFAULT_SEO, SeoSettings, fetchSetting, saveSetting, useInvalidateSetting } from "@/lib/cms";
 
 type RazorpayConfig = { key_id: string; mode: "test" | "live"; secret_configured: boolean };
 
@@ -18,6 +18,8 @@ const AdminSettings = () => {
   const [savingStore, setSavingStore] = useState(false);
   const [savingSeo, setSavingSeo] = useState(false);
   const [loading, setLoading] = useState(true);
+  const invalidateStore = useInvalidateStoreSettings();
+  const invalidateSetting = useInvalidateSetting();
 
   useEffect(() => {
     Promise.all([
@@ -49,7 +51,7 @@ const AdminSettings = () => {
     const { error } = await supabase.from("app_settings").upsert({ key: "store", value: store as any });
     setSavingStore(false);
     if (error) return toast.error(error.message);
-    invalidateSettingsCache();
+    invalidateStore();
     toast.success("Store settings saved — changes are live");
   };
 
@@ -58,7 +60,7 @@ const AdminSettings = () => {
     const { error } = await saveSetting("seo", seo);
     setSavingSeo(false);
     if (error) return toast.error(error.message);
-    invalidateCmsCache("seo");
+    invalidateSetting("seo");
     toast.success("SEO settings saved");
   };
 

@@ -70,6 +70,7 @@ const AdminImages = () => {
                   {s.desc && <p className="text-xs text-muted-foreground mb-1">{s.desc}</p>}
                   <div className="text-[10px] text-muted-foreground/50 font-mono mb-4">key: {s.key}</div>
                   <ImageUpload
+                    bucket="site-images"
                     value={data[s.key]?.image_url}
                     onChange={(url) => update(s.key, url)}
                     label=""

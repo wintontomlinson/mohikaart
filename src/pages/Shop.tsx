@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, Search, X } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import PageHeader from "@/components/site/PageHeader";
 import { ProductCard, Product } from "@/components/site/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,10 +13,30 @@ const ShopPage = () => {
   const [cats, setCats] = useState<Cat[]>([]);
   const [active, setActive] = useState<string>("all");
   const [sort, setSort] = useState<"featured" | "price-asc" | "price-desc">("featured");
-  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Sync URL ?q= with local search (both directions)
+  useEffect(() => {
+    const q = searchParams.get("q") ?? "";
+    if (q !== search) setSearch(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const next = new URLSearchParams(searchParams);
+      if (search) next.set("q", search); else next.delete("q");
+      if (next.toString() !== searchParams.toString()) {
+        setSearchParams(next, { replace: true });
+      }
+    }, 250);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   useEffect(() => {
     setLoading(true);

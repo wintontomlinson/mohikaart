@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type StoreSettings = {
   phone: string;        // digits only, e.g. "919876543210"
@@ -18,37 +18,42 @@ export const DEFAULT_SETTINGS: StoreSettings = {
 };
 
 let _cache: StoreSettings | null = null;
-let _promise: Promise<StoreSettings> | null = null;
 
 export async function fetchStoreSettings(): Promise<StoreSettings> {
   if (_cache) return _cache;
-  if (_promise) return _promise;
-  _promise = supabase
+  const { data } = await supabase
     .from("app_settings")
     .select("value")
     .eq("key", "store")
-    .maybeSingle()
-    .then(({ data }) => {
-      const val =
-        data?.value && typeof data.value === "object" && !Array.isArray(data.value)
-          ? (data.value as Partial<StoreSettings>)
-          : {};
-      _cache = { ...DEFAULT_SETTINGS, ...val };
-      _promise = null;
-      return _cache!;
-    });
-  return _promise;
+    .maybeSingle();
+  const val =
+    data?.value && typeof data.value === "object" && !Array.isArray(data.value)
+      ? (data.value as Partial<StoreSettings>)
+      : {};
+  _cache = { ...DEFAULT_SETTINGS, ...val };
+  return _cache;
 }
 
 export function invalidateSettingsCache() {
   _cache = null;
-  _promise = null;
 }
 
+/** Reads store settings via React Query so saves elsewhere refresh
+ *  every consumer (Navbar, WhatsApp button, Footer, …). */
 export function useStoreSettings() {
-  const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS);
-  useEffect(() => {
-    fetchStoreSettings().then(setSettings);
-  }, []);
-  return settings;
+  const q = useQuery({
+    queryKey: ["app_setting", "store"],
+    queryFn:  fetchStoreSettings,
+    staleTime: 60_000,
+  });
+  return q.data ?? DEFAULT_SETTINGS;
+}
+
+/** Call after saving store settings in admin to refresh subscribers. */
+export function useInvalidateStoreSettings() {
+  const qc = useQueryClient();
+  return () => {
+    invalidateSettingsCache();
+    qc.invalidateQueries({ queryKey: ["app_setting", "store"] });
+  };
 }

@@ -6,7 +6,7 @@ import {
   DEFAULT_HERO,
   fetchSetting,
   saveSetting,
-  invalidateCmsCache,
+  useInvalidateSetting,
 } from "@/lib/cms";
 import { Link } from "react-router-dom";
 
@@ -35,6 +35,7 @@ const AdminHero = () => {
   const [data, setData] = useState<HeroContent>(DEFAULT_HERO);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const invalidate = useInvalidateSetting();
 
   useEffect(() => {
     fetchSetting<HeroContent>("hero_content", DEFAULT_HERO).then((d) => {
@@ -48,7 +49,7 @@ const AdminHero = () => {
     const { error } = await saveSetting("hero_content", data);
     setSaving(false);
     if (error) return toast.error(error.message);
-    invalidateCmsCache("hero_content");
+    invalidate("hero_content");
     toast.success("Hero updated — refresh the homepage to see changes");
   };
 
@@ -78,6 +79,7 @@ const AdminHero = () => {
         <Link
           to="/"
           target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-muted text-xs"
         >
           <Eye className="w-3.5 h-3.5" /> Preview Site

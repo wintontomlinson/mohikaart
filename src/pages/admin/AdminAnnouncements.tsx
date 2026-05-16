@@ -6,7 +6,7 @@ import {
   DEFAULT_ANNOUNCEMENTS,
   fetchSetting,
   saveSetting,
-  invalidateCmsCache,
+  useInvalidateSetting,
 } from "@/lib/cms";
 
 const inp =
@@ -18,6 +18,7 @@ const AdminAnnouncements = () => {
   const [items, setItems] = useState<Announcement[]>(DEFAULT_ANNOUNCEMENTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const invalidate = useInvalidateSetting();
 
   useEffect(() => {
     fetchSetting<Announcement[]>("announcements", DEFAULT_ANNOUNCEMENTS).then((d) => {
@@ -51,7 +52,7 @@ const AdminAnnouncements = () => {
     const { error } = await saveSetting("announcements", items);
     setSaving(false);
     if (error) return toast.error(error.message);
-    invalidateCmsCache("announcements");
+    invalidate("announcements");
     toast.success("Announcements saved — top bar will update");
   };
 

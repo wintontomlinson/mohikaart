@@ -1,10 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { lazy, Suspense } from "react";
 
 import SiteLayout from "@/components/site/SiteLayout";
+
+// ── Storefront ── always-needed pages stay eager
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import CategoriesPage from "./pages/CategoriesPage";
@@ -14,70 +16,91 @@ import AboutPage from "./pages/AboutPage";
 import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
 import Checkout from "./pages/Checkout";
-import WeddingPage from "./pages/WeddingPage";
-import CorporatePage from "./pages/CorporatePage";
-import CareGuidePage from "./pages/CareGuidePage";
-import FAQPage from "./pages/FAQPage";
-import ShippingPage from "./pages/ShippingPage";
 import NotFound from "./pages/NotFound";
 
-import AdminLayout from "./pages/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminProducts from "./pages/admin/AdminProducts";
-import AdminCategories from "./pages/admin/AdminCategories";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminImages from "./pages/admin/AdminImages";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminInquiries from "./pages/admin/AdminInquiries";
-import AdminHero from "./pages/admin/AdminHero";
-import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
-import AdminTestimonials from "./pages/admin/AdminTestimonials";
-import AdminCoupons from "./pages/admin/AdminCoupons";
+// Rarely-visited storefront pages → lazy
+const WeddingPage    = lazy(() => import("./pages/WeddingPage"));
+const CorporatePage  = lazy(() => import("./pages/CorporatePage"));
+const CareGuidePage  = lazy(() => import("./pages/CareGuidePage"));
+const FAQPage        = lazy(() => import("./pages/FAQPage"));
+const ShippingPage   = lazy(() => import("./pages/ShippingPage"));
 
-const queryClient = new QueryClient();
+// Admin → entirely lazy so storefront visitors never download recharts
+const AdminLayout         = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminDashboard      = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminProducts       = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminCategories     = lazy(() => import("./pages/admin/AdminCategories"));
+const AdminOrders         = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminImages         = lazy(() => import("./pages/admin/AdminImages"));
+const AdminSettings       = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminInquiries      = lazy(() => import("./pages/admin/AdminInquiries"));
+const AdminHero           = lazy(() => import("./pages/admin/AdminHero"));
+const AdminAnnouncements  = lazy(() => import("./pages/admin/AdminAnnouncements"));
+const AdminTestimonials   = lazy(() => import("./pages/admin/AdminTestimonials"));
+const AdminCoupons        = lazy(() => import("./pages/admin/AdminCoupons"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30_000,
+    },
+  },
+});
+
+const RouteFallback = () => (
+  <div className="min-h-[60vh] flex items-center justify-center text-sm text-muted-foreground">
+    <div className="flex items-center gap-2">
+      <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+      Loading…
+    </div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Site */}
-          <Route element={<SiteLayout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/category/:slug" element={<CategoryPage />} />
-            <Route path="/product/:slug" element={<ProductPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/wedding" element={<WeddingPage />} />
-            <Route path="/corporate" element={<CorporatePage />} />
-            <Route path="/care-guide" element={<CareGuidePage />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/shipping" element={<ShippingPage />} />
-          </Route>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            {/* Site */}
+            <Route element={<SiteLayout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/category/:slug" element={<CategoryPage />} />
+              <Route path="/product/:slug" element={<ProductPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/wedding" element={<WeddingPage />} />
+              <Route path="/corporate" element={<CorporatePage />} />
+              <Route path="/care-guide" element={<CareGuidePage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/shipping" element={<ShippingPage />} />
+            </Route>
 
-          {/* Admin */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="images" element={<AdminImages />} />
-            <Route path="inquiries" element={<AdminInquiries />} />
-            <Route path="hero" element={<AdminHero />} />
-            <Route path="announcements" element={<AdminAnnouncements />} />
-            <Route path="testimonials" element={<AdminTestimonials />} />
-            <Route path="coupons" element={<AdminCoupons />} />
-            <Route path="settings" element={<AdminSettings />} />
-          </Route>
+            {/* Admin */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="images" element={<AdminImages />} />
+              <Route path="inquiries" element={<AdminInquiries />} />
+              <Route path="hero" element={<AdminHero />} />
+              <Route path="announcements" element={<AdminAnnouncements />} />
+              <Route path="testimonials" element={<AdminTestimonials />} />
+              <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
