@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
-import { Pencil, Trash2, Plus, X, Save, ImagePlus } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
 
@@ -36,6 +36,8 @@ const AdminProducts = () => {
   const [cats, setCats] = useState<{ slug: string; name: string }[]>([]);
   const [editing, setEditing] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "featured" | "in" | "out">("all");
 
   const load = async () => {
     const { data } = await supabase.from("products").select("*").order("sort_order");
@@ -80,16 +82,77 @@ const AdminProducts = () => {
     load();
   };
 
+  const toggleFeatured = async (p: Product) => {
+    const { error } = await supabase.from("products").update({ featured: !p.featured }).eq("id", p.id!);
+    if (error) return toast.error(error.message);
+    setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, featured: !p.featured } : x)));
+  };
+
+  const toggleStock = async (p: Product) => {
+    const { error } = await supabase.from("products").update({ in_stock: !p.in_stock }).eq("id", p.id!);
+    if (error) return toast.error(error.message);
+    setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, in_stock: !p.in_stock } : x)));
+  };
+
+  // Search + filter
+  const visible = products.filter((p) => {
+    if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !p.slug.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filter === "featured" && !p.featured) return false;
+    if (filter === "out") return !p.in_stock;
+    if (filter === "in") return p.in_stock;
+    return true;
+  });
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <h1 className="font-display text-4xl">Products</h1>
-          <p className="text-sm text-muted-foreground mt-1">{products.length} total</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {products.length} total · {products.filter((p) => p.featured).length} featured · {products.filter((p) => !p.in_stock).length} out of stock
+          </p>
         </div>
-        <button onClick={() => setEditing({ ...empty, gallery: [] })} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm">
+        <button onClick={() => setEditing({ ...empty, gallery: [] })} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity">
           <Plus className="w-4 h-4" /> New Product
         </button>
+      </div>
+
+      {/* Filter + search bar */}
+      <div className="flex flex-wrap items-center gap-3 mb-5">
+        <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-background border border-border min-w-[220px] flex-1 max-w-md">
+          <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or slug..."
+            className="flex-1 outline-none bg-transparent text-sm placeholder:text-muted-foreground/60"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {[
+            { id: "all",      label: "All" },
+            { id: "featured", label: "Featured" },
+            { id: "in",       label: "In stock" },
+            { id: "out",      label: "Out of stock" },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setFilter(f.id as any)}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                filter === f.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="bg-background rounded-2xl border border-border overflow-hidden">
@@ -99,13 +162,14 @@ const AdminProducts = () => {
               <th className="text-left p-4">Product</th>
               <th className="text-left p-4 hidden md:table-cell">Category</th>
               <th className="text-left p-4">Price</th>
-              <th className="text-left p-4 hidden md:table-cell">Status</th>
+              <th className="text-left p-4 hidden md:table-cell">Featured</th>
+              <th className="text-left p-4 hidden md:table-cell">Stock</th>
               <th className="p-4"></th>
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
-              <tr key={p.id} className="border-t border-border">
+            {visible.map((p) => (
+              <tr key={p.id} className="border-t border-border hover:bg-muted/20 transition-colors">
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <img src={resolveImage(p.image_url)} alt={p.name} className="w-12 h-12 rounded-lg object-cover" />
@@ -118,10 +182,25 @@ const AdminProducts = () => {
                 <td className="p-4 hidden md:table-cell text-muted-foreground">{p.category_slug ?? "-"}</td>
                 <td className="p-4 font-medium">{formatINR(Number(p.price))}</td>
                 <td className="p-4 hidden md:table-cell">
-                  <div className="flex gap-2">
-                    {p.featured && <span className="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-blush text-foreground">Featured</span>}
-                    {!p.in_stock && <span className="text-[10px] uppercase tracking-widest px-2 py-1 rounded-full bg-destructive/10 text-destructive">Out</span>}
-                  </div>
+                  <button
+                    onClick={() => toggleFeatured(p)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
+                    title={p.featured ? "Remove from featured" : "Mark as featured"}
+                  >
+                    <Star className={`w-4 h-4 ${p.featured ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
+                  </button>
+                </td>
+                <td className="p-4 hidden md:table-cell">
+                  <button
+                    onClick={() => toggleStock(p)}
+                    className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-widest font-medium transition-colors ${
+                      p.in_stock
+                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                        : "bg-rose-100 text-rose-700 hover:bg-rose-200"
+                    }`}
+                  >
+                    {p.in_stock ? "In stock" : "Out"}
+                  </button>
                 </td>
                 <td className="p-4 text-right">
                   <button onClick={() => setEditing({ ...p, gallery: p.gallery ?? [] })} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted"><Pencil className="w-4 h-4" /></button>
@@ -129,8 +208,10 @@ const AdminProducts = () => {
                 </td>
               </tr>
             ))}
-            {products.length === 0 && (
-              <tr><td colSpan={5} className="p-10 text-center text-muted-foreground">No products yet. Click "New Product" to add one.</td></tr>
+            {visible.length === 0 && (
+              <tr><td colSpan={6} className="p-10 text-center text-muted-foreground">
+                {products.length === 0 ? `No products yet. Click "New Product" to add one.` : "No products match your filters."}
+              </td></tr>
             )}
           </tbody>
         </table>

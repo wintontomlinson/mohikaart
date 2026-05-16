@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Save, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { DEFAULT_SETTINGS, StoreSettings, invalidateSettingsCache } from "@/lib/settings";
+import { DEFAULT_SEO, SeoSettings, fetchSetting, saveSetting, invalidateCmsCache } from "@/lib/cms";
 
 type RazorpayConfig = { key_id: string; mode: "test" | "live"; secret_configured: boolean };
 
@@ -11,22 +12,26 @@ const inp = "w-full px-4 py-2.5 rounded-xl bg-background border border-border fo
 const AdminSettings = () => {
   const [rzp, setRzp] = useState<RazorpayConfig>({ key_id: "", mode: "test", secret_configured: false });
   const [store, setStore] = useState<StoreSettings>(DEFAULT_SETTINGS);
+  const [seo, setSeo] = useState<SeoSettings>(DEFAULT_SEO);
   const [showKey, setShowKey] = useState(false);
   const [savingRzp, setSavingRzp] = useState(false);
   const [savingStore, setSavingStore] = useState(false);
+  const [savingSeo, setSavingSeo] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       supabase.from("app_settings").select("value").eq("key", "razorpay").maybeSingle(),
       supabase.from("app_settings").select("value").eq("key", "store").maybeSingle(),
-    ]).then(([{ data: rzpData }, { data: storeData }]) => {
+      fetchSetting<SeoSettings>("seo", DEFAULT_SEO),
+    ]).then(([{ data: rzpData }, { data: storeData }, seoData]) => {
       if (rzpData?.value && typeof rzpData.value === "object" && !Array.isArray(rzpData.value)) {
         setRzp(rzpData.value as any);
       }
       if (storeData?.value && typeof storeData.value === "object" && !Array.isArray(storeData.value)) {
         setStore({ ...DEFAULT_SETTINGS, ...(storeData.value as any) });
       }
+      setSeo(seoData);
       setLoading(false);
     });
   }, []);
@@ -46,6 +51,15 @@ const AdminSettings = () => {
     if (error) return toast.error(error.message);
     invalidateSettingsCache();
     toast.success("Store settings saved — changes are live");
+  };
+
+  const onSaveSeo = async () => {
+    setSavingSeo(true);
+    const { error } = await saveSetting("seo", seo);
+    setSavingSeo(false);
+    if (error) return toast.error(error.message);
+    invalidateCmsCache("seo");
+    toast.success("SEO settings saved");
   };
 
   if (loading) return (
@@ -145,6 +159,82 @@ const AdminSettings = () => {
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm disabled:opacity-60 hover:opacity-85 transition-opacity"
           >
             <Save className="w-4 h-4" /> {savingStore ? "Saving…" : "Save Store Info"}
+          </button>
+        </div>
+      </div>
+
+      {/* ── SEO Settings ───────────────────────────────────────── */}
+      <div className="bg-background rounded-2xl border border-border overflow-hidden">
+        <div className="px-6 py-5 border-b border-border">
+          <h2 className="font-display text-xl">SEO Settings</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Page title, description and keywords used by search engines and social shares.
+          </p>
+        </div>
+        <div className="p-6 space-y-5">
+          <div>
+            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
+              Site title
+            </label>
+            <input
+              value={seo.site_title}
+              onChange={(e) => setSeo((s) => ({ ...s, site_title: e.target.value }))}
+              className={inp}
+              placeholder="Mohika Art — Customized Resin Crafts"
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {seo.site_title.length}/60 characters
+            </p>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
+              Meta description
+            </label>
+            <textarea
+              rows={3}
+              value={seo.site_description}
+              onChange={(e) => setSeo((s) => ({ ...s, site_description: e.target.value }))}
+              className={inp + " resize-none"}
+              placeholder="One paragraph summary of your store (150–160 chars)"
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {seo.site_description.length}/160 characters
+            </p>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
+              Keywords
+            </label>
+            <input
+              value={seo.keywords}
+              onChange={(e) => setSeo((s) => ({ ...s, keywords: e.target.value }))}
+              className={inp}
+              placeholder="resin art, customized gifts, handmade gifts"
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">Comma-separated keywords</p>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
+              Social share image (URL)
+            </label>
+            <input
+              value={seo.og_image}
+              onChange={(e) => setSeo((s) => ({ ...s, og_image: e.target.value }))}
+              className={inp + " font-mono text-xs"}
+              placeholder="https://example.com/og-image.jpg"
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Used when your site is shared on WhatsApp, Facebook etc. Recommended: 1200×630px
+            </p>
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-border flex justify-end">
+          <button
+            onClick={onSaveSeo}
+            disabled={savingSeo}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm disabled:opacity-60 hover:opacity-85 transition-opacity"
+          >
+            <Save className="w-4 h-4" /> {savingSeo ? "Saving…" : "Save SEO Settings"}
           </button>
         </div>
       </div>

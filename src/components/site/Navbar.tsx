@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Menu, X, ShoppingBag, ChevronDown, Heart, Briefcase,
-  BookOpen, HelpCircle, Truck, ArrowRight, Sparkles, Star,
+  BookOpen, HelpCircle, Truck, ArrowRight, Sparkles, Search,
 } from "lucide-react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
 import { useStoreSettings } from "@/lib/settings";
+import { useAnnouncements } from "@/lib/cms";
 import logo from "@/assets/mohika-logo.png";
 
 /* ── nav links ── */
@@ -26,36 +27,38 @@ const moreLinks = [
   { to: "/shipping",   label: "Shipping",   icon: Truck,      desc: "Delivery & returns info",      tag: "" },
 ];
 
-
 function AnnouncementTicker({ threshold }: { threshold: number }) {
+  const announcements = useAnnouncements();
   const [idx, setIdx] = useState(0);
-  const msgs = [
-    `✦  FREE SHIPPING on orders above ₹${threshold}`,
-    "✦  Handcrafted with Love — Since 2021",
-    "✦  2000+ Happy Customers across India",
-    "✦  Customized resin gifts for every occasion",
-  ];
+
+  const msgs = (announcements.length > 0 ? announcements.map(a => a.text) : [
+    "FREE SHIPPING on orders above ₹{threshold}",
+    "Handcrafted with Love — Since 2021",
+  ]).map(m => m.replace("{threshold}", String(threshold)));
+
   useEffect(() => {
-    const id = setInterval(() => setIdx(v => (v + 1) % msgs.length), 3800);
+    if (msgs.length <= 1) return;
+    const id = setInterval(() => setIdx(v => (v + 1) % msgs.length), 4200);
     return () => clearInterval(id);
-  }, []);
+  }, [msgs.length]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.span
         key={idx}
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-0 flex items-center justify-center"
-        style={{ fontSize: "10px", letterSpacing: "0.2em", color: "white", fontWeight: 500 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0 flex items-center justify-center gap-2 px-6"
+        style={{ fontSize: "10.5px", letterSpacing: "0.18em", color: "white", fontWeight: 500 }}
       >
-        {msgs[idx]}
+        <Sparkles className="w-3 h-3 text-amber-300/80 shrink-0" />
+        <span className="truncate">{msgs[idx]}</span>
       </motion.span>
     </AnimatePresence>
   );
 }
-
 
 const Navbar = () => {
   const [scrolled, setScrolled]           = useState(false);
@@ -63,11 +66,15 @@ const Navbar = () => {
   const [open, setOpen]                   = useState(false);
   const [moreOpen, setMoreOpen]           = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [searchOpen, setSearchOpen]       = useState(false);
+  const [searchQuery, setSearchQuery]     = useState("");
   const moreRef     = useRef<HTMLDivElement>(null);
+  const searchRef   = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
   const { count, setOpen: setCartOpen } = useCart();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { free_shipping_threshold } = useStoreSettings();
 
   /* scroll tracking */
@@ -88,25 +95,49 @@ const Navbar = () => {
     setOpen(false);
     setMoreOpen(false);
     setMobileMoreOpen(false);
+    setSearchOpen(false);
   }, [pathname]);
 
-  /* close More dropdown on outside click */
+  /* close dropdowns on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
     };
-    if (moreOpen) document.addEventListener("mousedown", handler);
+    document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [moreOpen]);
+  }, []);
+
+  /* keyboard shortcut: / opens search */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const isMoreActive = moreLinks.some((l) => pathname === l.to);
   const hide = scrolled && scrollDir === "down" && !open;
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
 
   return (
     <motion.header
       initial={{ y: -120, opacity: 0 }}
       animate={{ y: hide ? -120 : 0, opacity: 1 }}
-      transition={{ duration: hide ? 0.3 : 0.8, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: hide ? 0.3 : 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="fixed top-0 inset-x-0 z-50"
     >
       {/* ── Announcement bar ── */}
@@ -114,22 +145,15 @@ const Navbar = () => {
         {!scrolled && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 32, opacity: 1 }}
+            animate={{ height: 30, opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden relative"
             style={{
-              background: "linear-gradient(90deg, hsl(22 20% 14%), hsl(28 22% 18%) 40%, hsl(34 42% 28%) 70%, hsl(22 20% 14%))",
+              background: "linear-gradient(90deg, hsl(22 24% 14%), hsl(28 26% 20%) 45%, hsl(34 38% 30%) 70%, hsl(22 24% 14%))",
             }}
           >
             <AnnouncementTicker threshold={free_shipping_threshold} />
-            {/* decorative sparkle dots */}
-            <div className="absolute left-6 top-1/2 -translate-y-1/2 opacity-30">
-              <Sparkles className="w-3 h-3 text-amber-300" />
-            </div>
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-30">
-              <Star className="w-2.5 h-2.5 text-amber-300 fill-amber-300" />
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -138,25 +162,22 @@ const Navbar = () => {
       <div
         className="transition-all duration-500"
         style={{
-          background: scrolled
-            ? "hsl(36 42% 99%/0.98)"
-            : "hsl(36 42% 99%/0.78)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
+          background: scrolled ? "hsl(36 42% 99%/0.97)" : "hsl(36 42% 99%/0.82)",
+          backdropFilter: "blur(22px) saturate(180%)",
+          WebkitBackdropFilter: "blur(22px) saturate(180%)",
           boxShadow: scrolled
-            ? "0 1px 0 hsl(34 30% 86%/0.9), 0 6px 28px -6px hsl(22 22% 22%/0.1)"
-            : "0 1px 0 hsl(34 30% 88%/0.35)",
+            ? "0 1px 0 hsl(34 30% 86%/0.8), 0 6px 24px -8px hsl(22 22% 22%/0.08)"
+            : "0 1px 0 hsl(34 30% 88%/0.3)",
         }}
       >
-        <nav className="max-w-[1360px] mx-auto px-5 md:px-10 flex items-center justify-between h-[62px] md:h-[70px]">
+        <nav className="max-w-[1360px] mx-auto px-5 md:px-10 flex items-center justify-between h-[60px] md:h-[68px]">
 
           {/* ── LOGO ── */}
-          <Link to="/" className="flex items-center shrink-0 group relative">
+          <Link to="/" className="flex items-center shrink-0 group" aria-label="Mohika Art home">
             <img
               src={logo}
               alt="Mohika Art"
-              className="h-[36px] md:h-[44px] w-auto object-contain transition-all duration-400 group-hover:scale-[1.04]"
-              style={{ transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1), filter 0.4s ease" }}
+              className="h-[34px] md:h-[42px] w-auto object-contain transition-transform duration-400 group-hover:scale-[1.04]"
             />
           </Link>
 
@@ -174,15 +195,12 @@ const Navbar = () => {
                     <span
                       className="text-[11px] tracking-[0.09em] uppercase font-semibold transition-all duration-250"
                       style={{
-                        color: isActive ? "hsl(var(--foreground))" : "hsl(var(--foreground)/0.45)",
-                        letterSpacing: "0.09em",
+                        color: isActive ? "hsl(var(--foreground))" : "hsl(var(--foreground)/0.5)",
                       }}
                     >
                       {l.label}
                     </span>
-                    {/* active pill underline */}
                     <motion.span
-                      layoutId="nav-pill"
                       className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"
                       animate={{
                         width: isActive ? "20px" : "0px",
@@ -191,7 +209,6 @@ const Navbar = () => {
                       transition={{ type: "spring", stiffness: 400, damping: 32 }}
                       style={{ height: "2px", background: "hsl(34 58% 52%)" }}
                     />
-                    {/* hover underline */}
                     <span
                       className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full opacity-0 group-hover:opacity-40 transition-all duration-250"
                       style={{ height: "2px", width: "12px", background: "hsl(34 58% 52%)" }}
@@ -206,10 +223,12 @@ const Navbar = () => {
               <button
                 onClick={() => setMoreOpen((v) => !v)}
                 className="group relative px-[14px] py-2.5 inline-flex flex-col items-center"
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
               >
                 <span
                   className="flex items-center gap-1 text-[11px] tracking-[0.09em] uppercase font-semibold transition-all duration-250"
-                  style={{ color: isMoreActive || moreOpen ? "hsl(var(--foreground))" : "hsl(var(--foreground)/0.45)" }}
+                  style={{ color: isMoreActive || moreOpen ? "hsl(var(--foreground))" : "hsl(var(--foreground)/0.5)" }}
                 >
                   More
                   <motion.span
@@ -222,26 +241,24 @@ const Navbar = () => {
                 </span>
               </button>
 
-              {/* ── MEGA DROPDOWN ── */}
               <AnimatePresence>
                 {moreOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.96 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute top-[calc(100%+8px)] right-0 w-[290px] rounded-2xl overflow-hidden"
                     style={{
                       background: "hsl(36 42% 99%/0.99)",
-                      backdropFilter: "blur(28px) saturate(170%)",
+                      backdropFilter: "blur(24px) saturate(170%)",
                       border: "1px solid hsl(34 30% 88%/0.65)",
                       boxShadow:
-                        "0 32px 80px -20px hsl(22 22% 22%/0.2), " +
-                        "0 8px 24px -8px hsl(22 22% 22%/0.07), " +
+                        "0 28px 72px -20px hsl(22 22% 22%/0.18), " +
+                        "0 8px 22px -8px hsl(22 22% 22%/0.06), " +
                         "inset 0 1px 0 hsl(36 50% 100%/0.9)",
                     }}
                   >
-                    {/* Header */}
                     <div
                       className="px-4 pt-3.5 pb-2.5 flex items-center gap-2"
                       style={{ borderBottom: "1px solid hsl(34 28% 90%/0.7)" }}
@@ -251,8 +268,6 @@ const Navbar = () => {
                         Explore More
                       </span>
                     </div>
-
-                    {/* Links */}
                     <div className="p-2">
                       {moreLinks.map((l, i) => {
                         const active = pathname === l.to;
@@ -271,9 +286,7 @@ const Navbar = () => {
                             >
                               <span
                                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-all duration-220 ${
-                                  active
-                                    ? "bg-amber-100"
-                                    : "bg-foreground/[0.04] group-hover:bg-amber-50"
+                                  active ? "bg-amber-100" : "bg-foreground/[0.04] group-hover:bg-amber-50"
                                 }`}
                               >
                                 <l.icon
@@ -286,7 +299,7 @@ const Navbar = () => {
                                 <div className="flex items-center gap-1.5">
                                   <span
                                     className={`text-[11.5px] font-semibold leading-none transition-colors duration-200 ${
-                                      active ? "text-foreground" : "text-foreground/60 group-hover:text-foreground"
+                                      active ? "text-foreground" : "text-foreground/65 group-hover:text-foreground"
                                     }`}
                                   >
                                     {l.label}
@@ -305,7 +318,7 @@ const Navbar = () => {
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[10px] leading-[1.4] text-foreground/35 mt-0.5">
+                                <div className="text-[10px] leading-[1.4] text-foreground/40 mt-0.5">
                                   {l.desc}
                                 </div>
                               </div>
@@ -315,8 +328,6 @@ const Navbar = () => {
                         );
                       })}
                     </div>
-
-                    {/* Footer promo row */}
                     <div
                       className="mx-3 mb-3 mt-1 rounded-xl px-3 py-2.5 flex items-center gap-2.5"
                       style={{
@@ -340,7 +351,55 @@ const Navbar = () => {
           </ul>
 
           {/* ── RIGHT ACTIONS ── */}
-          <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="flex items-center gap-1 md:gap-1.5">
+
+            {/* Search */}
+            <div className="relative" ref={searchRef}>
+              <motion.button
+                onClick={() => setSearchOpen((v) => !v)}
+                aria-label="Search"
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
+                style={{ color: "hsl(var(--foreground)/0.55)" }}
+                whileHover={{ backgroundColor: "hsl(var(--foreground)/0.05)", color: "hsl(var(--foreground))" }}
+                whileTap={{ scale: 0.92 }}
+              >
+                <Search className="w-[18px] h-[18px]" strokeWidth={1.6} />
+              </motion.button>
+
+              <AnimatePresence>
+                {searchOpen && (
+                  <motion.form
+                    onSubmit={submitSearch}
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-[300px] rounded-2xl overflow-hidden"
+                    style={{
+                      background: "hsl(36 42% 99%/0.99)",
+                      backdropFilter: "blur(20px)",
+                      border: "1px solid hsl(34 30% 88%/0.7)",
+                      boxShadow: "0 24px 56px -16px hsl(22 22% 22%/0.18)",
+                    }}
+                  >
+                    <div className="p-3 flex items-center gap-2">
+                      <Search className="w-4 h-4 text-foreground/40 ml-1.5 shrink-0" />
+                      <input
+                        autoFocus
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search products..."
+                        className="flex-1 outline-none bg-transparent text-sm placeholder:text-foreground/30"
+                      />
+                      <kbd className="text-[9px] px-1.5 py-0.5 rounded bg-foreground/5 text-foreground/40 font-mono border border-foreground/10">
+                        Enter
+                      </kbd>
+                    </div>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Cart */}
             <motion.button
@@ -369,8 +428,7 @@ const Navbar = () => {
               </AnimatePresence>
             </motion.button>
 
-            {/* Divider */}
-            <div className="hidden md:block w-px h-4 rounded-full bg-foreground/10 mx-0.5" />
+            <div className="hidden md:block w-px h-4 rounded-full bg-foreground/10 mx-1" />
 
             {/* Shop CTA — desktop */}
             <motion.div
@@ -383,13 +441,12 @@ const Navbar = () => {
                 to="/shop"
                 className="relative overflow-hidden inline-flex items-center gap-2 rounded-full text-[10px] tracking-[0.1em] uppercase font-semibold group"
                 style={{
-                  padding: "0.52rem 1.35rem",
+                  padding: "0.52rem 1.25rem",
                   background: "hsl(var(--foreground))",
                   color: "hsl(var(--background))",
                   boxShadow: "0 4px 16px -4px hsl(34 58% 38%/0.4)",
                 }}
               >
-                {/* shimmer */}
                 <motion.span
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
                   animate={{ x: ["-120%", "120%"] }}
@@ -438,6 +495,20 @@ const Navbar = () => {
             }}
           >
             <div className="max-w-[1360px] mx-auto px-4 py-2 pb-4">
+              {/* Mobile search */}
+              <form onSubmit={submitSearch} className="mb-3 mt-1">
+                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-foreground/[0.04] border border-foreground/[0.08]">
+                  <Search className="w-4 h-4 text-foreground/40 shrink-0" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search products..."
+                    className="flex-1 outline-none bg-transparent text-sm placeholder:text-foreground/30"
+                  />
+                </div>
+              </form>
+
               <ul className="flex flex-col gap-0.5">
                 {links.map((l, i) => {
                   const isActive = l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
@@ -446,7 +517,7 @@ const Navbar = () => {
                       key={l.to}
                       initial={{ opacity: 0, x: -14 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.045, duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ delay: i * 0.045, duration: 0.26 }}
                     >
                       <NavLink
                         to={l.to}
@@ -454,7 +525,7 @@ const Navbar = () => {
                         className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-[14px] font-medium transition-all duration-200 ${
                           isActive
                             ? "text-foreground bg-amber-50/50"
-                            : "text-foreground/50 hover:text-foreground hover:bg-foreground/[0.025]"
+                            : "text-foreground/55 hover:text-foreground hover:bg-foreground/[0.025]"
                         }`}
                       >
                         <span>{l.label}</span>
@@ -469,15 +540,14 @@ const Navbar = () => {
                   );
                 })}
 
-                {/* Mobile More toggle */}
                 <motion.li
                   initial={{ opacity: 0, x: -14 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: links.length * 0.045, duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ delay: links.length * 0.045, duration: 0.26 }}
                 >
                   <button
                     onClick={() => setMobileMoreOpen((v) => !v)}
-                    className="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[14px] font-medium text-foreground/50 hover:text-foreground hover:bg-foreground/[0.025] transition-colors"
+                    className="w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-[14px] font-medium text-foreground/55 hover:text-foreground hover:bg-foreground/[0.025] transition-colors"
                   >
                     <span>More</span>
                     <motion.span
@@ -495,7 +565,7 @@ const Navbar = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                        transition={{ duration: 0.24 }}
                         className="overflow-hidden ml-2.5 mt-0.5 rounded-xl"
                         style={{
                           background: "hsl(36 42% 98%/0.6)",
@@ -509,7 +579,7 @@ const Navbar = () => {
                               <NavLink
                                 to={l.to}
                                 className={`flex items-center gap-3 px-3.5 py-2.5 text-[13px] transition-colors ${
-                                  active ? "text-foreground bg-amber-50/50" : "text-foreground/45 hover:text-foreground/75"
+                                  active ? "text-foreground bg-amber-50/50" : "text-foreground/50 hover:text-foreground/80"
                                 }`}
                               >
                                 <span
@@ -536,7 +606,6 @@ const Navbar = () => {
                 </motion.li>
               </ul>
 
-              {/* Mobile CTA */}
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}

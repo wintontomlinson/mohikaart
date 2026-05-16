@@ -1,68 +1,38 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import { useTestimonials } from "@/lib/cms";
 
-const reviews = [
-  {
-    name: "Aanya Mehta",
-    city: "Mumbai",
-    avatar: "AM",
-    text: "I gifted the wedding bouquet block to my sister and she literally cried. The detail, the gold flakes, the packaging — pure luxury.",
-    rating: 5,
-    product: "Bridal Bouquet Preservation",
-  },
-  {
-    name: "Riya Kapoor",
-    city: "Delhi",
-    avatar: "RK",
-    text: "The name keychain looks like a piece of jewellery. Mohika personally messaged for every tiny detail. Beyond worth it.",
-    rating: 5,
-    product: "Name Keychain",
-  },
-  {
-    name: "Saanvi Iyer",
-    city: "Bengaluru",
-    avatar: "SI",
-    text: "Ordered the couple frame for our anniversary. It feels heirloom — something I'll pass on. Pictures don't do it justice.",
-    rating: 5,
-    product: "Couple Photo Frame",
-  },
-  {
-    name: "Priya Sharma",
-    city: "Jaipur",
-    avatar: "PS",
-    text: "The corporate gift hampers for our team were absolutely stunning. Every single person was in awe. Will definitely order again!",
-    rating: 5,
-    product: "Corporate Gift Hamper",
-  },
-  {
-    name: "Neha Gupta",
-    city: "Pune",
-    avatar: "NG",
-    text: "I ordered a custom tray with my baby's first flowers. It's the most precious thing I own. Thank you Mohika for making memories tangible.",
-    rating: 5,
-    product: "Custom Resin Tray",
-  },
-];
+const initials = (name: string) =>
+  name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
 const Testimonials = () => {
+  const reviews = useTestimonials();
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
 
   const next = useCallback(() => {
     setDirection(1);
-    setCurrent((prev) => (prev + 1) % reviews.length);
-  }, []);
+    setCurrent((prev) => (prev + 1) % Math.max(reviews.length, 1));
+  }, [reviews.length]);
 
   const prev = useCallback(() => {
     setDirection(-1);
-    setCurrent((prev) => (prev - 1 + reviews.length) % reviews.length);
-  }, []);
+    setCurrent((prev) => (prev - 1 + reviews.length) % Math.max(reviews.length, 1));
+  }, [reviews.length]);
 
   useEffect(() => {
+    if (reviews.length <= 1) return;
     const interval = setInterval(next, 5500);
     return () => clearInterval(interval);
-  }, [next]);
+  }, [next, reviews.length]);
+
+  // Reset index if data shrinks
+  useEffect(() => {
+    if (current >= reviews.length && reviews.length > 0) setCurrent(0);
+  }, [current, reviews.length]);
+
+  if (reviews.length === 0) return null;
 
   const variants = {
     enter: (dir: number) => ({ x: dir > 0 ? 280 : -280, opacity: 0, scale: 0.92 }),
@@ -156,7 +126,7 @@ const Testimonials = () => {
                   className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-background mb-5 shrink-0"
                   style={{ background: "linear-gradient(135deg, hsl(34 58% 52%), hsl(348 58% 68%))" }}
                 >
-                  {reviews[current].avatar}
+                  {initials(reviews[current].name)}
                 </div>
 
                 <div className="flex gap-1 mb-4 text-gold">
