@@ -50,36 +50,48 @@ const CheckoutPage = () => {
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
+  const EMAIL_RE   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PHONE_RE   = /^[+\d][\d\s-]{8,14}$/;       // 9–15 digits incl. optional +
+  const PINCODE_RE = /^\d{6}$/;
+
   const validate = () => {
-    if (!form.name.trim()) { toast.error("Name is required"); return false; }
-    if (!form.email.trim()) { toast.error("Email is required"); return false; }
-    if (!form.phone.trim()) { toast.error("Phone is required"); return false; }
-    if (!form.address.trim()) { toast.error("Address is required"); return false; }
-    if (!form.city.trim()) { toast.error("City is required"); return false; }
-    if (!form.pincode.trim()) { toast.error("Pincode is required"); return false; }
+    if (!form.name.trim())          { toast.error("Name is required"); return false; }
+    if (!EMAIL_RE.test(form.email)) { toast.error("Enter a valid email"); return false; }
+    if (!PHONE_RE.test(form.phone)) { toast.error("Enter a valid phone number"); return false; }
+    if (!form.address.trim())       { toast.error("Address is required"); return false; }
+    if (!form.city.trim())          { toast.error("City is required"); return false; }
+    if (!PINCODE_RE.test(form.pincode)) { toast.error("Pincode must be 6 digits"); return false; }
+    if (items.length === 0)         { toast.error("Cart is empty"); return false; }
     return true;
   };
 
-  const saveOrder = async (paymentMethod: "razorpay" | "whatsapp", extra: Record<string, string> = {}) => {
-    const payload = {
-      customer_name: form.name.trim(),
-      customer_email: form.email.trim(),
-      customer_phone: form.phone.trim(),
-      shipping_address: form.address.trim(),
-      shipping_city: form.city.trim(),
-      shipping_state: form.state.trim() || null,
-      shipping_pincode: form.pincode.trim(),
-      notes: form.notes.trim() || null,
-      items: items.map((i) => ({ id: i.id, slug: i.slug, name: i.name, price: i.price, qty: i.qty })),
-      subtotal: total,
-      total,
-      payment_method: paymentMethod,
-      status: "pending",
-      ...extra,
+  /**
+   * Server-side order creation (no client-trusted totals).
+   * Calls public.create_order(customer, items, payment_method) RPC.
+   */
+  const saveOrder = async (paymentMethod: "razorpay" | "whatsapp" | "cod") => {
+    const customer = {
+      name:    form.name.trim(),
+      email:   form.email.trim(),
+      phone:   form.phone.trim(),
+      address: form.address.trim(),
+      city:    form.city.trim(),
+      state:   form.state.trim() || null,
+      pincode: form.pincode.trim(),
+      notes:   form.notes.trim() || null,
     };
-    const { data, error } = await supabase.from("orders").insert(payload).select("id,order_number").maybeSingle();
+    const cartItems = items.map((i) => ({ id: i.id, qty: i.qty }));
+
+    const { data, error } = await supabase.rpc("create_order", {
+      p_customer:       customer,
+      p_items:          cartItems,
+      p_payment_method: paymentMethod,
+    });
+
     if (error) throw new Error(error.message);
-    return data!;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row?.id) throw new Error("Order creation failed");
+    return row as { id: string; order_number: string; total: number; currency: string };
   };
 
   const onWhatsApp = async () => {
@@ -90,7 +102,7 @@ const CheckoutPage = () => {
       const text = encodeURIComponent(
         `Hi Mohika Art! Order #${order.order_number}\n\n` +
         items.map((i) => `${i.name} x ${i.qty}: ${formatINR(i.price * i.qty)}`).join("\n") +
-        `\n\nTotal: ${formatINR(total)}` +
+        `\n\nTotal: ${formatINR(order.total)}` +
         `\n\nShip to: ${form.name}, ${form.address}, ${form.city}${form.state ? `, ${form.state}` : ""} - ${form.pincode}` +
         `\nPhone: ${form.phone}` +
         (form.notes ? `\nNote: ${form.notes}` : "")
@@ -98,7 +110,23 @@ const CheckoutPage = () => {
       setOrderNumber(order.order_number);
       clear();
       setStep("success");
-      window.open(`https://wa.me/${phone}?text=${text}`, "_blank");
+      window.open(`https://wa.me/${phone}?text=${text}`, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast.error(e.message || "Something went wrong");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const onCOD = async () => {
+    if (!validate()) return;
+    setProcessing(true);
+    try {
+      const order = await saveOrder("cod");
+      setOrderNumber(order.order_number);
+      clear();
+      setStep("success");
+      toast.success("Order placed — pay on delivery");
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");
     } finally {
@@ -128,19 +156,22 @@ const CheckoutPage = () => {
 
       const rzp = new window.Razorpay({
         key: razorpayKeyId,
-        amount: Math.round(total * 100),
-        currency: "INR",
+        amount: Math.round(order.total * 100),
+        currency: order.currency || "INR",
         name: "Mohika Art",
         description: `Order #${order.order_number}`,
         prefill: { name: form.name, email: form.email, contact: form.phone },
         theme: { color: "#b8860b" },
         handler: async (response: any) => {
-          await supabase.from("orders").update({
-            status: "confirmed",
-            razorpay_payment_id: response.razorpay_payment_id ?? null,
-            razorpay_order_id: response.razorpay_order_id ?? null,
-            razorpay_signature: response.razorpay_signature ?? null,
-          }).eq("id", order.id);
+          // Best-effort: tell the server the payment was submitted.
+          // The server marks the order as 'payment_submitted'; the admin
+          // verifies it (or a webhook later promotes to 'confirmed').
+          await supabase.rpc("record_payment", {
+            p_order_id:     order.id,
+            p_payment_id:   response.razorpay_payment_id,
+            p_rzp_order_id: response.razorpay_order_id ?? null,
+            p_signature:    response.razorpay_signature ?? null,
+          });
           setOrderNumber(order.order_number);
           clear();
           setStep("success");
@@ -148,7 +179,7 @@ const CheckoutPage = () => {
         },
         modal: {
           ondismiss: async () => {
-            await supabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
+            await supabase.rpc("cancel_pending_order", { p_order_id: order.id });
             toast.info("Payment cancelled.");
             setProcessing(false);
           },
@@ -328,6 +359,14 @@ const CheckoutPage = () => {
                       className="w-full px-8 py-4 rounded-full border border-foreground/30 hover:bg-foreground hover:text-background transition-all duration-500 inline-flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
                     >
                       <MessageCircle className="w-4 h-4" /> Order on WhatsApp
+                    </button>
+
+                    <button
+                      onClick={onCOD}
+                      disabled={processing}
+                      className="w-full px-8 py-4 rounded-full border border-border hover:border-foreground/40 hover:bg-muted/40 transition-all duration-300 inline-flex items-center justify-center gap-2 disabled:opacity-60 text-sm text-foreground/75"
+                    >
+                      <Package className="w-4 h-4" /> Cash on Delivery
                     </button>
                   </div>
 

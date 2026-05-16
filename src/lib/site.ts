@@ -30,7 +30,7 @@ const map: Record<string, string> = {
   "gallery-customer.jpg": customer,
 };
 
-const PLACEHOLDER = hero;
+const PLACEHOLDER = "/placeholder.svg";
 
 export function resolveImage(url?: string | null): string {
   if (!url) return PLACEHOLDER;

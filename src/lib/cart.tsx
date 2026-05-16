@@ -48,9 +48,24 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const remove = useCallback((id: string) => setItems((p) => p.filter((i) => i.id !== id)), []);
-  const setQty = useCallback((id: string, qty: number) =>
-    setItems((p) => p.map((i) => (i.id === id ? { ...i, qty: Math.max(1, qty) } : i))), []);
+  const setQty = useCallback((id: string, qty: number) => {
+    if (qty <= 0) {
+      setItems((p) => p.filter((i) => i.id !== id));
+      return;
+    }
+    setItems((p) => p.map((i) => (i.id === id ? { ...i, qty: Math.min(99, qty) } : i)));
+  }, []);
   const clear = useCallback(() => setItems([]), []);
+
+  // Cross-tab sync — listen for updates from other tabs
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== KEY || e.newValue === null) return;
+      try { setItems(JSON.parse(e.newValue)); } catch { /* ignore */ }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const value = useMemo<Ctx>(() => ({
     items,

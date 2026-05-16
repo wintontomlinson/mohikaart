@@ -3,29 +3,38 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LogOut, Package, Image as ImageIcon, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail, Sparkles, MessageSquareQuote,
-  Megaphone, Ticket, Search, Eye, EyeOff,
+  Megaphone, Ticket, Search, Eye, EyeOff, ShieldAlert,
 } from "lucide-react";
+import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import logo from "@/assets/mohika-mark.png";
 
-const KEY = "mohika.admin.auth.v1";
-const PASSWORD = "2344"; // change anytime here
+/** Public helper kept for old imports (now backed by real auth) */
+export const isAdmin = () => {
+  // The React tree decides admin status via useAdminAuth(); legacy callers
+  // (none remaining) used to check localStorage. Always return false here so
+  // any stale code is forced through the proper provider.
+  return false;
+};
 
-export const isAdmin = () => localStorage.getItem(KEY) === "1";
+/* ──────────────────────────────────────────────────────────
+   Sign-in screen
+   ────────────────────────────────────────────────────────── */
+const AdminLogin = () => {
+  const { signIn } = useAdminAuth();
+  const [email, setEmail] = useState("");
+  const [pw, setPw]       = useState("");
+  const [show, setShow]   = useState(false);
+  const [err, setErr]     = useState("");
+  const [busy, setBusy]   = useState(false);
 
-const AdminLogin = ({ onOk }: { onOk: () => void }) => {
-  const [pw, setPw] = useState("");
-  const [show, setShow] = useState(false);
-  const [err, setErr] = useState("");
-  const [attempts, setAttempts] = useState(0);
-  const [locked, setLocked] = useState(false);
-
-  useEffect(() => {
-    if (attempts >= 5) {
-      setLocked(true);
-      const t = setTimeout(() => { setLocked(false); setAttempts(0); }, 30000);
-      return () => clearTimeout(t);
-    }
-  }, [attempts]);
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr("");
+    setBusy(true);
+    const { error } = await signIn(email, pw);
+    setBusy(false);
+    if (error) setErr(error);
+  };
 
   return (
     <div
@@ -37,22 +46,11 @@ const AdminLogin = ({ onOk }: { onOk: () => void }) => {
           "linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%)",
       }}
     >
-      {/* Decorative blobs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blush/20 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-champagne/15 blur-3xl pointer-events-none" />
 
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (locked) return;
-          if (pw === PASSWORD) {
-            localStorage.setItem(KEY, "1");
-            onOk();
-          } else {
-            setErr("Incorrect password");
-            setAttempts((n) => n + 1);
-          }
-        }}
+        onSubmit={onSubmit}
         className="bg-card/95 backdrop-blur-xl rounded-3xl p-10 w-full max-w-md shadow-2xl border border-border relative z-10"
       >
         <div className="flex items-center gap-3 mb-8">
@@ -69,47 +67,60 @@ const AdminLogin = ({ onOk }: { onOk: () => void }) => {
 
         <h1 className="font-display text-3xl mb-1">Welcome back</h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Enter the admin password to access the panel.
+          Sign in with your admin credentials to access the panel.
         </p>
 
         <div className="space-y-4">
-          <div className="relative">
+          <div>
+            <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground">Email</label>
             <input
-              type={show ? "text" : "password"}
+              type="email"
+              autoComplete="email"
               autoFocus
-              value={pw}
-              onChange={(e) => { setPw(e.target.value); setErr(""); }}
-              placeholder="Password"
-              disabled={locked}
-              className="w-full px-4 py-3 pr-11 rounded-xl bg-background border border-border focus:border-foreground/50 outline-none text-sm transition-colors disabled:opacity-50"
+              required
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setErr(""); }}
+              placeholder="you@mohikaart.com"
+              className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-foreground/50 outline-none text-sm transition-colors"
             />
-            <button
-              type="button"
-              onClick={() => setShow((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
           </div>
 
-          {err && !locked && (
-            <p className="text-sm text-destructive flex items-center gap-2">
-              {err}
-              {attempts > 0 && <span className="text-xs opacity-60">({5 - attempts} tries left)</span>}
-            </p>
-          )}
-          {locked && (
-            <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
-              Too many attempts. Please wait 30 seconds.
+          <div>
+            <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground">Password</label>
+            <div className="relative">
+              <input
+                type={show ? "text" : "password"}
+                autoComplete="current-password"
+                required
+                value={pw}
+                onChange={(e) => { setPw(e.target.value); setErr(""); }}
+                placeholder="••••••••"
+                className="w-full px-4 py-3 pr-11 rounded-xl bg-background border border-border focus:border-foreground/50 outline-none text-sm transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => setShow((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={show ? "Hide password" : "Show password"}
+              >
+                {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {err && (
+            <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg flex items-start gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{err}</span>
             </p>
           )}
 
           <button
             type="submit"
-            disabled={locked || !pw}
+            disabled={busy || !email || !pw}
             className="w-full px-6 py-3 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {locked ? "Locked" : "Sign In"}
+            {busy ? "Signing in…" : "Sign In"}
           </button>
         </div>
 
@@ -121,81 +132,91 @@ const AdminLogin = ({ onOk }: { onOk: () => void }) => {
   );
 };
 
-const AdminLayout = ({ children }: { children?: ReactNode }) => {
-  const [auth, setAuth] = useState(isAdmin());
+/* ──────────────────────────────────────────────────────────
+   Authenticated-but-not-admin screen
+   ────────────────────────────────────────────────────────── */
+const NotAuthorized = () => {
+  const { signOut, user } = useAdminAuth();
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
+      <div className="bg-card border border-border rounded-2xl shadow-luxe p-10 max-w-md text-center">
+        <ShieldAlert className="w-10 h-10 text-amber-600 mx-auto mb-4" />
+        <h2 className="font-display text-2xl mb-2">Not authorized</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          {user?.email ? <><strong>{user.email}</strong> is signed in but not an admin.</> : "You are not signed in as an admin."}
+          {" "}If this is your account, ask the site owner to grant admin access.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <Link to="/" className="px-5 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors">
+            Back to site
+          </Link>
+          <button
+            onClick={signOut}
+            className="px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ──────────────────────────────────────────────────────────
+   The actual admin shell (same UI as before, just wires
+   into Supabase Auth instead of localStorage password)
+   ────────────────────────────────────────────────────────── */
+const AdminShell = ({ children }: { children?: ReactNode }) => {
+  const { isAdmin, loading, user, signOut } = useAdminAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch]         = useState("");
   const { pathname } = useLocation();
   const nav = useNavigate();
 
-  useEffect(() => {
-    const onStorage = () => setAuth(isAdmin());
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  if (!auth) return <AdminLogin onOk={() => setAuth(true)} />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
+        Loading…
+      </div>
+    );
+  }
+  if (!user) return <AdminLogin />;
+  if (!isAdmin) return <NotAuthorized />;
 
   const groups: { title: string; items: { to: string; icon: any; label: string }[] }[] = [
-    {
-      title: "Overview",
-      items: [
-        { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-      ],
-    },
-    {
-      title: "Catalogue",
-      items: [
-        { to: "/admin/products",    icon: Package, label: "Products" },
-        { to: "/admin/categories",  icon: Tag,     label: "Categories" },
-        { to: "/admin/coupons",     icon: Ticket,  label: "Coupons" },
-      ],
-    },
-    {
-      title: "Customers",
-      items: [
-        { to: "/admin/orders",     icon: ShoppingCart,     label: "Orders" },
-        { to: "/admin/inquiries",  icon: Mail,             label: "Inquiries" },
-        { to: "/admin/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
-      ],
-    },
-    {
-      title: "Content",
-      items: [
-        { to: "/admin/hero",         icon: Sparkles,  label: "Hero Section" },
-        { to: "/admin/announcements", icon: Megaphone, label: "Announcements" },
-        { to: "/admin/images",       icon: ImageIcon, label: "Site Images" },
-      ],
-    },
-    {
-      title: "System",
-      items: [
-        { to: "/admin/settings",  icon: Settings, label: "Settings" },
-      ],
-    },
+    { title: "Overview", items: [{ to: "/admin", icon: LayoutDashboard, label: "Dashboard" }] },
+    { title: "Catalogue", items: [
+      { to: "/admin/products",    icon: Package, label: "Products" },
+      { to: "/admin/categories",  icon: Tag,     label: "Categories" },
+      { to: "/admin/coupons",     icon: Ticket,  label: "Coupons" },
+    ]},
+    { title: "Customers", items: [
+      { to: "/admin/orders",     icon: ShoppingCart,        label: "Orders" },
+      { to: "/admin/inquiries",  icon: Mail,                label: "Inquiries" },
+      { to: "/admin/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
+    ]},
+    { title: "Content", items: [
+      { to: "/admin/hero",          icon: Sparkles,  label: "Hero Section" },
+      { to: "/admin/announcements", icon: Megaphone, label: "Announcements" },
+      { to: "/admin/images",        icon: ImageIcon, label: "Site Images" },
+    ]},
+    { title: "System", items: [{ to: "/admin/settings", icon: Settings, label: "Settings" }] },
   ];
 
-  // Flatten for mobile bottom nav (keep most important)
   const flatItems = groups.flatMap((g) => g.items);
   const bottomNavItems = [
-    flatItems[0], // Dashboard
+    flatItems[0],
     flatItems.find((i) => i.to === "/admin/products")!,
     flatItems.find((i) => i.to === "/admin/orders")!,
     flatItems.find((i) => i.to === "/admin/inquiries")!,
     flatItems.find((i) => i.to === "/admin/hero")!,
   ];
 
-  // Filtered for search
   const filtered = search.trim()
     ? groups
-        .map((g) => ({
-          ...g,
-          items: g.items.filter((i) =>
-            i.label.toLowerCase().includes(search.toLowerCase())
-          ),
-        }))
+        .map((g) => ({ ...g, items: g.items.filter((i) => i.label.toLowerCase().includes(search.toLowerCase())) }))
         .filter((g) => g.items.length > 0)
     : groups;
 
@@ -213,7 +234,6 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
         </div>
       </div>
 
-      {/* Search */}
       <div className="p-4 pb-2">
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/[0.06] border border-background/10">
           <Search className="w-3.5 h-3.5 text-background/40 shrink-0" />
@@ -254,13 +274,16 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="text-xs text-background/40 px-3 py-6 text-center">
-            No matches
-          </div>
+          <div className="text-xs text-background/40 px-3 py-6 text-center">No matches</div>
         )}
       </nav>
 
       <div className="p-4 border-t border-background/10 space-y-1">
+        {user && (
+          <div className="px-3 py-2 mb-1 text-[10px] text-background/60 truncate" title={user.email ?? undefined}>
+            {user.email}
+          </div>
+        )}
         <Link
           to="/"
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
@@ -268,10 +291,10 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
           <Home className="w-4 h-4 shrink-0" /> View Site
         </Link>
         <button
-          onClick={() => { localStorage.removeItem(KEY); nav("/admin"); setAuth(false); }}
+          onClick={async () => { await signOut(); nav("/admin"); }}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
         >
-          <LogOut className="w-4 h-4 shrink-0" /> Logout
+          <LogOut className="w-4 h-4 shrink-0" /> Sign out
         </button>
       </div>
     </>
@@ -279,12 +302,10 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
-      {/* Desktop Sidebar */}
       <aside className="w-64 shrink-0 bg-foreground text-background hidden md:flex flex-col">
         <SidebarContent />
       </aside>
 
-      {/* Mobile overlay sidebar */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-foreground/50" onClick={() => setMobileOpen(false)} />
@@ -295,24 +316,24 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
       )}
 
       <div className="flex-1 min-w-0">
-        {/* Mobile Header */}
         <header className="md:hidden bg-foreground text-background px-4 py-3.5 flex items-center justify-between sticky top-0 z-40">
           <button
             onClick={() => setMobileOpen(true)}
             className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
+            aria-label="Open menu"
           >
             <Menu className="w-4 h-4" />
           </button>
           <div className="font-display text-lg text-gold-grad">Admin Panel</div>
           <button
-            onClick={() => { localStorage.removeItem(KEY); setAuth(false); }}
+            onClick={async () => { await signOut(); }}
             className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
+            aria-label="Sign out"
           >
             <LogOut className="w-4 h-4" />
           </button>
         </header>
 
-        {/* Mobile bottom nav */}
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-foreground text-background border-t border-background/10 flex">
           {bottomNavItems.map((it) => {
             const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
@@ -345,5 +366,11 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
     </div>
   );
 };
+
+const AdminLayout = ({ children }: { children?: ReactNode }) => (
+  <AdminAuthProvider>
+    <AdminShell>{children}</AdminShell>
+  </AdminAuthProvider>
+);
 
 export default AdminLayout;

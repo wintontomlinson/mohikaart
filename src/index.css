@@ -297,3 +297,27 @@
   ::-webkit-scrollbar-thumb  { background: hsl(var(--champagne)); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: hsl(var(--gold)); }
 }
+
+
+
+/* ──────────────────────────────────────────────────────────
+   Accessibility: respect the user's reduced-motion setting.
+   Kills our infinite/cosmetic animations & long transitions
+   without hiding essential motion (carousels still flip,
+   route transitions still fade because they are short).
+   ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Hide pure decoration that has no informational value */
+  .noise-overlay,
+  .gold-divider {
+    animation: none !important;
+  }
+}

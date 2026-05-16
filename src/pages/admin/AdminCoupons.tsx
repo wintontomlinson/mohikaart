@@ -6,7 +6,7 @@ import {
   DEFAULT_COUPONS,
   fetchSetting,
   saveSetting,
-  invalidateCmsCache,
+  useInvalidateSetting,
 } from "@/lib/cms";
 import { formatINR } from "@/lib/site";
 
@@ -53,6 +53,7 @@ const AdminCoupons = () => {
   const [editing, setEditing] = useState<Coupon | null>(null);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const invalidate = useInvalidateSetting();
 
   useEffect(() => {
     fetchSetting<Coupon[]>("coupons", DEFAULT_COUPONS).then((d) => {
@@ -65,7 +66,7 @@ const AdminCoupons = () => {
     setItems(next);
     const { error } = await saveSetting("coupons", next);
     if (error) toast.error(error.message);
-    else invalidateCmsCache("coupons");
+    else invalidate("coupons");
   };
 
   const onSave = async () => {

@@ -182,6 +182,7 @@ const AdminDashboard = () => {
         <Link
           to="/"
           target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-muted text-xs"
         >
           <ArrowUpRight className="w-3.5 h-3.5" /> View Live Site

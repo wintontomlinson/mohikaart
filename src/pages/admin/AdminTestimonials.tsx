@@ -6,7 +6,7 @@ import {
   DEFAULT_TESTIMONIALS,
   fetchSetting,
   saveSetting,
-  invalidateCmsCache,
+  useInvalidateSetting,
 } from "@/lib/cms";
 
 const inp =
@@ -41,6 +41,7 @@ const AdminTestimonials = () => {
   const [editing, setEditing] = useState<Testimonial | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const invalidate = useInvalidateSetting();
 
   useEffect(() => {
     fetchSetting<Testimonial[]>("testimonials", DEFAULT_TESTIMONIALS).then((d) => {
@@ -55,7 +56,7 @@ const AdminTestimonials = () => {
     const { error } = await saveSetting("testimonials", next);
     setSaving(false);
     if (error) return toast.error(error.message);
-    invalidateCmsCache("testimonials");
+    invalidate("testimonials");
   };
 
   const onSave = async () => {

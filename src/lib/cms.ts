@@ -2,7 +2,7 @@
 // Each "section" is a key in app_settings with its JSON value.
 
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 /* ──────────────────────────────────────────────────────────────
    Hero content
@@ -164,8 +164,13 @@ export const DEFAULT_SEO: SeoSettings = {
 };
 
 /* ──────────────────────────────────────────────────────────────
-   Generic loader / saver
+   Generic loader / saver (React Query + module-level cache)
+
+   The module-level cache makes repeated reads cheap; React Query
+   layered on top makes saves invalidate ALL components reading the
+   same key, fixing the previous stale-UI-after-save bug.
    ────────────────────────────────────────────────────────────── */
+
 const _cache = new Map<string, any>();
 
 export async function fetchSetting<T>(key: string, fallback: T): Promise<T> {
@@ -200,32 +205,38 @@ export function invalidateCmsCache(key?: string) {
 }
 
 /* ──────────────────────────────────────────────────────────────
-   Hooks
+   Hooks (use React Query so saves auto-refresh subscribers)
    ────────────────────────────────────────────────────────────── */
+function useSetting<T>(key: string, fallback: T) {
+  return useQuery({
+    queryKey: ["app_setting", key],
+    queryFn:  () => fetchSetting<T>(key, fallback),
+    staleTime: 60_000,
+  });
+}
+
+/** Invalidate one (or all) CMS settings across the React tree.
+ *  Call this from admin save handlers after `saveSetting()`. */
+export function useInvalidateSetting() {
+  const qc = useQueryClient();
+  return (key?: string) => {
+    invalidateCmsCache(key);
+    if (key) qc.invalidateQueries({ queryKey: ["app_setting", key] });
+    else qc.invalidateQueries({ queryKey: ["app_setting"] });
+  };
+}
+
 export function useHeroContent() {
-  const [data, setData] = useState<HeroContent>(DEFAULT_HERO);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    fetchSetting<HeroContent>("hero_content", DEFAULT_HERO).then((d) => {
-      setData(d);
-      setLoading(false);
-    });
-  }, []);
-  return { data, loading };
+  const q = useSetting<HeroContent>("hero_content", DEFAULT_HERO);
+  return { data: q.data ?? DEFAULT_HERO, loading: q.isLoading };
 }
 
 export function useAnnouncements() {
-  const [data, setData] = useState<Announcement[]>(DEFAULT_ANNOUNCEMENTS);
-  useEffect(() => {
-    fetchSetting<Announcement[]>("announcements", DEFAULT_ANNOUNCEMENTS).then(setData);
-  }, []);
-  return data.filter((a) => a.active);
+  const q = useSetting<Announcement[]>("announcements", DEFAULT_ANNOUNCEMENTS);
+  return (q.data ?? DEFAULT_ANNOUNCEMENTS).filter((a) => a.active);
 }
 
 export function useTestimonials() {
-  const [data, setData] = useState<Testimonial[]>(DEFAULT_TESTIMONIALS);
-  useEffect(() => {
-    fetchSetting<Testimonial[]>("testimonials", DEFAULT_TESTIMONIALS).then(setData);
-  }, []);
-  return data.filter((t) => t.active);
+  const q = useSetting<Testimonial[]>("testimonials", DEFAULT_TESTIMONIALS);
+  return (q.data ?? DEFAULT_TESTIMONIALS).filter((t) => t.active);
 }
