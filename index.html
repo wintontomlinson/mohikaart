@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#fdf9f0" />
     <title>Mohika Art — Customized Resin Crafts & Handmade Gifts</title>
     <meta name="description" content="Mohika Art handcrafts premium customized resin keepsakes — name keychains, photo frames, wedding memories, bookmarks & luxury gift hampers. Pan India delivery." />
+    <meta name="keywords" content="resin art, customized gifts, handmade gifts, wedding bouquet preservation, name keychain, photo frame, corporate gifts, India" />
     <meta name="author" content="Mohika Art" />
     <link rel="canonical" href="/" />
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -23,8 +24,31 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="robots" content="index, follow" />
 
-    <!-- Strict client-side hardening -->
+    <!-- ────────────────────────────────────────────────────────────
+         Browser-side security hardening (defense in depth)
+         The real authority lives in Supabase RLS + create_order RPC,
+         but these meta-tags drastically reduce the blast radius of
+         any front-end XSS or content-injection mistakes.
+         ──────────────────────────────────────────────────────────── -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), browsing-topics=(), interest-cohort=(), payment=(self https://checkout.razorpay.com)" />
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      base-uri 'self';
+      object-src 'none';
+      frame-ancestors 'self';
+      form-action 'self' https://wa.me https://api.whatsapp.com;
+      img-src 'self' data: blob: https:;
+      font-src 'self' data: https://fonts.gstatic.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      script-src 'self' 'unsafe-inline' https://checkout.razorpay.com;
+      connect-src 'self' https: wss:;
+      frame-src https://checkout.razorpay.com https://api.razorpay.com https://*.razorpay.com;
+      worker-src 'self' blob:;
+      upgrade-insecure-requests;
+    " />
   </head>
 
   <body>

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
+import { safePath } from "@/lib/validation";
 import { useHeroContent } from "@/lib/cms";
 import heroFallback from "@/assets/hero-resin-tray.jpg";
 import keychain from "@/assets/cat-keychain.jpg";
@@ -82,12 +83,7 @@ const Hero = () => {
   // Stat values: support both numeric and pre-formatted strings
   const stat2Numeric = !isNaN(Number(content.stat2_value));
 
-  // Sanitize admin-controlled CTA links: only allow same-site paths.
-  const safePath = (p: string, fallback: string) => {
-    if (!p) return fallback;
-    const t = p.trim();
-    return t.startsWith("/") ? t : fallback;
-  };
+  // Sanitize admin-controlled CTA links via shared helper.
   const ctaPrimary   = safePath(content.cta_primary_link,   "/shop");
   const ctaSecondary = safePath(content.cta_secondary_link, "/contact");
 
@@ -95,7 +91,7 @@ const Hero = () => {
     <section
       ref={ref}
       id="top"
-      className="relative overflow-hidden noise-overlay"
+      className="relative overflow-hidden noise-overlay flex flex-col"
       style={{
         minHeight: "100svh",
         background:
@@ -176,7 +172,7 @@ const Hero = () => {
       {/* ── MAIN LAYOUT ── */}
       <motion.div
         style={{ opacity: fadeOp, scale: scaleContent }}
-        className="relative mx-auto flex w-full max-w-[1360px] flex-col items-start gap-8 px-5 pb-16 pt-[92px] md:flex-row md:items-start md:gap-0 md:px-10 md:pb-16 md:pt-[104px]"
+        className="relative mx-auto flex w-full max-w-[1360px] flex-1 flex-col items-start gap-8 px-5 pb-12 pt-[92px] md:flex-row md:items-start md:gap-0 md:px-10 md:pb-12 md:pt-[104px]"
       >
 
         {/* ══ LEFT (45%) ══ */}
@@ -626,7 +622,7 @@ const Hero = () => {
         <div className="gold-divider" />
         <div
           className="overflow-hidden py-3.5"
-          style={{ background: "hsl(36 42% 99%/0.6)", backdropFilter: "blur(8px)" }}
+          style={{ background: "transparent" }}
         >
           <div className="flex whitespace-nowrap" style={{ animation: "marquee 32s linear infinite" }}>
             {[...Array(2)].map((_, i) => (

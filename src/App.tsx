@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense } from "react";
 
 import SiteLayout from "@/components/site/SiteLayout";
+import SeoUpdater from "@/components/site/SeoUpdater";
 
 // ── Storefront ── always-needed pages stay eager
 import Index from "./pages/Index";
@@ -28,6 +29,7 @@ const ShippingPage   = lazy(() => import("./pages/ShippingPage"));
 // Admin → entirely lazy so storefront visitors never download recharts
 const AdminLayout         = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminDashboard      = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminAnalytics      = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminProducts       = lazy(() => import("./pages/admin/AdminProducts"));
 const AdminCategories     = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminOrders         = lazy(() => import("./pages/admin/AdminOrders"));
@@ -38,6 +40,7 @@ const AdminHero           = lazy(() => import("./pages/admin/AdminHero"));
 const AdminAnnouncements  = lazy(() => import("./pages/admin/AdminAnnouncements"));
 const AdminTestimonials   = lazy(() => import("./pages/admin/AdminTestimonials"));
 const AdminCoupons        = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminUsers          = lazy(() => import("./pages/admin/AdminUsers"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +66,7 @@ const App = () => (
     <TooltipProvider>
       <Sonner />
       <BrowserRouter>
+        <SeoUpdater />
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             {/* Site */}
@@ -86,6 +90,7 @@ const App = () => (
             {/* Admin */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
+              <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="categories" element={<AdminCategories />} />
               <Route path="orders" element={<AdminOrders />} />
@@ -95,6 +100,7 @@ const App = () => (
               <Route path="announcements" element={<AdminAnnouncements />} />
               <Route path="testimonials" element={<AdminTestimonials />} />
               <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
 

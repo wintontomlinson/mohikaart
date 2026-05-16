@@ -3,6 +3,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 /* ──────────────────────────────────────────────────────────────
    Hero content
@@ -239,4 +240,29 @@ export function useAnnouncements() {
 export function useTestimonials() {
   const q = useSetting<Testimonial[]>("testimonials", DEFAULT_TESTIMONIALS);
   return (q.data ?? DEFAULT_TESTIMONIALS).filter((t) => t.active);
+}
+
+/**
+ * Hook that mirrors the admin's SEO settings into the live document.
+ * Updates <title>, <meta name="description">, <meta name="keywords">,
+ * og:title, og:description and og:image. Safe to call once at the
+ * top of the React tree (e.g. inside <App>).
+ */
+export function useDynamicSeo() {
+  const q = useSetting<SeoSettings>("seo", DEFAULT_SEO);
+  const seo = q.data ?? DEFAULT_SEO;
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const setMeta = (selector: string, attr: string, value: string) => {
+      const el = document.querySelector(selector);
+      if (el && value) el.setAttribute(attr, value);
+    };
+    if (seo.site_title) document.title = seo.site_title;
+    setMeta('meta[name="description"]', "content", seo.site_description);
+    setMeta('meta[name="keywords"]',    "content", seo.keywords);
+    setMeta('meta[property="og:title"]',       "content", seo.site_title);
+    setMeta('meta[property="og:description"]', "content", seo.site_description);
+    if (seo.og_image) setMeta('meta[property="og:image"]', "content", seo.og_image);
+  }, [seo.site_title, seo.site_description, seo.keywords, seo.og_image]);
 }

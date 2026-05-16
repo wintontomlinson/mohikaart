@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/site";
-import { Eye, X, ChevronDown } from "lucide-react";
+import { Eye, X, ChevronDown, Search, Download } from "lucide-react";
 import { toast } from "sonner";
 
 type Order = {
@@ -23,14 +23,15 @@ type Order = {
   created_at: string;
 };
 
-const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+const STATUSES = ["pending", "payment_submitted", "confirmed", "shipped", "delivered", "cancelled"];
 
 const statusColors: Record<string, string> = {
-  pending:   "bg-amber-100 text-amber-700 border-amber-200",
-  confirmed: "bg-blue-100 text-blue-700 border-blue-200",
-  shipped:   "bg-indigo-100 text-indigo-700 border-indigo-200",
-  delivered: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  cancelled: "bg-rose-100 text-rose-700 border-rose-200",
+  pending:           "bg-amber-100 text-amber-700 border-amber-200",
+  payment_submitted: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  confirmed:         "bg-blue-100 text-blue-700 border-blue-200",
+  shipped:           "bg-indigo-100 text-indigo-700 border-indigo-200",
+  delivered:         "bg-emerald-100 text-emerald-700 border-emerald-200",
+  cancelled:         "bg-rose-100 text-rose-700 border-rose-200",
 };
 
 const fmt = (d: string) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -38,6 +39,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString("en-IN", { day: "numer
 const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [viewing, setViewing] = useState<Order | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
@@ -58,15 +60,73 @@ const AdminOrders = () => {
     if (viewing?.id === id) setViewing((v) => v ? { ...v, status } : v);
   };
 
-  const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const matchesSearch = (o: Order) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      o.order_number.toLowerCase().includes(q) ||
+      o.customer_name.toLowerCase().includes(q) ||
+      o.customer_email.toLowerCase().includes(q) ||
+      (o.customer_phone || "").toLowerCase().includes(q) ||
+      (o.shipping_city || "").toLowerCase().includes(q)
+    );
+  };
+
+  const filtered = orders
+    .filter((o) => filter === "all" ? true : o.status === filter)
+    .filter(matchesSearch);
 
   const counts = STATUSES.reduce((acc, s) => ({ ...acc, [s]: orders.filter((o) => o.status === s).length }), {} as Record<string, number>);
 
+  const exportCSV = () => {
+    const headers = ["Order #", "Date", "Status", "Customer", "Email", "Phone", "Address", "City", "State", "Pincode", "Subtotal", "Total", "Payment Method"];
+    const rows = filtered.map((o) => [
+      o.order_number, new Date(o.created_at).toISOString(), o.status,
+      o.customer_name, o.customer_email, o.customer_phone,
+      o.shipping_address, o.shipping_city, o.shipping_state ?? "", o.shipping_pincode,
+      o.subtotal, o.total, o.payment_method ?? "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mohika-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-display text-4xl">Orders</h1>
-        <p className="text-sm text-muted-foreground mt-1">{orders.length} total orders</p>
+      <div className="mb-8 flex items-end justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="font-display text-4xl">Orders</h1>
+          <p className="text-sm text-muted-foreground mt-1">{orders.length} total orders · {filtered.length} shown</p>
+        </div>
+        <button
+          onClick={exportCSV}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" /> Export CSV
+        </button>
+      </div>
+
+      {/* Search */}
+      <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-background border border-border max-w-md mb-4">
+        <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by order #, name, email, phone, city…"
+          className="flex-1 outline-none bg-transparent text-sm placeholder:text-muted-foreground/60"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Filter tabs */}
@@ -83,7 +143,7 @@ const AdminOrders = () => {
             onClick={() => setFilter(s)}
             className={`px-4 py-1.5 rounded-full text-xs font-medium border capitalize transition-all ${filter === s ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"}`}
           >
-            {s} ({counts[s] ?? 0})
+            {s.replace("_", " ")} ({counts[s] ?? 0})
           </button>
         ))}
       </div>
