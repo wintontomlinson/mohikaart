@@ -4,6 +4,7 @@ import { MessageCircle, Instagram, Mail, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoreSettings } from "@/lib/settings";
+import { EMAIL_RE, PHONE_RE, LIMITS, clamp } from "@/lib/validation";
 
 type Cat = { id: string; name: string };
 
@@ -19,14 +20,22 @@ const Contact = () => {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSending(true);
+
     const fd = new FormData(e.target as HTMLFormElement);
+    const name    = clamp(fd.get("name"),    LIMITS.name);
+    const phoneV  = clamp(fd.get("phone"),   LIMITS.phone);
+    const emailV  = clamp(fd.get("email"),   LIMITS.email).toLowerCase();
+    const product = clamp(fd.get("product"), LIMITS.product);
+    const idea    = clamp(fd.get("idea"),    LIMITS.idea);
+
+    if (!name)                      return toast.error("Please enter your name");
+    if (!EMAIL_RE.test(emailV))     return toast.error("Please enter a valid email");
+    if (!PHONE_RE.test(phoneV))     return toast.error("Please enter a valid phone number");
+    if (!idea)                      return toast.error("Please describe your idea");
+
+    setSending(true);
     const { error } = await supabase.from("inquiries").insert({
-      name: (fd.get("name") as string).trim(),
-      phone: (fd.get("phone") as string).trim(),
-      email: (fd.get("email") as string).trim(),
-      product: (fd.get("product") as string) || null,
-      idea: (fd.get("idea") as string).trim(),
+      name, phone: phoneV, email: emailV, product: product || null, idea,
     });
     setSending(false);
     if (error) {
@@ -56,7 +65,7 @@ const Contact = () => {
           </p>
 
           <div className="mt-12 space-y-4">
-            <a href={`https://wa.me/${phone}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
+            <a href={`https://wa.me/${encodeURIComponent(phone.replace(/\D/g, ""))}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
               <div className="w-14 h-14 rounded-2xl bg-blush-grad flex items-center justify-center">
                 <MessageCircle className="w-6 h-6" strokeWidth={1.5} />
               </div>
@@ -66,7 +75,7 @@ const Contact = () => {
               </div>
               <span className="ml-auto text-2xl text-gold opacity-0 group-hover:opacity-100 transition">→</span>
             </a>
-            <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
+            <a href={`https://instagram.com/${encodeURIComponent(instagram.replace(/^@/, "").replace(/[^\w.]/g, ""))}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
               <div className="w-14 h-14 rounded-2xl bg-blush-grad flex items-center justify-center">
                 <Instagram className="w-6 h-6" strokeWidth={1.5} />
               </div>
@@ -76,7 +85,7 @@ const Contact = () => {
               </div>
               <span className="ml-auto text-2xl text-gold opacity-0 group-hover:opacity-100 transition">→</span>
             </a>
-            <a href={`mailto:${email}`} className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
+            <a href={`mailto:${encodeURIComponent(email)}`} className="flex items-center gap-5 p-5 rounded-2xl glass hover:shadow-luxe transition-all duration-500 group">
               <div className="w-14 h-14 rounded-2xl bg-blush-grad flex items-center justify-center">
                 <Mail className="w-6 h-6" strokeWidth={1.5} />
               </div>
@@ -103,16 +112,16 @@ const Contact = () => {
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Name</label>
-              <input required name="name" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
+              <input required name="name" maxLength={80} autoComplete="name" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
             </div>
             <div>
               <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Phone</label>
-              <input required type="tel" name="phone" placeholder="+91 98765 43210" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
+              <input required type="tel" name="phone" maxLength={20} autoComplete="tel" placeholder="+91 98765 43210" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
             </div>
           </div>
           <div>
             <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Email</label>
-            <input required type="email" name="email" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
+            <input required type="email" name="email" maxLength={120} autoComplete="email" className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition" />
           </div>
           <div>
             <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Product of Interest</label>
@@ -136,7 +145,7 @@ const Contact = () => {
           </div>
           <div>
             <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Your Idea</label>
-            <textarea required name="idea" rows={4} className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition resize-none" placeholder="Describe the moment, names, colors..." />
+            <textarea required name="idea" rows={4} maxLength={1000} className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none transition resize-none" placeholder="Describe the moment, names, colors..." />
           </div>
           <button
             disabled={sending}

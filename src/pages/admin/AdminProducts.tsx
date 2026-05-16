@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
-import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
 
@@ -38,6 +38,7 @@ const AdminProducts = () => {
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "featured" | "in" | "out">("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const load = async () => {
     const { data } = await supabase.from("products").select("*").order("sort_order");
@@ -45,6 +46,7 @@ const AdminProducts = () => {
       ...p,
       gallery: Array.isArray(p.gallery) ? p.gallery : [],
     })) as Product[]);
+    setSelected(new Set());
   };
 
   useEffect(() => {
@@ -82,6 +84,80 @@ const AdminProducts = () => {
     load();
   };
 
+  const onDuplicate = async (p: Product) => {
+    const { id, ...rest } = p;
+    // Strip generated columns we don't want to copy verbatim.
+    delete (rest as any).created_at;
+    delete (rest as any).updated_at;
+    const copy = {
+      ...rest,
+      name: `${p.name} (Copy)`,
+      slug: `${p.slug}-copy-${Date.now().toString(36).slice(-4)}`,
+      featured: false,
+    };
+    const { error } = await supabase.from("products").insert(copy);
+    if (error) return toast.error(error.message);
+    toast.success("Duplicated");
+    load();
+  };
+
+  const onBulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Delete ${selected.size} product${selected.size === 1 ? "" : "s"}?`)) return;
+    const { error } = await supabase.from("products").delete().in("id", Array.from(selected));
+    if (error) return toast.error(error.message);
+    toast.success(`Deleted ${selected.size}`);
+    load();
+  };
+
+  const onBulkSetStock = async (in_stock: boolean) => {
+    if (selected.size === 0) return;
+    const { error } = await supabase.from("products").update({ in_stock }).in("id", Array.from(selected));
+    if (error) return toast.error(error.message);
+    toast.success(`${in_stock ? "Restocked" : "Marked out of stock"}: ${selected.size}`);
+    load();
+  };
+
+  const onBulkSetFeatured = async (featured: boolean) => {
+    if (selected.size === 0) return;
+    const { error } = await supabase.from("products").update({ featured }).in("id", Array.from(selected));
+    if (error) return toast.error(error.message);
+    toast.success(`Updated ${selected.size}`);
+    load();
+  };
+
+  const exportCSV = () => {
+    const list = visible;
+    const headers = ["Name", "Slug", "Category", "Price (INR)", "Original price", "Featured", "In stock", "Sort order", "Image URL"];
+    const rows = list.map((p) => [
+      p.name, p.slug, p.category_slug ?? "", p.price, p.original_price ?? "",
+      p.featured ? "yes" : "no", p.in_stock ? "yes" : "no", p.sort_order, p.image_url ?? "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mohika-products-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selected.size === visible.length) setSelected(new Set());
+    else setSelected(new Set(visible.map((p) => p.id!)));
+  };
+
   const toggleFeatured = async (p: Product) => {
     const { error } = await supabase.from("products").update({ featured: !p.featured }).eq("id", p.id!);
     if (error) return toast.error(error.message);
@@ -112,9 +188,17 @@ const AdminProducts = () => {
             {products.length} total · {products.filter((p) => p.featured).length} featured · {products.filter((p) => !p.in_stock).length} out of stock
           </p>
         </div>
-        <button onClick={() => setEditing({ ...empty, gallery: [] })} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity">
-          <Plus className="w-4 h-4" /> New Product
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={exportCSV}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" /> CSV
+          </button>
+          <button onClick={() => setEditing({ ...empty, gallery: [] })} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity">
+            <Plus className="w-4 h-4" /> New Product
+          </button>
+        </div>
       </div>
 
       {/* Filter + search bar */}
@@ -156,9 +240,33 @@ const AdminProducts = () => {
       </div>
 
       <div className="bg-background rounded-2xl border border-border overflow-hidden">
+        {selected.size > 0 && (
+          <div className="bg-amber-50/70 border-b border-amber-200 px-4 py-2.5 flex items-center justify-between flex-wrap gap-2 text-xs">
+            <div className="font-medium">
+              {selected.size} selected
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <button onClick={() => onBulkSetFeatured(true)}  className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">Mark featured</button>
+              <button onClick={() => onBulkSetFeatured(false)} className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">Unfeature</button>
+              <button onClick={() => onBulkSetStock(true)}     className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">In stock</button>
+              <button onClick={() => onBulkSetStock(false)}    className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">Out of stock</button>
+              <button onClick={onBulkDelete}                   className="px-3 py-1.5 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">Delete</button>
+              <button onClick={() => setSelected(new Set())}   className="px-3 py-1.5 rounded-full hover:bg-foreground/5 transition-colors">Clear</button>
+            </div>
+          </div>
+        )}
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-xs uppercase tracking-widest text-muted-foreground">
             <tr>
+              <th className="text-left p-4 w-10">
+                <input
+                  type="checkbox"
+                  checked={visible.length > 0 && selected.size === visible.length}
+                  onChange={toggleAll}
+                  className="cursor-pointer"
+                  title="Select all"
+                />
+              </th>
               <th className="text-left p-4">Product</th>
               <th className="text-left p-4 hidden md:table-cell">Category</th>
               <th className="text-left p-4">Price</th>
@@ -169,7 +277,15 @@ const AdminProducts = () => {
           </thead>
           <tbody>
             {visible.map((p) => (
-              <tr key={p.id} className="border-t border-border hover:bg-muted/20 transition-colors">
+              <tr key={p.id} className={`border-t border-border hover:bg-muted/20 transition-colors ${selected.has(p.id!) ? "bg-amber-50/30" : ""}`}>
+                <td className="p-4">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(p.id!)}
+                    onChange={() => toggleSelect(p.id!)}
+                    className="cursor-pointer"
+                  />
+                </td>
                 <td className="p-4">
                   <div className="flex items-center gap-3">
                     <img src={resolveImage(p.image_url)} alt={p.name} className="w-12 h-12 rounded-lg object-cover" />
@@ -203,13 +319,14 @@ const AdminProducts = () => {
                   </button>
                 </td>
                 <td className="p-4 text-right">
-                  <button onClick={() => setEditing({ ...p, gallery: p.gallery ?? [] })} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => onDelete(p.id!)} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-destructive/10 text-destructive ml-1"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => onDuplicate(p)} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted" title="Duplicate"><Copy className="w-4 h-4" /></button>
+                  <button onClick={() => setEditing({ ...p, gallery: p.gallery ?? [] })} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted ml-1" title="Edit"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => onDelete(p.id!)} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-destructive/10 text-destructive ml-1" title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </td>
               </tr>
             ))}
             {visible.length === 0 && (
-              <tr><td colSpan={6} className="p-10 text-center text-muted-foreground">
+              <tr><td colSpan={7} className="p-10 text-center text-muted-foreground">
                 {products.length === 0 ? `No products yet. Click "New Product" to add one.` : "No products match your filters."}
               </td></tr>
             )}

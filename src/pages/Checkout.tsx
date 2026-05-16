@@ -7,6 +7,7 @@ import { Minus, Plus, Trash2, CreditCard, MessageCircle, CheckCircle2, Package }
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoreSettings } from "@/lib/settings";
+import { EMAIL_RE, PHONE_RE, PINCODE_RE, LIMITS, clamp } from "@/lib/validation";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -50,18 +51,29 @@ const CheckoutPage = () => {
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const EMAIL_RE   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const PHONE_RE   = /^[+\d][\d\s-]{8,14}$/;       // 9–15 digits incl. optional +
-  const PINCODE_RE = /^\d{6}$/;
+  const EMAIL_RE_LOCAL   = EMAIL_RE;
+  const PHONE_RE_LOCAL   = PHONE_RE;
+  const PINCODE_RE_LOCAL = PINCODE_RE;
 
   const validate = () => {
-    if (!form.name.trim())          { toast.error("Name is required"); return false; }
-    if (!EMAIL_RE.test(form.email)) { toast.error("Enter a valid email"); return false; }
-    if (!PHONE_RE.test(form.phone)) { toast.error("Enter a valid phone number"); return false; }
-    if (!form.address.trim())       { toast.error("Address is required"); return false; }
-    if (!form.city.trim())          { toast.error("City is required"); return false; }
-    if (!PINCODE_RE.test(form.pincode)) { toast.error("Pincode must be 6 digits"); return false; }
-    if (items.length === 0)         { toast.error("Cart is empty"); return false; }
+    if (!form.name.trim() || form.name.trim().length > LIMITS.name)
+      { toast.error("Please enter your name"); return false; }
+    if (!EMAIL_RE_LOCAL.test(form.email.trim()) || form.email.length > LIMITS.email)
+      { toast.error("Enter a valid email"); return false; }
+    if (!PHONE_RE_LOCAL.test(form.phone.trim()) || form.phone.length > LIMITS.phone)
+      { toast.error("Enter a valid phone number"); return false; }
+    if (!form.address.trim() || form.address.length > LIMITS.address)
+      { toast.error("Please enter your address"); return false; }
+    if (!form.city.trim() || form.city.length > LIMITS.city)
+      { toast.error("Please enter your city"); return false; }
+    if (!PINCODE_RE_LOCAL.test(form.pincode.trim()))
+      { toast.error("Pincode must be 6 digits"); return false; }
+    if (form.notes.length > LIMITS.notes)
+      { toast.error("Please shorten your special instructions"); return false; }
+    if (items.length === 0)
+      { toast.error("Your cart is empty"); return false; }
+    if (items.length > 50)
+      { toast.error("Too many items in cart — please contact us via WhatsApp"); return false; }
     return true;
   };
 
@@ -71,16 +83,16 @@ const CheckoutPage = () => {
    */
   const saveOrder = async (paymentMethod: "razorpay" | "whatsapp" | "cod") => {
     const customer = {
-      name:    form.name.trim(),
-      email:   form.email.trim(),
-      phone:   form.phone.trim(),
-      address: form.address.trim(),
-      city:    form.city.trim(),
-      state:   form.state.trim() || null,
-      pincode: form.pincode.trim(),
-      notes:   form.notes.trim() || null,
+      name:    clamp(form.name,    LIMITS.name),
+      email:   clamp(form.email,   LIMITS.email).toLowerCase(),
+      phone:   clamp(form.phone,   LIMITS.phone),
+      address: clamp(form.address, LIMITS.address),
+      city:    clamp(form.city,    LIMITS.city),
+      state:   clamp(form.state,   LIMITS.state) || null,
+      pincode: clamp(form.pincode, 6),
+      notes:   clamp(form.notes,   LIMITS.notes) || null,
     };
-    const cartItems = items.map((i) => ({ id: i.id, qty: i.qty }));
+    const cartItems = items.map((i) => ({ id: i.id, qty: Math.max(1, Math.min(99, i.qty | 0)) }));
 
     const { data, error } = await supabase.rpc("create_order", {
       p_customer:       customer,
@@ -110,7 +122,8 @@ const CheckoutPage = () => {
       setOrderNumber(order.order_number);
       clear();
       setStep("success");
-      window.open(`https://wa.me/${phone}?text=${text}`, "_blank", "noopener,noreferrer");
+      const safePhone = (phone || "").replace(/\D/g, "");
+      window.open(`https://wa.me/${encodeURIComponent(safePhone)}?text=${text}`, "_blank", "noopener,noreferrer");
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");
     } finally {
@@ -281,30 +294,30 @@ const CheckoutPage = () => {
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <F label="Full Name *">
-                      <input value={form.name} onChange={set("name")} className={inp} placeholder="Priya Sharma" />
+                      <input value={form.name} onChange={set("name")} maxLength={LIMITS.name} autoComplete="name" className={inp} placeholder="Priya Sharma" />
                     </F>
                     <F label="Phone *">
-                      <input value={form.phone} onChange={set("phone")} className={inp} placeholder="+91 98765 43210" type="tel" />
+                      <input value={form.phone} onChange={set("phone")} maxLength={LIMITS.phone} autoComplete="tel" className={inp} placeholder="+91 98765 43210" type="tel" />
                     </F>
                   </div>
 
                   <F label="Email *">
-                    <input value={form.email} onChange={set("email")} className={inp} placeholder="you@email.com" type="email" />
+                    <input value={form.email} onChange={set("email")} maxLength={LIMITS.email} autoComplete="email" className={inp} placeholder="you@email.com" type="email" />
                   </F>
 
                   <F label="Shipping Address *">
-                    <input value={form.address} onChange={set("address")} className={inp} placeholder="Flat 4B, Sunrise Apartments, MG Road" />
+                    <input value={form.address} onChange={set("address")} maxLength={LIMITS.address} autoComplete="street-address" className={inp} placeholder="Flat 4B, Sunrise Apartments, MG Road" />
                   </F>
 
                   <div className="grid sm:grid-cols-3 gap-4">
                     <F label="City *">
-                      <input value={form.city} onChange={set("city")} className={inp} placeholder="Mumbai" />
+                      <input value={form.city} onChange={set("city")} maxLength={LIMITS.city} autoComplete="address-level2" className={inp} placeholder="Mumbai" />
                     </F>
                     <F label="State">
-                      <input value={form.state} onChange={set("state")} className={inp} placeholder="Maharashtra" />
+                      <input value={form.state} onChange={set("state")} maxLength={LIMITS.state} autoComplete="address-level1" className={inp} placeholder="Maharashtra" />
                     </F>
                     <F label="Pincode *">
-                      <input value={form.pincode} onChange={set("pincode")} className={inp} placeholder="400001" maxLength={6} />
+                      <input value={form.pincode} onChange={set("pincode")} maxLength={6} inputMode="numeric" autoComplete="postal-code" className={inp} placeholder="400001" />
                     </F>
                   </div>
 
@@ -313,6 +326,7 @@ const CheckoutPage = () => {
                       value={form.notes}
                       onChange={set("notes")}
                       rows={3}
+                      maxLength={LIMITS.notes}
                       className={inp + " resize-none"}
                       placeholder="Colour preferences, names to engrave, gift message…"
                     />

@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LogOut, Package, Image as ImageIcon, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail, Sparkles, MessageSquareQuote,
-  Megaphone, Ticket, Search, Eye, EyeOff, ShieldAlert,
+  Megaphone, Ticket, Search, Eye, EyeOff, ShieldAlert, Users, BarChart3,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import logo from "@/assets/mohika-mark.png";
@@ -186,7 +186,10 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   if (!isAdmin) return <NotAuthorized />;
 
   const groups: { title: string; items: { to: string; icon: any; label: string }[] }[] = [
-    { title: "Overview", items: [{ to: "/admin", icon: LayoutDashboard, label: "Dashboard" }] },
+    { title: "Overview", items: [
+      { to: "/admin",           icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/admin/analytics", icon: BarChart3,       label: "Analytics" },
+    ]},
     { title: "Catalogue", items: [
       { to: "/admin/products",    icon: Package, label: "Products" },
       { to: "/admin/categories",  icon: Tag,     label: "Categories" },
@@ -202,7 +205,10 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
       { to: "/admin/announcements", icon: Megaphone, label: "Announcements" },
       { to: "/admin/images",        icon: ImageIcon, label: "Site Images" },
     ]},
-    { title: "System", items: [{ to: "/admin/settings", icon: Settings, label: "Settings" }] },
+    { title: "System", items: [
+      { to: "/admin/users",    icon: Users,    label: "Admin Users" },
+      { to: "/admin/settings", icon: Settings, label: "Settings" },
+    ]},
   ];
 
   const flatItems = groups.flatMap((g) => g.items);

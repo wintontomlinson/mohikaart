@@ -4,6 +4,7 @@ import { formatINR } from "@/lib/site";
 import {
   Package, ShoppingCart, IndianRupee, TrendingUp, Star, AlertCircle,
   Mail, Sparkles, Megaphone, Ticket, ArrowUpRight, MessageSquareQuote,
+  BarChart3, Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -39,11 +40,12 @@ type Stats = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:   "#f59e0b",
-  confirmed: "#3b82f6",
-  shipped:   "#6366f1",
-  delivered: "#10b981",
-  cancelled: "#ef4444",
+  pending:           "#f59e0b",
+  payment_submitted: "#06b6d4",
+  confirmed:         "#3b82f6",
+  shipped:           "#6366f1",
+  delivered:         "#10b981",
+  cancelled:         "#ef4444",
 };
 
 const fmtDay = (d: Date) =>
@@ -161,11 +163,12 @@ const AdminDashboard = () => {
   ];
 
   const statusColor: Record<string, string> = {
-    pending:   "bg-amber-100 text-amber-700",
-    confirmed: "bg-blue-100 text-blue-700",
-    shipped:   "bg-indigo-100 text-indigo-700",
-    delivered: "bg-emerald-100 text-emerald-700",
-    cancelled: "bg-rose-100 text-rose-700",
+    pending:           "bg-amber-100 text-amber-700",
+    payment_submitted: "bg-cyan-100 text-cyan-700",
+    confirmed:         "bg-blue-100 text-blue-700",
+    shipped:           "bg-indigo-100 text-indigo-700",
+    delivered:         "bg-emerald-100 text-emerald-700",
+    cancelled:         "bg-rose-100 text-rose-700",
   };
 
   return (
@@ -364,6 +367,7 @@ const AdminDashboard = () => {
         <h2 className="font-display text-xl mb-4">Quick Actions</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
+            { to: "/admin/analytics",     icon: BarChart3,         label: "Analytics",           desc: "Revenue, orders & insights" },
             { to: "/admin/products",      icon: Package,           label: "Manage Products",     desc: "Add, edit or remove products" },
             { to: "/admin/categories",    icon: TrendingUp,        label: "Categories",          desc: "Organize your catalogue" },
             { to: "/admin/coupons",       icon: Ticket,            label: "Coupons",             desc: "Create discount codes" },
@@ -373,6 +377,7 @@ const AdminDashboard = () => {
             { to: "/admin/hero",          icon: Sparkles,          label: "Hero Section",        desc: "Edit headline & stats" },
             { to: "/admin/announcements", icon: Megaphone,         label: "Announcements",       desc: "Top bar messages" },
             { to: "/admin/images",        icon: Star,              label: "Site Images",         desc: "Update photos" },
+            { to: "/admin/users",         icon: Users,             label: "Admin Users",         desc: "Manage your team" },
           ].map((q) => (
             <Link
               key={q.to}
