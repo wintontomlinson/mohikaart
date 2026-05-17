@@ -93,7 +93,7 @@ const Hero = () => {
       id="top"
       className="relative overflow-hidden noise-overlay flex flex-col"
       style={{
-        minHeight: "100svh",
+        minHeight: "min(100svh, 900px)",
         background:
           "radial-gradient(ellipse 90% 70% at 5% 0%, hsl(348 55% 93%/0.95), transparent 55%)," +
           "radial-gradient(ellipse 65% 60% at 96% 0%, hsl(38 65% 91%/0.85), transparent 50%)," +
@@ -172,13 +172,13 @@ const Hero = () => {
       {/* ── MAIN LAYOUT ── */}
       <motion.div
         style={{ opacity: fadeOp, scale: scaleContent }}
-        className="relative mx-auto flex w-full max-w-[1360px] flex-1 flex-col items-start gap-8 px-5 pb-12 pt-[92px] md:flex-row md:items-start md:gap-0 md:px-10 md:pb-12 md:pt-[104px]"
+        className="relative mx-auto flex w-full max-w-[1360px] flex-1 flex-col items-start gap-8 px-5 pb-8 pt-[72px] md:flex-row md:items-center md:gap-0 md:px-10 md:pb-8 md:pt-[84px]"
       >
 
         {/* ══ LEFT (45%) ══ */}
         <motion.div
           style={{ y: yLeft }}
-          className="flex w-full flex-col justify-center pb-10 md:w-[45%] md:pb-0 md:pr-10 lg:pr-16 xl:pr-20"
+          className="flex w-full flex-col justify-center pb-6 md:w-[45%] md:pb-0 md:pr-10 lg:pr-16 xl:pr-20"
         >
           {/* Eyebrow breadcrumb */}
           <motion.div
@@ -436,7 +436,7 @@ const Hero = () => {
         </motion.div>
 
         {/* ══ RIGHT (55%) ══ */}
-        <div className="relative w-full md:w-[55%]" style={{ height: "clamp(440px, 64vh, 700px)" }}>
+        <div className="relative w-full md:w-[55%]" style={{ height: "clamp(380px, 56vh, 620px)" }}>
           <motion.div style={{ y: yRight }} className="absolute inset-0">
 
             {/* ── MAIN HERO IMAGE ── */}
