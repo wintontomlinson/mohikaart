@@ -6,8 +6,6 @@ import {
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
-import { useStoreSettings } from "@/lib/settings";
-import { useAnnouncements } from "@/lib/cms";
 import logo from "@/assets/mohika-logo.png";
 
 /* ── nav links ── */
@@ -27,39 +25,6 @@ const moreLinks = [
   { to: "/shipping",   label: "Shipping",   icon: Truck,      desc: "Delivery & returns info",      tag: "" },
 ];
 
-function AnnouncementTicker({ threshold }: { threshold: number }) {
-  const announcements = useAnnouncements();
-  const [idx, setIdx] = useState(0);
-
-  const msgs = (announcements.length > 0 ? announcements.map(a => a.text) : [
-    "FREE SHIPPING on orders above ₹{threshold}",
-    "Handcrafted with Love — Since 2021",
-  ]).map(m => m.replace("{threshold}", String(threshold)));
-
-  useEffect(() => {
-    if (msgs.length <= 1) return;
-    const id = setInterval(() => setIdx(v => (v + 1) % msgs.length), 4200);
-    return () => clearInterval(id);
-  }, [msgs.length]);
-
-  return (
-    <AnimatePresence mode="wait">
-      <motion.span
-        key={idx}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-0 flex items-center justify-center gap-2 px-6"
-        style={{ fontSize: "10.5px", letterSpacing: "0.18em", color: "white", fontWeight: 500 }}
-      >
-        <Sparkles className="w-3 h-3 text-amber-300/80 shrink-0" />
-        <span className="truncate">{msgs[idx]}</span>
-      </motion.span>
-    </AnimatePresence>
-  );
-}
-
 const Navbar = () => {
   const [scrolled, setScrolled]           = useState(false);
   const [scrollDir, setScrollDir]         = useState<"up" | "down">("up");
@@ -75,7 +40,6 @@ const Navbar = () => {
   const { count, setOpen: setCartOpen } = useCart();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { free_shipping_threshold } = useStoreSettings();
 
   /* scroll tracking */
   useEffect(() => {
@@ -140,24 +104,6 @@ const Navbar = () => {
       transition={{ duration: hide ? 0.3 : 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="fixed top-0 inset-x-0 z-50"
     >
-      {/* ── Announcement bar ── */}
-      <AnimatePresence>
-        {!scrolled && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 30, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden relative"
-            style={{
-              background: "linear-gradient(90deg, hsl(22 24% 14%), hsl(28 26% 20%) 45%, hsl(34 38% 30%) 70%, hsl(22 24% 14%))",
-            }}
-          >
-            <AnnouncementTicker threshold={free_shipping_threshold} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ── Main nav bar ── */}
       <div
         className="transition-all duration-500"
