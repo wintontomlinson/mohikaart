@@ -313,7 +313,17 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   );
 
   return (
-    <div className="min-h-screen bg-muted/30 flex" style={{ minHeight: "100dvh" }}>
+    <div
+      className="bg-muted/30 flex"
+      style={{
+        minHeight: "100dvh",
+        // Explicitly anchor to the absolute viewport top — guards against
+        // rare layouts where the admin tree gets pushed down by stale
+        // scroll position, browser autofill insets, or chrome quirks.
+        marginTop: 0,
+        paddingTop: 0,
+      }}
+    >
       <aside className="w-64 shrink-0 bg-foreground text-background hidden md:flex flex-col sticky top-0 h-screen self-start">
         <SidebarContent />
       </aside>
