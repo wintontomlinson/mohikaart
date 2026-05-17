@@ -101,7 +101,8 @@
   h3 { font-weight: 500; font-size: clamp(1.1rem, 1.9vw, 1.55rem); }
   h4 { font-weight: 500; font-size: clamp(0.95rem, 1.4vw, 1.15rem); }
   p  { font-feature-settings: 'kern', 'liga', 'calt'; }
-  section { @apply py-16 md:py-24; }
+  /* Only apply section padding to storefront pages, NOT admin */
+  :where(main) > section { @apply py-16 md:py-24; }
   ::selection { background: hsl(var(--blush)); color: hsl(var(--rose-text)); }
 }
 
@@ -320,4 +321,12 @@
   .gold-divider {
     animation: none !important;
   }
+}
+
+/* ── Force #root to fill viewport from absolute top ── */
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  position: relative;
 }

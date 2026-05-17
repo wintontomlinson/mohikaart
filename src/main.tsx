@@ -3,6 +3,14 @@ import App from "./App.tsx";
 import "./index.css";
 import React from "react";
 
+// Disable browser scroll restoration globally — we manage scroll position
+// ourselves on every route change. This kills the "phantom white gap"
+// that some browsers paint at the top when restoring stale scroll
+// positions on SPA navigation.
+if ("scrollRestoration" in window.history) {
+  window.history.scrollRestoration = "manual";
+}
+
 // Last-ditch safety net for completely uncaught errors that prevent
 // React from mounting at all.
 window.addEventListener("unhandledrejection", (e) => {
