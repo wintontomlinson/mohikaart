@@ -175,6 +175,12 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  // Always start admin pages at the top — prevents the visual "white gap"
+  // that appears when navigating into /admin from a scrolled storefront page.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [pathname]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
@@ -307,8 +313,8 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   );
 
   return (
-    <div className="min-h-screen bg-muted/30 flex">
-      <aside className="w-64 shrink-0 bg-foreground text-background hidden md:flex flex-col">
+    <div className="min-h-screen bg-muted/30 flex" style={{ minHeight: "100dvh" }}>
+      <aside className="w-64 shrink-0 bg-foreground text-background hidden md:flex flex-col sticky top-0 h-screen self-start">
         <SidebarContent />
       </aside>
 

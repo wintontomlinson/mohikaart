@@ -53,7 +53,7 @@ const queryClient = new QueryClient({
 });
 
 const RouteFallback = () => (
-  <div className="min-h-[60vh] flex items-center justify-center text-sm text-muted-foreground">
+  <div className="fixed inset-0 flex items-center justify-center text-sm text-muted-foreground bg-background z-50">
     <div className="flex items-center gap-2">
       <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
       Loading…
