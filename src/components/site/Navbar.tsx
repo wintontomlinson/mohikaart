@@ -6,7 +6,7 @@ import {
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
-import logo from "@/assets/mohika-logo.png";
+import { Monogram, Wordmark } from "@/components/site/Logo";
 
 /* ── nav links ── */
 const links = [
@@ -120,15 +120,10 @@ const Navbar = () => {
 
           {/* ── LOGO ── */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group" aria-label="Mohika Art home">
-            <img
-              src={logo}
-              alt="Mohika Art"
-              className="h-[32px] md:h-[38px] w-auto object-contain transition-transform duration-400 group-hover:scale-[1.04]"
-              style={{ filter: "brightness(0.2)" }}
-            />
-            <span className="hidden sm:block font-display text-lg md:text-xl" style={{ fontWeight: 350, color: "hsl(var(--foreground))", letterSpacing: "-0.02em" }}>
-              Mohika <em className="not-italic text-gold-grad" style={{ fontFamily: "var(--font-serif)" }}>Art</em>
+            <span className="inline-flex items-center transition-transform duration-400 group-hover:scale-[1.04]">
+              <Monogram size={36} tone="foreground" />
             </span>
+            <Wordmark className="hidden sm:block" />
           </Link>
 
           {/* ── DESKTOP NAV ── */}

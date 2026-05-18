@@ -1,6 +1,6 @@
 import { Instagram, Mail, MessageCircle, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
-import mark from "@/assets/mohika-mark.png";
+import { Monogram, Wordmark } from "@/components/site/Logo";
 import { useStoreSettings } from "@/lib/settings";
 
 const Footer = () => {
@@ -13,12 +13,8 @@ const Footer = () => {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-lg bg-background/[0.08] flex items-center justify-center p-1.5">
-                <img src={mark} alt="Mohika Art" className="w-full h-full object-contain" />
-              </div>
-              <div className="font-display text-xl text-gold-grad" style={{ fontWeight: 300 }}>
-                Mohika <span className="italic">Art</span>
-              </div>
+              <Monogram size={32} tone="background" />
+              <Wordmark variant="dark" />
             </div>
             <p className="text-[12px] text-background/45 leading-relaxed max-w-[220px]">
               Handcrafted resin keepsakes that preserve your precious moments forever.
