@@ -6,10 +6,10 @@ import wedding from "@/assets/cat-wedding.jpg";
 import couple from "@/assets/cat-couple.jpg";
 
 const offerings = [
-  { icon: Heart,    title: "Bridal Bouquet Preservation", desc: "Preserve your bridal bouquet flowers in a luxurious resin block, frame or paperweight — a forever memory of your special day." },
+  { icon: Heart,    title: "Bridal Bouquet Preservation", desc: "Preserve your bridal bouquet flowers in a luxurious resin block, frame or paperweight - a forever memory of your special day." },
   { icon: Sparkles, title: "Wedding Invite Keepsakes",    desc: "Encase your wedding card, ring shots, or vow excerpts in a gallery-worthy resin display for your home." },
-  { icon: Gift,     title: "Bridesmaid & Groomsmen Gifts", desc: "Personalised resin keychains, name tags & coasters — thoughtful tokens for your entire wedding party." },
-  { icon: Camera,   title: "Photo & Date Memory Frames",  desc: "Your favourite moment, the wedding date, GPS coordinates of your venue — sealed in clear resin elegance." },
+  { icon: Gift,     title: "Bridesmaid & Groomsmen Gifts", desc: "Personalised resin keychains, name tags & coasters - thoughtful tokens for your entire wedding party." },
+  { icon: Camera,   title: "Photo & Date Memory Frames",  desc: "Your favourite moment, the wedding date, GPS coordinates of your venue - sealed in clear resin elegance." },
 ];
 
 const process = [

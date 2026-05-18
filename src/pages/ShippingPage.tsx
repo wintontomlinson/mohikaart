@@ -22,7 +22,7 @@ const ShippingPage = () => (
     <PageHeader
       eyebrow="Shipping & Returns"
       title={<>Delivered with <em className="not-italic text-gold-grad">care.</em></>}
-      subtitle="Every Mohika Art piece is hand-packed in our signature champagne box, wrapped in tissue and tied with a satin ribbon — ready to gift the moment it arrives."
+      subtitle="Every Mohika Art piece is hand-packed in our signature champagne box, wrapped in tissue and tied with a satin ribbon - ready to gift the moment it arrives."
     />
 
     {/* Cards */}

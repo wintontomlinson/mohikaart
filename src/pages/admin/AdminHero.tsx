@@ -50,13 +50,13 @@ const AdminHero = () => {
     setSaving(false);
     if (error) return toast.error(error.message);
     invalidate("hero_content");
-    toast.success("Hero updated — refresh the homepage to see changes");
+    toast.success("Hero updated - refresh the homepage to see changes");
   };
 
   const reset = () => {
     if (confirm("Reset hero to default content?")) {
       setData(DEFAULT_HERO);
-      toast.info("Defaults loaded — click Save to apply");
+      toast.info("Defaults loaded - click Save to apply");
     }
   };
 

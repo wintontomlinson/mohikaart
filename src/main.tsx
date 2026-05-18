@@ -3,7 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import React from "react";
 
-// Disable browser scroll restoration globally — we manage scroll position
+// Disable browser scroll restoration globally - we manage scroll position
 // ourselves on every route change. This kills the "phantom white gap"
 // that some browsers paint at the top when restoring stale scroll
 // positions on SPA navigation.
@@ -91,7 +91,7 @@ class ErrorBoundary extends React.Component<
             Something went wrong
           </h1>
           <p style={{ color: "hsl(25 10% 44%)", marginTop: 12, lineHeight: 1.6 }}>
-            Sorry — an unexpected error occurred. Try refreshing the page; if the issue
+            Sorry - an unexpected error occurred. Try refreshing the page; if the issue
             persists, please reach out via WhatsApp or email and we'll look into it.
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>

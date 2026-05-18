@@ -39,7 +39,7 @@ export const DEFAULT_HERO: HeroContent = {
   headline_part2: "Into Timeless",
   headline_part3: "Art.",
   subheadline:
-    "Customized handcrafted resin creations that preserve your most precious moments in luxurious, gallery-worthy keepsakes — each piece poured with love and intention.",
+    "Customized handcrafted resin creations that preserve your most precious moments in luxurious, gallery-worthy keepsakes - each piece poured with love and intention.",
   cta_primary_label: "Shop Collection",
   cta_primary_link: "/shop",
   cta_secondary_label: "Custom Order",
@@ -63,7 +63,7 @@ export type Announcement = { id: string; text: string; active: boolean };
 
 export const DEFAULT_ANNOUNCEMENTS: Announcement[] = [
   { id: "a1", text: "FREE SHIPPING on orders above ₹{threshold}", active: true },
-  { id: "a2", text: "Handcrafted with Love — Since 2021", active: true },
+  { id: "a2", text: "Handcrafted with Love - Since 2021", active: true },
   { id: "a3", text: "2000+ Happy Customers across India", active: true },
   { id: "a4", text: "Customized resin gifts for every occasion", active: true },
 ];
@@ -88,7 +88,7 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
     city: "Mumbai",
     product: "Bridal Bouquet Preservation",
     rating: 5,
-    text: "I gifted the wedding bouquet block to my sister and she literally cried. The detail, the gold flakes, the packaging — pure luxury.",
+    text: "I gifted the wedding bouquet block to my sister and she literally cried. The detail, the gold flakes, the packaging - pure luxury.",
     active: true,
   },
   {
@@ -106,7 +106,7 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
     city: "Bengaluru",
     product: "Couple Photo Frame",
     rating: 5,
-    text: "Ordered the couple frame for our anniversary. It feels heirloom — something I'll pass on. Pictures don't do it justice.",
+    text: "Ordered the couple frame for our anniversary. It feels heirloom - something I'll pass on. Pictures don't do it justice.",
     active: true,
   },
   {
@@ -156,9 +156,9 @@ export type SeoSettings = {
 };
 
 export const DEFAULT_SEO: SeoSettings = {
-  site_title: "Mohika Art — Customized Resin Crafts & Handmade Gifts",
+  site_title: "Mohika Art - Customized Resin Crafts & Handmade Gifts",
   site_description:
-    "Customized handcrafted resin creations that preserve your most precious moments. Wedding gifts, name keychains, photo frames & more — handmade in India.",
+    "Customized handcrafted resin creations that preserve your most precious moments. Wedding gifts, name keychains, photo frames & more - handmade in India.",
   keywords:
     "resin art, customized gifts, handmade gifts, wedding bouquet preservation, name keychain, photo frame, corporate gifts, India",
   og_image: "",

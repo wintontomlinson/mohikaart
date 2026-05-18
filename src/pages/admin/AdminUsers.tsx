@@ -91,7 +91,7 @@ const AdminUsers = () => {
         <div className="text-xs text-amber-800/90 leading-relaxed">
           <strong className="font-semibold">Admins must already have a Supabase Auth account.</strong>{" "}
           Have them sign up first (or create their account in Supabase Dashboard → Authentication → Users),
-          then promote them here using their email. Removing an admin only revokes panel access — their
+          then promote them here using their email. Removing an admin only revokes panel access - their
           account is not deleted.
         </div>
       </div>

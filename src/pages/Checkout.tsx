@@ -73,7 +73,7 @@ const CheckoutPage = () => {
     if (items.length === 0)
       { toast.error("Your cart is empty"); return false; }
     if (items.length > 50)
-      { toast.error("Too many items in cart — please contact us via WhatsApp"); return false; }
+      { toast.error("Too many items in cart - please contact us via WhatsApp"); return false; }
     return true;
   };
 
@@ -139,7 +139,7 @@ const CheckoutPage = () => {
       setOrderNumber(order.order_number);
       clear();
       setStep("success");
-      toast.success("Order placed — pay on delivery");
+      toast.success("Order placed - pay on delivery");
     } catch (e: any) {
       toast.error(e.message || "Something went wrong");
     } finally {

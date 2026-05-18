@@ -8,7 +8,7 @@ const features = [
   { icon: Briefcase, title: "Branded Corporate Gifts",  desc: "Logo-embedded resin paperweights, desk accessories and pen holders for client gifting & onboarding hampers." },
   { icon: Award,     title: "Awards & Recognition",     desc: "Custom award trophies, employee milestones and recognition plaques cast in premium resin with gold inlay." },
   { icon: Users,     title: "Bulk Event Favors",        desc: "Conference giveaways, return gifts, and team event souvenirs. Minimum order from 25 pieces." },
-  { icon: Package,   title: "Luxury Gift Hampers",      desc: "Curated festive hampers: Diwali, New Year, Onboarding kits — packaged in our signature champagne boxes." },
+  { icon: Package,   title: "Luxury Gift Hampers",      desc: "Curated festive hampers: Diwali, New Year, Onboarding kits - packaged in our signature champagne boxes." },
 ];
 
 const clients = [

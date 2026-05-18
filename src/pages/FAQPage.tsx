@@ -37,7 +37,7 @@ const faqGroups = [
       },
       {
         q: "What can be embedded in resin?",
-        a: "Almost anything flat or small: dried flowers, photos, fabric swatches, coins, leaves, letters, hair, feathers — if it matters to you, we'll find a way.",
+        a: "Almost anything flat or small: dried flowers, photos, fabric swatches, coins, leaves, letters, hair, feathers - if it matters to you, we'll find a way.",
       },
     ],
   },

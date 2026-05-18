@@ -89,7 +89,7 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
 INSERT INTO public.app_settings (key, value) VALUES
 ('seo', '{
-  "site_title": "Mohika Art — Customized Resin Crafts & Handmade Gifts",
+  "site_title": "Mohika Art - Customized Resin Crafts & Handmade Gifts",
   "site_description": "Handcrafted premium resin keepsakes — name keychains, photo frames, wedding memories, bookmarks & luxury gift hampers. Pan India delivery.",
   "keywords": "resin art, customized gifts, handmade gifts, wedding bouquet preservation, name keychain, photo frame, corporate gifts, India",
   "og_image": ""

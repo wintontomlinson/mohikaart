@@ -4,9 +4,9 @@ import { useRef } from "react";
 
 const items = [
   { icon: Hand,      title: "Handmade Precision",  desc: "Every piece poured, set and polished by hand with quiet patience.", color: "from-blush/40 to-champagne/30" },
-  { icon: Sparkles,  title: "Fully Customized",    desc: "Names, dates, dried bouquets — designed entirely around your story.", color: "from-gold/20 to-blush/20" },
+  { icon: Sparkles,  title: "Fully Customized",    desc: "Names, dates, dried bouquets - designed entirely around your story.", color: "from-gold/20 to-blush/20" },
   { icon: Gem,       title: "Premium Resin",       desc: "Crystal clear, non-yellowing, jeweller-grade epoxy that lasts a lifetime.", color: "from-lavender/30 to-blush/20" },
-  { icon: Package,   title: "Secure Packaging",    desc: "Multi-layered luxury packaging — your gift arrives flawless.", color: "from-champagne/30 to-gold/20" },
+  { icon: Package,   title: "Secure Packaging",    desc: "Multi-layered luxury packaging - your gift arrives flawless.", color: "from-champagne/30 to-gold/20" },
   { icon: Gift,      title: "Gifting Perfect",     desc: "Includes elegant gift box, ribbon and a handwritten note.", color: "from-blush/30 to-lavender/20" },
   { icon: Truck,     title: "Pan India Delivery",  desc: "Shipped safely across India with real-time tracking. Free on all orders.", color: "from-gold/30 to-champagne/20" },
 ];

@@ -15,9 +15,9 @@ const SECTIONS: { title: string; slots: { key: string; label: string; desc?: str
   {
     title: "About",
     slots: [
-      { key: "about_1", label: "About – main image",      desc: "Large top-left photo in the About collage" },
-      { key: "about_2", label: "About – secondary image", desc: "Bottom-right photo in the About collage" },
-      { key: "about_3", label: "About – accent image",    desc: "Small overlapping accent photo in the About collage" },
+      { key: "about_1", label: "About - main image",      desc: "Large top-left photo in the About collage" },
+      { key: "about_2", label: "About - secondary image", desc: "Bottom-right photo in the About collage" },
+      { key: "about_3", label: "About - accent image",    desc: "Small overlapping accent photo in the About collage" },
     ],
   },
   {

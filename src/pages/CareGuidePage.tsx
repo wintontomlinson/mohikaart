@@ -14,11 +14,11 @@ const tips = [
 const facts = [
   {
     title: "Tiny bubbles are natural.",
-    desc: "Each piece is poured by hand; small inclusions are part of the charm — not a defect.",
+    desc: "Each piece is poured by hand; small inclusions are part of the charm - not a defect.",
   },
   {
     title: "Color may vary slightly.",
-    desc: "Real flowers, dried petals, and natural pigments shift gently between batches — making each piece truly one-of-a-kind.",
+    desc: "Real flowers, dried petals, and natural pigments shift gently between batches - making each piece truly one-of-a-kind.",
   },
   {
     title: "Cured & food-safe surface.",

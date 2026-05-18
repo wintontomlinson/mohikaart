@@ -53,7 +53,7 @@ const AdminAnnouncements = () => {
     setSaving(false);
     if (error) return toast.error(error.message);
     invalidate("announcements");
-    toast.success("Announcements saved — top bar will update");
+    toast.success("Announcements saved - top bar will update");
   };
 
   if (loading)

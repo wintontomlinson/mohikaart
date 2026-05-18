@@ -52,7 +52,7 @@ const AdminSettings = () => {
     setSavingStore(false);
     if (error) return toast.error(error.message);
     invalidateStore();
-    toast.success("Store settings saved — changes are live");
+    toast.success("Store settings saved - changes are live");
   };
 
   const onSaveSeo = async () => {
@@ -182,7 +182,7 @@ const AdminSettings = () => {
               value={seo.site_title}
               onChange={(e) => setSeo((s) => ({ ...s, site_title: e.target.value }))}
               className={inp}
-              placeholder="Mohika Art — Customized Resin Crafts"
+              placeholder="Mohika Art - Customized Resin Crafts"
             />
             <p className="text-[10px] text-muted-foreground mt-1">
               {seo.site_title.length}/60 characters
