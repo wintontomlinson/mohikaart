@@ -119,12 +119,16 @@ const Navbar = () => {
         <nav className="max-w-[1360px] mx-auto px-5 md:px-10 flex items-center justify-between h-[60px] md:h-[68px]">
 
           {/* ── LOGO ── */}
-          <Link to="/" className="flex items-center shrink-0 group" aria-label="Mohika Art home">
+          <Link to="/" className="flex items-center gap-2 shrink-0 group" aria-label="Mohika Art home">
             <img
               src={logo}
               alt="Mohika Art"
-              className="h-[34px] md:h-[42px] w-auto object-contain transition-transform duration-400 group-hover:scale-[1.04]"
+              className="h-[32px] md:h-[38px] w-auto object-contain transition-transform duration-400 group-hover:scale-[1.04]"
+              style={{ filter: "brightness(0.2)" }}
             />
+            <span className="hidden sm:block font-display text-lg md:text-xl" style={{ fontWeight: 350, color: "hsl(var(--foreground))", letterSpacing: "-0.02em" }}>
+              Mohika <em className="not-italic text-gold-grad" style={{ fontFamily: "var(--font-serif)" }}>Art</em>
+            </span>
           </Link>
 
           {/* ── DESKTOP NAV ── */}
