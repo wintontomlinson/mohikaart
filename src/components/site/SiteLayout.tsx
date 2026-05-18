@@ -8,6 +8,7 @@ import LoadingScreen from "@/components/site/LoadingScreen";
 import CursorSpotlight from "@/components/site/CursorSpotlight";
 import ScrollProgress from "@/components/site/ScrollProgress";
 import { CartProvider } from "@/lib/cart";
+import { WishlistProvider } from "@/lib/wishlist";
 import { useEffect } from "react";
 
 const ScrollTop = () => {
@@ -18,18 +19,20 @@ const ScrollTop = () => {
 
 const SiteLayout = () => (
   <CartProvider>
-    <LoadingScreen />
-    <CursorSpotlight />
-    <ScrollProgress />
-    <ScrollTop />
-    <Navbar />
-    <main className="relative">
-      <Outlet />
-    </main>
-    <Footer />
-    <WhatsAppFab />
-    <BackToTop />
-    <CartDrawer />
+    <WishlistProvider>
+      <LoadingScreen />
+      <CursorSpotlight />
+      <ScrollProgress />
+      <ScrollTop />
+      <Navbar />
+      <main className="relative">
+        <Outlet />
+      </main>
+      <Footer />
+      <WhatsAppFab />
+      <BackToTop />
+      <CartDrawer />
+    </WishlistProvider>
   </CartProvider>
 );
 

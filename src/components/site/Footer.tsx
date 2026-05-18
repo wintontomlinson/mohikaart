@@ -1,14 +1,28 @@
-import { Instagram, Mail, MessageCircle, Heart } from "lucide-react";
+import { useState } from "react";
+import { Instagram, Mail, MessageCircle, Heart, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { Monogram, Wordmark } from "@/components/site/Logo";
 import { useStoreSettings } from "@/lib/settings";
 
 const Footer = () => {
   const { phone, phone_display, email, instagram } = useStoreSettings();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+
+  const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!newsletterEmail.includes("@")) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    toast.success("You are in! Check your inbox.");
+    setNewsletterEmail("");
+  };
+
   return (
     <footer className="bg-foreground text-background">
       <div className="container py-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-start">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-start">
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
@@ -57,6 +71,33 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Newsletter (sits to the LEFT of Contact on lg+) */}
+          <div className="col-span-2 md:col-span-2 lg:col-span-1">
+            <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Newsletter</p>
+            <p className="font-display text-base text-background/85 leading-snug mb-1.5">Join the inner circle</p>
+            <p className="text-[12px] text-background/45 leading-relaxed mb-3 max-w-[260px]">
+              Early access to drops, behind-the-scenes, and a 10% welcome offer.
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2">
+              <input
+                type="email"
+                required
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                placeholder="you@example.com"
+                aria-label="Email address"
+                className="flex-1 min-w-0 px-3 py-2 rounded-full bg-background/[0.06] border border-background/[0.12] text-[12px] text-background placeholder:text-background/30 focus:outline-none focus:border-gold/60 transition-colors"
+              />
+              <button
+                type="submit"
+                aria-label="Subscribe"
+                className="shrink-0 w-9 h-9 rounded-full bg-gold/80 hover:bg-gold text-foreground flex items-center justify-center transition-colors"
+              >
+                <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+              </button>
+            </form>
           </div>
 
           {/* Contact */}
