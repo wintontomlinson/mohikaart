@@ -3,7 +3,7 @@ import { Instagram, Mail, MessageCircle, Heart, ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Monogram, Wordmark } from "@/components/site/Logo";
-import { useStoreSettings } from "@/lib/settings";
+import { useStoreSettings, isPlaceholderPhone } from "@/lib/settings";
 import { EMAIL_RE } from "@/lib/validation";
 
 const Footer = () => {
@@ -17,11 +17,15 @@ const Footer = () => {
       toast.error("Please enter a valid email address.");
       return;
     }
+    if (isPlaceholderPhone(phone)) {
+      toast.error("We will be in touch soon - please contact us via Instagram for now.");
+      return;
+    }
     const digits = (phone || "").replace(/\D/g, "");
     const message = `Hi Mohika! I'd like to join your inner circle - my email is ${trimmed}.`;
     const href = `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
     window.open(href, "_blank", "noopener,noreferrer");
-    toast.success("Opening WhatsApp...");
+    toast.success("Opening WhatsApp - drop your email there too if it didn't carry over.");
     setNewsletterEmail("");
   };
 
@@ -82,12 +86,15 @@ const Footer = () => {
           {/* Newsletter (sits to the LEFT of Contact on lg+).
               Real WhatsApp opt-in: tapping the arrow opens wa.me with a
               prefilled message containing the typed email so Mohika can
-              confirm + ship the welcome offer manually. No fake backend. */}
+              follow up manually. The submit short-circuits with a soft
+              Instagram fallback when the store phone is still the
+              placeholder so unconfigured deployments never open chats to
+              `919999999999`. */}
           <div className="col-span-2 md:col-span-2 lg:col-span-1">
             <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Newsletter</p>
             <p className="font-display text-base text-background/85 leading-snug mb-1.5">Join the inner circle</p>
             <p className="text-[12px] text-background/45 leading-relaxed mb-3 max-w-[260px]">
-              Tap the arrow and we will pick it up on WhatsApp - 10% welcome offer included.
+              Drop your email - we will send drop alerts and the occasional welcome surprise on WhatsApp.
             </p>
             <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2">
               <input

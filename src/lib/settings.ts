@@ -17,6 +17,12 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   free_shipping_threshold: 499,
 };
 
+/** Returns true when the configured store phone is still the placeholder
+ *  fallback or otherwise non-dialable. Used to short-circuit wa.me CTAs so
+ *  unconfigured deployments never open chats to `919999999999`. */
+export const isPlaceholderPhone = (phone: string): boolean =>
+  phone === DEFAULT_SETTINGS.phone || !phone || phone.replace(/\D/g, "").length < 10;
+
 let _cache: StoreSettings | null = null;
 
 export async function fetchStoreSettings(): Promise<StoreSettings> {

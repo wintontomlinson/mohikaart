@@ -17,7 +17,6 @@ export type Product = {
   badge: string | null;
   short_description: string | null;
   category_slug: string | null;
-  stock_count?: number | null;
 };
 
 export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) => {
@@ -126,12 +125,7 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
               ))}
               <span className="ml-1.5 text-[10px] text-muted-foreground">(4.9)</span>
             </div>
-            {/* Urgency line - only render when stock is low and known */}
-            {p.stock_count != null && p.stock_count > 0 && p.stock_count < 5 && (
-              <p className="mt-1.5 text-[10px] uppercase tracking-[0.18em] text-gold font-semibold">
-                Only {p.stock_count} left
-              </p>
-            )}
+            {/* Scarcity messaging is intentionally not rendered until a real stock_count column lands in supabase + the explicit selects fetch it. */}
           </div>
           <div className="text-right shrink-0">
             <div className="font-display text-2xl text-gold-grad leading-none">{formatINR(Number(p.price))}</div>

@@ -10,11 +10,12 @@ const RATING = 4.9;
 const TrustBar = () => {
   const reviews = useTestimonials();
   const reviewCount = Math.max(reviews.length, 0);
-  // Honest pill copy: when the CMS has any verified reviews, surface the
-  // live count; otherwise fall back to a clean rating-only label so we
-  // never invent volume we don't have.
+  // Below 50 we render the rating-only fallback so the pill never reads cheap;
+  // once the brand has 50+ verified reviews on file the live count starts
+  // displaying automatically. Do not lower this threshold without a real review
+  // aggregate (Google / dedicated reviews table) backing the volume.
   const reviewLabel =
-    reviewCount >= 1
+    reviewCount >= 50
       ? `${RATING} / 5 from ${reviewCount} Reviews`
       : `${RATING} / 5 Verified Reviews`;
 

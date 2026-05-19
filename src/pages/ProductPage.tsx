@@ -26,6 +26,26 @@ const computeDeliveryEstimate = (days: number): Date => {
   return target;
 };
 
+// Per-category business-day lead times that line up with the FAQ promises:
+// wedding keepsakes are bouquet-preservation pieces (14-21 calendar days, ~18
+// business days); photo frames, coaster sets and gift hampers are standard
+// custom (7-10 days, ~9 business days); name keychains and bookmarks are the
+// quickest poured pieces (~6 business days). Unknown / null category slugs
+// fall back to a safe 7-day default.
+const LEAD_TIME_BY_CATEGORY: Record<string, number> = {
+  "wedding-keepsakes": 18,
+  "photo-frames": 9,
+  "name-keychains": 6,
+  "coaster-sets": 9,
+  "bookmarks": 6,
+  "gift-hampers": 9,
+};
+
+const getLeadTimeDays = (categorySlug: string | null): number => {
+  if (!categorySlug) return 7;
+  return LEAD_TIME_BY_CATEGORY[categorySlug] ?? 7;
+};
+
 const ProductPage = () => {
   const { slug = "" } = useParams();
   const [p, setP] = useState<Full | null>(null);
@@ -95,7 +115,10 @@ const ProductPage = () => {
               // by `list.length > 0` so a failed network call never wipes
               // healthy entries.
               if (list.length > 0) {
-                pruneRecentlyViewed(list.map((r) => r.id));
+                // Append full.id because the supabase fetch deliberately
+                // excludes the current product from the rail data, but it
+                // still belongs in localStorage so the next page can show it.
+                pruneRecentlyViewed([...list.map((r) => r.id), full.id]);
               }
             });
         } else {
@@ -140,22 +163,41 @@ const ProductPage = () => {
   }, [p?.id]);
 
   // Lift WhatsAppFab + BackToTop above the 64px-tall sticky CTA bar while it
-  // is shown. Both FABs consume `--fab-bottom-offset` via inline style; we
-  // toggle it on :root and reset on unmount so navigating away from the
-  // product page does not leave the FABs floating.
+  // is shown. The bar is `md:hidden`, so we ALSO gate the offset on a
+  // `(max-width: 767px)` matchMedia: on desktop the bar never appears, so the
+  // FABs must not lift. The cleanup unconditionally resets the variable to
+  // `0px` so navigating off the page or resizing past 767px while pastGallery
+  // is still true cleans up correctly.
   useEffect(() => {
-    if (typeof document === "undefined") return;
-    document.documentElement.style.setProperty(
-      "--fab-bottom-offset",
-      pastGallery ? "76px" : "0px"
-    );
+    if (typeof document === "undefined" || typeof window === "undefined" || !window.matchMedia) return;
+    const mql = window.matchMedia("(max-width: 767px)");
+    const apply = () => {
+      document.documentElement.style.setProperty(
+        "--fab-bottom-offset",
+        pastGallery && mql.matches ? "76px" : "0px"
+      );
+    };
+    apply();
+    if (mql.addEventListener) {
+      mql.addEventListener("change", apply);
+      return () => {
+        mql.removeEventListener("change", apply);
+        document.documentElement.style.setProperty("--fab-bottom-offset", "0px");
+      };
+    }
+    mql.addListener(apply); // Safari < 14 fallback
     return () => {
+      mql.removeListener(apply);
       document.documentElement.style.setProperty("--fab-bottom-offset", "0px");
     };
   }, [pastGallery]);
 
   // Memoised delivery date string so we don't recompute on every render.
-  const deliveryLabel = useMemo(() => format(computeDeliveryEstimate(5), "EEE, d MMM"), []);
+  // The hook sits before the early-return null guard, so guard `p` here.
+  const deliveryLabel = useMemo(
+    () => (p ? format(computeDeliveryEstimate(getLeadTimeDays(p.category_slug)), "EEE, d MMM") : ""),
+    [p?.category_slug]
+  );
 
   if (notFound) {
     return (
