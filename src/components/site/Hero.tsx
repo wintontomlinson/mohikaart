@@ -63,13 +63,14 @@ const Hero = () => {
 
               {/* Headline */}
               <h1 className="mt-6 font-display" style={{ fontSize: "clamp(2.8rem, 5.5vw, 4.2rem)", fontWeight: 400, lineHeight: 1.05, letterSpacing: "-0.03em", color: "#3D2B1F" }}>
-                Where precious moments
+                Turn Memories
                 <br />
+                Into{" "}
                 <span className="relative inline-block">
-                  become
+                  Timeless
                   <motion.span className="absolute -bottom-2 left-0 h-[2px] bg-[#C9964A]/40" initial={{ width: 0 }} animate={{ width: "100%" }} transition={{ delay: 1, duration: 0.8 }} />
                 </span>{" "}
-                <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>eternal.</em>
+                <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>Art.</em>
               </h1>
 
               {/* Subheadline */}
