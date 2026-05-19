@@ -15,7 +15,8 @@ const WhatsAppFab = () => {
     transition={{ delay: 2.5, duration: 0.5, type: "spring", stiffness: 200 }}
     whileHover={{ scale: 1.1, rotate: -5 }}
     whileTap={{ scale: 0.9 }}
-    className="fixed bottom-6 right-6 z-40 w-14 h-14 md:w-16 md:h-16 rounded-full bg-foreground text-background flex items-center justify-center shadow-luxe btn-glow group"
+    className="fixed right-6 z-40 w-14 h-14 md:w-16 md:h-16 rounded-full bg-foreground text-background flex items-center justify-center shadow-luxe btn-glow group"
+    style={{ bottom: "calc(1.5rem + var(--fab-bottom-offset))" }}
   >
     <motion.span
       className="absolute inset-0 rounded-full bg-blush/40"

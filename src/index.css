@@ -75,6 +75,11 @@
     --sidebar-accent-foreground: 22 25% 20%;
     --sidebar-border: 34 28% 87%;
     --sidebar-ring: 34 58% 52%;
+
+    /* Lifts the floating action buttons above the mobile sticky CTA bar
+       on /product/* while it is shown. ProductPage toggles this between
+       0px (default) and 76px (sticky bar height + breathing room). */
+    --fab-bottom-offset: 0px;
   }
 }
 
@@ -305,6 +310,15 @@
   ::-webkit-scrollbar-track  { background: hsl(var(--background)); }
   ::-webkit-scrollbar-thumb  { background: hsl(var(--champagne)); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: hsl(var(--gold)); }
+
+  /* Hide the native scrollbar in WebKit/Blink + Firefox.
+     Used on horizontal pill rails (TrustBar, mobile category strips)
+     where the bar is decorative noise on a snap-scroll surface. */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
 }
 
 

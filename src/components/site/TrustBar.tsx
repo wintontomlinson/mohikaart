@@ -5,20 +5,25 @@ import { useTestimonials } from "@/lib/cms";
 
 type Pill = { icon: LucideIcon; label: string; sub: string };
 
+const RATING = 4.9;
+
 const TrustBar = () => {
   const reviews = useTestimonials();
   const reviewCount = Math.max(reviews.length, 0);
-  // We don't have a CMS field for the displayed count yet, so we pad
-  // the visible pill count to a marketing-friendly threshold while
-  // keeping the underlying value live for future tightening.
-  const displayCount = reviewCount >= 100 ? `${reviewCount}+` : "2000+";
+  // Honest pill copy: when the CMS has any verified reviews, surface the
+  // live count; otherwise fall back to a clean rating-only label so we
+  // never invent volume we don't have.
+  const reviewLabel =
+    reviewCount >= 1
+      ? `${RATING} / 5 from ${reviewCount} Reviews`
+      : `${RATING} / 5 Verified Reviews`;
 
   const pills: Pill[] = [
     { icon: ShieldCheck, label: "Secure Payments", sub: "UPI · Cards · Net banking" },
     { icon: Truck,       label: "Free Pan-India Shipping", sub: "Insured · Tracked" },
     { icon: Package2,    label: "Premium Packaging", sub: "Gift-ready, every order" },
     { icon: Heart,       label: "Handmade with Love", sub: "Poured by hand in India" },
-    { icon: Star,        label: `4.9 / 5 from ${displayCount} Reviews`, sub: "Verified buyers" },
+    { icon: Star,        label: reviewLabel, sub: "Verified buyers" },
   ];
 
   return (
@@ -39,9 +44,8 @@ const TrustBar = () => {
             snap-x snap-mandatory md:snap-none
             -mx-4 px-4 md:mx-0 md:px-0
             py-4
-            scrollbar-none
+            no-scrollbar
           "
-          style={{ scrollbarWidth: "none" }}
         >
           {pills.map((p, i) => (
             <motion.li

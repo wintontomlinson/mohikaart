@@ -15,17 +15,17 @@ type Cat = { id: string; name: string; slug: string; image_url: string | null };
 
 /**
  * Used when the live `categories` table returns 0 rows (fresh installs,
- * pre-seed previews) so the homepage still feels complete. Slugs match
- * the seed data so deep-links land on a sensible category page once
- * data lands.
+ * pre-seed previews) so the homepage still feels complete. Slugs and
+ * display names are kept in lockstep with SEED_EXAMPLE_DATA.sql so
+ * deep-links land on a real category page the moment the seed runs.
  */
 const FALLBACK_CATEGORIES: Cat[] = [
-  { id: "fb-wedding",      name: "Wedding Keepsakes",   slug: "wedding-keepsakes",   image_url: catWedding },
-  { id: "fb-flowers",      name: "Flower Preservation", slug: "flower-preservation", image_url: catTray },
-  { id: "fb-couple",       name: "Couple Gifts",        slug: "couple-gifts",        image_url: catCouple },
-  { id: "fb-frames",       name: "Resin Frames",        slug: "resin-frames",        image_url: catFrame },
-  { id: "fb-keychains",    name: "Keychains",           slug: "keychains",           image_url: catKeychain },
-  { id: "fb-personalized", name: "Personalized Gifts",  slug: "personalized-gifts",  image_url: catHamper },
+  { id: "fb-wedding",   name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
+  { id: "fb-frames",    name: "Photo Frames",      slug: "photo-frames",      image_url: catFrame },
+  { id: "fb-keychains", name: "Name Keychains",    slug: "name-keychains",    image_url: catKeychain },
+  { id: "fb-coasters",  name: "Coaster Sets",      slug: "coaster-sets",      image_url: catTray },
+  { id: "fb-bookmarks", name: "Bookmarks",         slug: "bookmarks",         image_url: catCouple },
+  { id: "fb-hampers",   name: "Gift Hampers",      slug: "gift-hampers",      image_url: catHamper },
 ];
 
 const Categories = ({ heading = true }: { heading?: boolean }) => {

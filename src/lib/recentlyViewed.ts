@@ -40,3 +40,25 @@ export const pushRecentlyViewed = (productId: string): void => {
     // Storage is unavailable (private mode, quota, etc.) - nothing to do.
   }
 };
+
+/**
+ * Drop any stored ids that are no longer in `validIds` (e.g. the product
+ * was deleted). Preserves the most-recent-first order of survivors.
+ *
+ * IMPORTANT: only call this AFTER a successful network fetch that returns
+ * at least one row - calling it on a failed fetch would wipe healthy ids
+ * just because the request errored.
+ */
+export const pruneRecentlyViewed = (validIds: string[]): void => {
+  if (typeof window === "undefined") return;
+  try {
+    const current = safeParse(window.localStorage.getItem(KEY));
+    if (current.length === 0) return;
+    const allow = new Set(validIds);
+    const next = current.filter((id) => allow.has(id));
+    if (next.length === current.length) return;
+    window.localStorage.setItem(KEY, JSON.stringify(next));
+  } catch {
+    // Storage unavailable - nothing to do.
+  }
+};

@@ -27,6 +27,22 @@ const PICKS: FaqItem[] = HOMEPAGE_GROUP_ORDER.flatMap((label) => {
   return group.faqs.slice(0, 2);
 }).slice(0, 8);
 
+/* schema.org FAQPage structured data. We render it inline as a JSON-LD
+   <script> on the homepage only - /faq intentionally does NOT also emit
+   this so Google sees a single canonical FAQ entity for the brand. */
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: PICKS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.a,
+    },
+  })),
+};
+
 const HomepageFAQ = () => {
   const { phone } = useStoreSettings();
 
@@ -39,6 +55,11 @@ const HomepageFAQ = () => {
           "radial-gradient(ellipse 60% 60% at 50% 0%, hsl(38 62% 88% / 0.35), transparent), hsl(36 42% 98%)",
       }}
     >
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className="container max-w-3xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

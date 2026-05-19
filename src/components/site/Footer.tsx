@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { Monogram, Wordmark } from "@/components/site/Logo";
 import { useStoreSettings } from "@/lib/settings";
+import { EMAIL_RE } from "@/lib/validation";
 
 const Footer = () => {
   const { phone, phone_display, email, instagram } = useStoreSettings();
@@ -11,11 +12,16 @@ const Footer = () => {
 
   const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!newsletterEmail.includes("@")) {
+    const trimmed = newsletterEmail.trim();
+    if (!EMAIL_RE.test(trimmed)) {
       toast.error("Please enter a valid email address.");
       return;
     }
-    toast.success("You are in! Check your inbox.");
+    const digits = (phone || "").replace(/\D/g, "");
+    const message = `Hi Mohika! I'd like to join your inner circle - my email is ${trimmed}.`;
+    const href = `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+    window.open(href, "_blank", "noopener,noreferrer");
+    toast.success("Opening WhatsApp...");
     setNewsletterEmail("");
   };
 
@@ -73,12 +79,15 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Newsletter (sits to the LEFT of Contact on lg+) */}
+          {/* Newsletter (sits to the LEFT of Contact on lg+).
+              Real WhatsApp opt-in: tapping the arrow opens wa.me with a
+              prefilled message containing the typed email so Mohika can
+              confirm + ship the welcome offer manually. No fake backend. */}
           <div className="col-span-2 md:col-span-2 lg:col-span-1">
             <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Newsletter</p>
             <p className="font-display text-base text-background/85 leading-snug mb-1.5">Join the inner circle</p>
             <p className="text-[12px] text-background/45 leading-relaxed mb-3 max-w-[260px]">
-              Early access to drops, behind-the-scenes, and a 10% welcome offer.
+              Tap the arrow and we will pick it up on WhatsApp - 10% welcome offer included.
             </p>
             <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2">
               <input
@@ -92,7 +101,7 @@ const Footer = () => {
               />
               <button
                 type="submit"
-                aria-label="Subscribe"
+                aria-label="Continue on WhatsApp"
                 className="shrink-0 w-9 h-9 rounded-full bg-gold/80 hover:bg-gold text-foreground flex items-center justify-center transition-colors"
               >
                 <ArrowRight className="w-4 h-4" strokeWidth={1.8} />

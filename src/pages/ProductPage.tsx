@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, Plus, Minus, ShieldCheck, Truck, Sparkles, ChevronRight, X } from "lucide-react";
+import { Heart, Plus, Minus, ShieldCheck, Truck, Sparkles, ChevronRight } from "lucide-react";
 import { addDays, format, getDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
@@ -9,8 +9,8 @@ import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { ProductCard, Product } from "@/components/site/ProductCard";
 import PackagingShowcase from "@/components/site/PackagingShowcase";
-import { pushRecentlyViewed, getRecentlyViewed } from "@/lib/recentlyViewed";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { pushRecentlyViewed, getRecentlyViewed, pruneRecentlyViewed } from "@/lib/recentlyViewed";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 type Full = Product & { description: string | null; gallery: string[] };
 
@@ -81,7 +81,7 @@ const ProductPage = () => {
         if (ids.length > 0) {
           supabase.from("products")
             .select("id,slug,name,price,original_price,image_url,badge,short_description,category_slug")
-            .in("id", ids).limit(8)
+            .in("id", ids).limit(12)
             .then(({ data: rows }) => {
               const list = (rows ?? []) as Product[];
               // Preserve the most-recent-first order of the stored ids.
@@ -89,6 +89,14 @@ const ProductPage = () => {
                 .map((id) => list.find((r) => r.id === id))
                 .filter((r): r is Product => Boolean(r));
               setRecent(ordered);
+              // Self-heal localStorage: drop any stored id that didn't come
+              // back from supabase (deleted product, slug change, etc.) so
+              // dead ids don't permanently occupy the 12-slot cap. Guarded
+              // by `list.length > 0` so a failed network call never wipes
+              // healthy entries.
+              if (list.length > 0) {
+                pruneRecentlyViewed(list.map((r) => r.id));
+              }
             });
         } else {
           setRecent([]);
@@ -130,6 +138,21 @@ const ProductPage = () => {
     observer.observe(node);
     return () => observer.disconnect();
   }, [p?.id]);
+
+  // Lift WhatsAppFab + BackToTop above the 64px-tall sticky CTA bar while it
+  // is shown. Both FABs consume `--fab-bottom-offset` via inline style; we
+  // toggle it on :root and reset on unmount so navigating away from the
+  // product page does not leave the FABs floating.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.style.setProperty(
+      "--fab-bottom-offset",
+      pastGallery ? "76px" : "0px"
+    );
+    return () => {
+      document.documentElement.style.setProperty("--fab-bottom-offset", "0px");
+    };
+  }, [pastGallery]);
 
   // Memoised delivery date string so we don't recompute on every render.
   const deliveryLabel = useMemo(() => format(computeDeliveryEstimate(5), "EEE, d MMM"), []);
@@ -216,14 +239,21 @@ const ProductPage = () => {
                 initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="rounded-3xl overflow-hidden shadow-luxe aspect-[4/5] bg-card relative cursor-zoom-in"
+                className={`rounded-3xl overflow-hidden shadow-luxe aspect-[4/5] bg-card relative ${zoomEnabled ? "cursor-zoom-in" : "cursor-pointer"}`}
                 ref={imageWrapRef}
                 onMouseMove={handleZoomMove}
                 onMouseEnter={handleZoomEnter}
                 onMouseLeave={handleZoomLeave}
                 onClick={handleMainImageClick}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setLightboxOpen(true);
+                  }
+                }}
                 role="button"
-                aria-label={zoomEnabled ? "Hover to zoom" : "Tap to view full screen"}
+                tabIndex={0}
+                aria-label={zoomEnabled ? "Hover to zoom, press Enter to view full screen" : "Tap to view full screen"}
               >
                 <img
                   src={main}
@@ -418,6 +448,8 @@ const ProductPage = () => {
             onClick={() => wishlistToggle(p.id)}
             aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
             aria-pressed={wished}
+            tabIndex={pastGallery ? 0 : -1}
+            style={{ pointerEvents: pastGallery ? "auto" : "none" }}
             className="shrink-0 w-11 h-11 rounded-full bg-background/70 flex items-center justify-center transition-all"
           >
             <Heart
@@ -430,6 +462,8 @@ const ProductPage = () => {
           </button>
           <button
             onClick={handleAddToCart}
+            tabIndex={pastGallery ? 0 : -1}
+            style={{ pointerEvents: pastGallery ? "auto" : "none" }}
             className="shrink-0 px-5 h-11 rounded-full bg-foreground text-background btn-text inline-flex items-center justify-center"
           >
             Add to Cart
@@ -440,19 +474,12 @@ const ProductPage = () => {
       {/* Mobile fullscreen lightbox */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <DialogContent className="max-w-none w-screen h-screen p-0 bg-foreground/95 border-0 rounded-none flex flex-col items-center justify-center sm:rounded-none">
-          <button
-            onClick={() => setLightboxOpen(false)}
-            aria-label="Close"
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/15 hover:bg-background/25 text-background flex items-center justify-center transition-colors z-10"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <DialogTitle className="sr-only">Product image: {p.name}</DialogTitle>
           <div className="w-full flex-1 flex items-center justify-center px-4">
             <img
               src={main}
               alt={p.name}
               className="max-w-full max-h-[80vh] object-contain"
-              onClick={() => setLightboxOpen(false)}
             />
           </div>
           {allImages.length > 1 && (

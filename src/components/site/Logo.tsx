@@ -24,7 +24,7 @@ export const Wordmark = ({ variant = "light", className = "" }: WordmarkProps) =
   >
     Mohika{" "}
     <em
-      className="not-italic text-gold-grad"
+      className="text-gold-grad"
       style={{ fontFamily: "var(--font-serif)", fontStyle: "italic" }}
     >
       Art

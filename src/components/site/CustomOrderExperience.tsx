@@ -156,6 +156,38 @@ const CustomOrderExperience = () => {
   const [message, setMessage] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const focusShape = (idx: number) => {
+    const next = SHAPES[idx];
+    if (!next) return;
+    setShape(next.id);
+    buttonsRef.current[idx]?.focus();
+  };
+
+  const handleShapeKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, idx: number) => {
+    const last = SHAPES.length - 1;
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        e.preventDefault();
+        focusShape(idx === last ? 0 : idx + 1);
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        e.preventDefault();
+        focusShape(idx === 0 ? last : idx - 1);
+        break;
+      case "Home":
+        e.preventDefault();
+        focusShape(0);
+        break;
+      case "End":
+        e.preventDefault();
+        focusShape(last);
+        break;
+    }
+  };
 
   const toggleFlower = (id: FlowerId) =>
     setFlowers((curr) =>
@@ -268,15 +300,18 @@ const CustomOrderExperience = () => {
                 aria-label="Keepsake shape"
                 className="grid grid-cols-2 sm:grid-cols-4 gap-3"
               >
-                {SHAPES.map((s) => {
+                {SHAPES.map((s, idx) => {
                   const active = shape === s.id;
                   return (
                     <button
                       key={s.id}
+                      ref={(el) => { buttonsRef.current[idx] = el; }}
                       type="button"
                       role="radio"
                       aria-checked={active}
+                      tabIndex={active ? 0 : -1}
                       onClick={() => setShape(s.id)}
+                      onKeyDown={(e) => handleShapeKeyDown(e, idx)}
                       className={`group flex flex-col items-center gap-2 rounded-2xl px-3 py-4 transition-all duration-300 ${
                         active
                           ? "bg-foreground text-background shadow-luxe"
