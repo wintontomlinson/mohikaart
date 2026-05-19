@@ -1,6 +1,7 @@
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import catWedding from "@/assets/cat-wedding.jpg";
@@ -12,6 +13,12 @@ import catHamper from "@/assets/cat-hamper.jpg";
 
 type Cat = { id: string; name: string; slug: string; image_url: string | null };
 
+/**
+ * Used when the live `categories` table returns 0 rows (fresh installs,
+ * pre-seed previews) so the homepage still feels complete. Slugs and
+ * display names are kept in lockstep with SEED_EXAMPLE_DATA.sql so
+ * deep-links land on a real category page the moment the seed runs.
+ */
 const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-wedding",   name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
   { id: "fb-frames",    name: "Photo Frames",      slug: "photo-frames",      image_url: catFrame },
@@ -20,15 +27,6 @@ const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-bookmarks", name: "Bookmarks",         slug: "bookmarks",         image_url: catCouple },
   { id: "fb-hampers",   name: "Gift Hampers",      slug: "gift-hampers",      image_url: catHamper },
 ];
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  }),
-};
 
 const Categories = ({ heading = true }: { heading?: boolean }) => {
   const [cats, setCats] = useState<Cat[]>([]);
@@ -44,81 +42,70 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
   const display = cats.length > 0 ? cats : FALLBACK_CATEGORIES;
 
   return (
-    <section id="categories" className="py-20">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
+    <section id="categories" className={`relative ${heading ? "py-28 md:py-40" : "py-14 md:py-20"} bg-blush/20`}>
+      <div className="container">
         {heading && (
-          <motion.div
-            className="mb-14"
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <p
-              style={{ fontSize: "11px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#C9964A", fontWeight: 600, marginBottom: "12px" }}
+          <div className="max-w-2xl mx-auto text-center mb-20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              style={{ fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "hsl(34 58% 52%)", marginBottom: "1.25rem", fontWeight: 500 }}
             >
-              Collections
-            </p>
-            <h2
-              className="font-display"
-              style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1, color: "#3D2B1F" }}
+              Explore
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="font-display leading-[1.04] tracking-[-0.03em]"
+              style={{ fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3.6rem)" }}
             >
-              Curated for Every{" "}
-              <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>
-                Occasion
-              </em>
-            </h2>
-          </motion.div>
+              Crafted Categories
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="mt-5"
+              style={{ fontSize: "clamp(0.92rem, 1.3vw, 1.02rem)", color: "hsl(25 10% 46%)", fontWeight: 380, lineHeight: 1.72 }}
+            >
+              From keychains to wedding heirlooms, find the perfect handmade keepsake for every moment.
+            </motion.p>
+          </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
           {display.map((c, i) => (
             <motion.div
               key={c.id}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
+              initial={{ opacity: 0, y: 40, scale: 0.93 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.65, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -8 }}
+              className="group relative rounded-3xl overflow-hidden shadow-card bg-card-grad card-3d"
             >
-              <Link
-                to={`/category/${c.slug}`}
-                className="group relative overflow-hidden rounded-[20px] block transition-all duration-500"
-                style={{ height: "280px", border: "1px solid transparent" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,150,74,0.3)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "transparent"; }}
-              >
-                <img
-                  src={resolveImage(c.image_url)}
-                  alt={c.name}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.08]"
-                />
-                {/* Dark gradient overlay */}
-                <div className="absolute inset-0"
-                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.20) 40%, transparent 60%)" }}
-                />
-                {/* Title */}
-                <div className="absolute bottom-0 left-0 p-6">
-                  <span className="font-display text-white" style={{ fontSize: "20px", fontWeight: 500 }}>
-                    {c.name}
-                  </span>
+              <Link to={`/category/${c.slug}`} className="block">
+                <div className="relative overflow-hidden aspect-[3/4]">
+                  <img
+                    src={resolveImage(c.image_url)}
+                    alt={c.name}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                    style={{ transitionDuration: "1400ms" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/65 via-foreground/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gold/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  <div className="absolute inset-0 rounded-3xl border-2 border-gold/0 group-hover:border-gold/25 transition-all duration-500 pointer-events-none" />
                 </div>
-                {/* SHOP NOW pill on hover */}
-                <div className="absolute bottom-6 right-6 translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-[400ms] ease-out">
-                  <span
-                    className="inline-block rounded-full px-5 py-2"
-                    style={{
-                      background: "#C9964A",
-                      color: "#ffffff",
-                      fontSize: "10px",
-                      fontWeight: 700,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    SHOP NOW
-                  </span>
+                <div className="absolute inset-x-0 bottom-0 p-5">
+                  <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.25em] text-background/60 mb-1.5">
+                    Shop now
+                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                  </div>
+                  <div className="font-display text-xl md:text-2xl text-background leading-tight">{c.name}</div>
                 </div>
               </Link>
             </motion.div>

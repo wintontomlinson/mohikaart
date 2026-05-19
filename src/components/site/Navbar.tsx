@@ -26,13 +26,13 @@ const moreLinks = [
 ];
 
 const Navbar = () => {
-  const [scrolled, setScrolled]             = useState(false);
-  const [scrollDir, setScrollDir]           = useState<"up" | "down">("up");
-  const [open, setOpen]                     = useState(false);
-  const [moreOpen, setMoreOpen]             = useState(false);
+  const [scrolled, setScrolled]           = useState(false);
+  const [scrollDir, setScrollDir]         = useState<"up" | "down">("up");
+  const [open, setOpen]                   = useState(false);
+  const [moreOpen, setMoreOpen]           = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
-  const [searchOpen, setSearchOpen]         = useState(false);
-  const [searchQuery, setSearchQuery]       = useState("");
+  const [searchOpen, setSearchOpen]       = useState(false);
+  const [searchQuery, setSearchQuery]     = useState("");
   const moreRef     = useRef<HTMLDivElement>(null);
   const searchRef   = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
@@ -102,23 +102,21 @@ const Navbar = () => {
       initial={{ y: -120, opacity: 0 }}
       animate={{ y: hide ? -120 : 0, opacity: 1 }}
       transition={{ duration: hide ? 0.3 : 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed inset-x-0 z-50"
-      style={{ top: "38px" }}
+      className="fixed top-0 inset-x-0 z-50"
     >
       {/* ── Main nav bar ── */}
       <div
         className="transition-all duration-500"
         style={{
-          height: "64px",
-          background: scrolled ? "rgba(250,247,244,0.92)" : "rgba(250,247,244,0.82)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          background: scrolled ? "hsl(36 42% 99%/0.97)" : "hsl(36 42% 99%/0.82)",
+          backdropFilter: "blur(22px) saturate(180%)",
+          WebkitBackdropFilter: "blur(22px) saturate(180%)",
           boxShadow: scrolled
-            ? "0 1px 0 rgba(0,0,0,0.04), 0 4px 20px -4px rgba(61,43,31,0.06)"
+            ? "0 1px 0 hsl(34 30% 86%/0.8), 0 6px 24px -8px hsl(22 22% 22%/0.08)"
             : "0 1px 0 hsl(34 30% 88%/0.3)",
         }}
       >
-        <nav className="max-w-[1280px] mx-auto px-6 lg:px-8 flex items-center justify-between h-full">
+        <nav className="max-w-[1360px] mx-auto px-5 md:px-10 flex items-center justify-between h-[60px] md:h-[68px]">
 
           {/* ── LOGO ── */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group" aria-label="Mohika Art home">
@@ -137,7 +135,7 @@ const Navbar = () => {
                   <NavLink
                     to={l.to}
                     end={l.to === "/"}
-                    className="nav-link-underline group relative px-[14px] py-2.5 inline-flex flex-col items-center"
+                    className="group relative px-[14px] py-2.5 inline-flex flex-col items-center"
                   >
                     <span
                       className="text-[11px] tracking-[0.09em] uppercase font-semibold transition-all duration-250"
@@ -147,6 +145,19 @@ const Navbar = () => {
                     >
                       {l.label}
                     </span>
+                    <motion.span
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"
+                      animate={{
+                        width: isActive ? "20px" : "0px",
+                        opacity: isActive ? 1 : 0,
+                      }}
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                      style={{ height: "2px", background: "hsl(34 58% 52%)" }}
+                    />
+                    <span
+                      className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full opacity-0 group-hover:opacity-40 transition-all duration-250"
+                      style={{ height: "2px", width: "12px", background: "hsl(34 58% 52%)" }}
+                    />
                   </NavLink>
                 </li>
               );
@@ -262,6 +273,22 @@ const Navbar = () => {
                         );
                       })}
                     </div>
+                    <div
+                      className="mx-3 mb-3 mt-1 rounded-xl px-3 py-2.5 flex items-center gap-2.5"
+                      style={{
+                        background: "linear-gradient(135deg, hsl(34 58% 52%/0.08), hsl(348 55% 90%/0.3))",
+                        border: "1px solid hsl(34 58% 52%/0.12)",
+                      }}
+                    >
+                      <span className="flex h-6 w-6 items-center justify-center rounded-lg shrink-0" style={{ background: "hsl(34 58% 52%/0.12)" }}>
+                        <Sparkles className="w-3 h-3" style={{ color: "hsl(34 58% 50%)" }} />
+                      </span>
+                      <div>
+                        <div style={{ fontSize: "10px", fontWeight: 700, color: "hsl(34 52% 40%)" }}>Customize Your Gift</div>
+                        <div style={{ fontSize: "9px", color: "hsl(25 10% 46%)" }}>Personal touches, perfect every time</div>
+                      </div>
+                      <ArrowRight className="w-3 h-3 ml-auto shrink-0" style={{ color: "hsl(34 52% 48%)" }} />
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -365,6 +392,11 @@ const Navbar = () => {
                   boxShadow: "0 4px 16px -4px hsl(34 58% 38%/0.4)",
                 }}
               >
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  animate={{ x: ["-120%", "120%"] }}
+                  transition={{ duration: 2.8, repeat: Infinity, repeatDelay: 7, ease: "easeInOut" }}
+                />
                 <span className="relative z-10 flex items-center gap-1.5">
                   Shop Now
                   <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -401,13 +433,13 @@ const Navbar = () => {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="lg:hidden overflow-hidden"
             style={{
-              background: "rgba(250,247,244,0.92)",
-              backdropFilter: "blur(20px) saturate(180%)",
+              background: "hsl(36 42% 99%/0.98)",
+              backdropFilter: "blur(28px) saturate(170%)",
               borderBottom: "1px solid hsl(34 30% 88%/0.6)",
               boxShadow: "0 24px 56px -12px hsl(22 22% 22%/0.14)",
             }}
           >
-            <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-2 pb-4">
+            <div className="max-w-[1360px] mx-auto px-4 py-2 pb-4">
               {/* Mobile search */}
               <form onSubmit={submitSearch} className="mb-3 mt-1">
                 <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-foreground/[0.04] border border-foreground/[0.08]">
