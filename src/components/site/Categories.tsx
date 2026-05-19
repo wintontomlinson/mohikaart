@@ -4,8 +4,29 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
+import catWedding from "@/assets/cat-wedding.jpg";
+import catTray from "@/assets/cat-tray.jpg";
+import catCouple from "@/assets/cat-couple.jpg";
+import catFrame from "@/assets/cat-frame.jpg";
+import catKeychain from "@/assets/cat-keychain.jpg";
+import catHamper from "@/assets/cat-hamper.jpg";
 
 type Cat = { id: string; name: string; slug: string; image_url: string | null };
+
+/**
+ * Used when the live `categories` table returns 0 rows (fresh installs,
+ * pre-seed previews) so the homepage still feels complete. Slugs and
+ * display names are kept in lockstep with SEED_EXAMPLE_DATA.sql so
+ * deep-links land on a real category page the moment the seed runs.
+ */
+const FALLBACK_CATEGORIES: Cat[] = [
+  { id: "fb-wedding",   name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
+  { id: "fb-frames",    name: "Photo Frames",      slug: "photo-frames",      image_url: catFrame },
+  { id: "fb-keychains", name: "Name Keychains",    slug: "name-keychains",    image_url: catKeychain },
+  { id: "fb-coasters",  name: "Coaster Sets",      slug: "coaster-sets",      image_url: catTray },
+  { id: "fb-bookmarks", name: "Bookmarks",         slug: "bookmarks",         image_url: catCouple },
+  { id: "fb-hampers",   name: "Gift Hampers",      slug: "gift-hampers",      image_url: catHamper },
+];
 
 const Categories = ({ heading = true }: { heading?: boolean }) => {
   const [cats, setCats] = useState<Cat[]>([]);
@@ -17,6 +38,8 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
       .order("sort_order")
       .then(({ data }) => setCats((data ?? []) as Cat[]));
   }, []);
+
+  const display = cats.length > 0 ? cats : FALLBACK_CATEGORIES;
 
   return (
     <section id="categories" className={`relative ${heading ? "py-28 md:py-40" : "py-14 md:py-20"} bg-blush/20`}>
@@ -54,7 +77,7 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-          {cats.map((c, i) => (
+          {display.map((c, i) => (
             <motion.div
               key={c.id}
               initial={{ opacity: 0, y: 40, scale: 0.93 }}

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background:  36 38% 97%;
+    --background:  32 60% 97%;
     --foreground:  22 20% 16%;
 
     --ivory:       36 38% 97%;
@@ -14,7 +14,7 @@
     --champagne-deep: 35 42% 58%;
     --gold:        34 58% 52%;
     --gold-soft:   38 62% 70%;
-    --blush:       348 58% 90%;
+    --blush:       348 56% 90%;
     --blush-deep:  346 52% 76%;
     --beige:       32 28% 88%;
     --lavender:    278 32% 90%;
@@ -63,7 +63,7 @@
 
     --font-display: 'Playfair Display', 'Cormorant Garamond', serif;
     --font-serif:   'Cormorant Garamond', serif;
-    --font-sans:    'DM Sans', system-ui, sans-serif;
+    --font-sans:    'Inter', 'DM Sans', system-ui, sans-serif;
 
     --transition-luxe: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -75,6 +75,11 @@
     --sidebar-accent-foreground: 22 25% 20%;
     --sidebar-border: 34 28% 87%;
     --sidebar-ring: 34 58% 52%;
+
+    /* Lifts the floating action buttons above the mobile sticky CTA bar
+       on /product/* while it is shown. ProductPage toggles this between
+       0px (default) and 76px (sticky bar height + breathing room). */
+    --fab-bottom-offset: 0px;
   }
 }
 
@@ -96,9 +101,9 @@
     letter-spacing: -0.025em;
     line-height: 1.08;
   }
-  h1 { font-weight: 400; font-size: clamp(2.4rem, 5.5vw, 4.8rem); }
-  h2 { font-weight: 500; font-size: clamp(1.9rem, 3.8vw, 3.4rem); }
-  h3 { font-weight: 500; font-size: clamp(1.1rem, 1.9vw, 1.55rem); }
+  h1 { font-weight: 400; font-size: clamp(2.6rem, 6vw, 4.5rem); }
+  h2 { font-weight: 500; font-size: clamp(1.85rem, 4.2vw, 3rem); }
+  h3 { font-weight: 500; font-size: clamp(1.25rem, 1.9vw, 1.625rem); }
   h4 { font-weight: 500; font-size: clamp(0.95rem, 1.4vw, 1.15rem); }
   p  { font-feature-settings: 'kern', 'liga', 'calt'; }
   /* Section spacing for storefront content sections.
@@ -118,6 +123,13 @@
     letter-spacing: 0.3em;
     text-transform: uppercase;
     color: hsl(var(--gold));
+  }
+
+  .btn-text {
+    font-family: var(--font-sans);
+    font-size: 0.94rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
   }
 
   .bg-hero        { background: var(--gradient-hero); }
@@ -298,6 +310,15 @@
   ::-webkit-scrollbar-track  { background: hsl(var(--background)); }
   ::-webkit-scrollbar-thumb  { background: hsl(var(--champagne)); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: hsl(var(--gold)); }
+
+  /* Hide the native scrollbar in WebKit/Blink + Firefox.
+     Used on horizontal pill rails (TrustBar, mobile category strips)
+     where the bar is decorative noise on a snap-scroll surface. */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
 }
 
 

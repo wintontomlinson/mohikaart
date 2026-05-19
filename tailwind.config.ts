@@ -16,7 +16,7 @@ export default {
       fontFamily: {
         display: ["Playfair Display", "Cormorant Garamond", "serif"],
         serif: ["Cormorant Garamond", "serif"],
-        sans: ["DM Sans", "system-ui", "sans-serif"],
+        sans: ["Inter", "DM Sans", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

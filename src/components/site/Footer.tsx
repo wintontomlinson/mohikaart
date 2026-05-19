@@ -1,24 +1,44 @@
-import { Instagram, Mail, MessageCircle, Heart } from "lucide-react";
+import { useState } from "react";
+import { Instagram, Mail, MessageCircle, Heart, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import mark from "@/assets/mohika-mark.png";
-import { useStoreSettings } from "@/lib/settings";
+import { toast } from "sonner";
+import { Monogram, Wordmark } from "@/components/site/Logo";
+import { useStoreSettings, isPlaceholderPhone } from "@/lib/settings";
+import { EMAIL_RE } from "@/lib/validation";
 
 const Footer = () => {
   const { phone, phone_display, email, instagram } = useStoreSettings();
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+
+  const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmed = newsletterEmail.trim();
+    if (!EMAIL_RE.test(trimmed)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (isPlaceholderPhone(phone)) {
+      toast.error("We will be in touch soon - please contact us via Instagram for now.");
+      return;
+    }
+    const digits = (phone || "").replace(/\D/g, "");
+    const message = `Hi Mohika! I'd like to join your inner circle - my email is ${trimmed}.`;
+    const href = `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+    window.open(href, "_blank", "noopener,noreferrer");
+    toast.success("Opening WhatsApp - drop your email there too if it didn't carry over.");
+    setNewsletterEmail("");
+  };
+
   return (
     <footer className="bg-foreground text-background">
       <div className="container py-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-start">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-start">
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-lg bg-background/[0.08] flex items-center justify-center p-1.5">
-                <img src={mark} alt="Mohika Art" className="w-full h-full object-contain" />
-              </div>
-              <div className="font-display text-xl text-gold-grad" style={{ fontWeight: 300 }}>
-                Mohika <span className="italic">Art</span>
-              </div>
+              <Monogram size={32} tone="background" />
+              <Wordmark variant="dark" />
             </div>
             <p className="text-[12px] text-background/45 leading-relaxed max-w-[220px]">
               Handcrafted resin keepsakes that preserve your precious moments forever.
@@ -61,6 +81,39 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Newsletter (sits to the LEFT of Contact on lg+).
+              Real WhatsApp opt-in: tapping the arrow opens wa.me with a
+              prefilled message containing the typed email so Mohika can
+              follow up manually. The submit short-circuits with a soft
+              Instagram fallback when the store phone is still the
+              placeholder so unconfigured deployments never open chats to
+              `919999999999`. */}
+          <div className="col-span-2 md:col-span-2 lg:col-span-1">
+            <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Newsletter</p>
+            <p className="font-display text-base text-background/85 leading-snug mb-1.5">Join the inner circle</p>
+            <p className="text-[12px] text-background/45 leading-relaxed mb-3 max-w-[260px]">
+              Drop your email - we will send drop alerts and the occasional welcome surprise on WhatsApp.
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2">
+              <input
+                type="email"
+                required
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                placeholder="you@example.com"
+                aria-label="Email address"
+                className="flex-1 min-w-0 px-3 py-2 rounded-full bg-background/[0.06] border border-background/[0.12] text-[12px] text-background placeholder:text-background/30 focus:outline-none focus:border-gold/60 transition-colors"
+              />
+              <button
+                type="submit"
+                aria-label="Continue on WhatsApp"
+                className="shrink-0 w-9 h-9 rounded-full bg-gold/80 hover:bg-gold text-foreground flex items-center justify-center transition-colors"
+              >
+                <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+              </button>
+            </form>
           </div>
 
           {/* Contact */}

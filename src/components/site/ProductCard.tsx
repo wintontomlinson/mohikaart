@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
 import { useCart } from "@/lib/cart";
+import { useWishlist } from "@/lib/wishlist";
 
 export type Product = {
   id: string;
@@ -20,7 +21,8 @@ export type Product = {
 
 export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) => {
   const { add } = useCart();
-  const [wished, setWished] = useState(false);
+  const { has, toggle } = useWishlist();
+  const wished = has(p.id);
   const [adding, setAdding] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -84,7 +86,7 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
 
           {/* Wishlist button */}
           <button
-            onClick={(e) => { e.preventDefault(); setWished(w => !w); }}
+            onClick={(e) => { e.preventDefault(); toggle(p.id); }}
             className="absolute top-4 right-4 w-10 h-10 rounded-full glass flex items-center justify-center transition-all duration-300 hover:scale-110"
             aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           >
@@ -123,6 +125,7 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
               ))}
               <span className="ml-1.5 text-[10px] text-muted-foreground">(4.9)</span>
             </div>
+            {/* Scarcity messaging is intentionally not rendered until a real stock_count column lands in supabase + the explicit selects fetch it. */}
           </div>
           <div className="text-right shrink-0">
             <div className="font-display text-2xl text-gold-grad leading-none">{formatINR(Number(p.price))}</div>

@@ -29,7 +29,15 @@ const Showcase = () => {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-          {data.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}
+          {data.length > 0
+            ? data.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)
+            : Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={`skeleton-${i}`}
+                  className="rounded-3xl bg-muted/40 aspect-[4/5] animate-pulse"
+                  aria-hidden="true"
+                />
+              ))}
         </div>
       </div>
     </section>
