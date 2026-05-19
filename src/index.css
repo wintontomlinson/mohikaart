@@ -352,3 +352,13 @@
   min-height: 100dvh;
   position: relative;
 }
+
+
+/* ── Marquee Strip (outside @layer for reliable animation) ── */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-strip {
+  animation: marquee-scroll 32s linear infinite;
+}

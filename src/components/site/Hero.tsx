@@ -624,7 +624,7 @@ const Hero = () => {
           className="overflow-hidden py-3.5"
           style={{ background: "transparent" }}
         >
-          <div className="flex whitespace-nowrap" style={{ animation: "marquee 32s linear infinite" }}>
+          <div className="marquee-strip flex whitespace-nowrap">
             {[...Array(2)].map((_, i) => (
               <span key={i} className="flex shrink-0 items-center">
                 {[
