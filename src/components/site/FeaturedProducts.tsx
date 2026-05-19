@@ -4,14 +4,15 @@ import { ArrowRight } from "lucide-react";
 import { useProducts, ProductCard } from "./ProductCard";
 
 /**
- * Best Sellers — premium ecommerce grid section.
- * Shows 6 featured products in a clean 3-col layout (Shopify luxury style).
+ * Featured Products — editorial 4-up showcase.
+ * Sits above Best Sellers as a curated "this week's picks" feel.
+ * Uses the same product schema; pulls top 4 featured items.
  */
-const Showcase = () => {
-  const { data } = useProducts({ featured: true, limit: 6 });
+const FeaturedProducts = () => {
+  const { data } = useProducts({ featured: true, limit: 4 });
 
   return (
-    <section className="py-16 md:py-20" style={{ background: "#FAF7F4" }}>
+    <section className="py-16 md:py-20">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-12">
           <motion.div
@@ -24,7 +25,7 @@ const Showcase = () => {
               className="font-semibold uppercase mb-3"
               style={{ fontSize: "11px", color: "#C9964A", letterSpacing: "0.25em" }}
             >
-              Best Sellers
+              Featured
             </p>
             <h2
               className="font-display"
@@ -36,12 +37,12 @@ const Showcase = () => {
                 color: "#3D2B1F",
               }}
             >
-              Loved by{" "}
+              This week&apos;s{" "}
               <em
                 className="font-serif italic"
                 style={{ color: "#C9964A", fontWeight: 400 }}
               >
-                everyone.
+                favourites.
               </em>
             </h2>
           </motion.div>
@@ -67,16 +68,16 @@ const Showcase = () => {
               onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#3D2B1F")}
             >
-              View All Products
+              Explore Collection
               <ArrowRight style={{ width: 14, height: 14 }} />
             </Link>
           </motion.div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {data.length > 0
             ? data.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)
-            : Array.from({ length: 6 }).map((_, i) => (
+            : Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={`skeleton-${i}`}
                   className="aspect-square animate-pulse"
@@ -90,4 +91,4 @@ const Showcase = () => {
   );
 };
 
-export default Showcase;
+export default FeaturedProducts;

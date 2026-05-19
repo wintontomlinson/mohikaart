@@ -13,12 +13,6 @@ import catHamper from "@/assets/cat-hamper.jpg";
 
 type Cat = { id: string; name: string; slug: string; image_url: string | null };
 
-/**
- * Used when the live `categories` table returns 0 rows (fresh installs,
- * pre-seed previews) so the homepage still feels complete. Slugs and
- * display names are kept in lockstep with SEED_EXAMPLE_DATA.sql so
- * deep-links land on a real category page the moment the seed runs.
- */
 const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-wedding",   name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
   { id: "fb-frames",    name: "Photo Frames",      slug: "photo-frames",      image_url: catFrame },
@@ -28,6 +22,10 @@ const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-hampers",   name: "Gift Hampers",      slug: "gift-hampers",      image_url: catHamper },
 ];
 
+/**
+ * Categories — clean luxury ecommerce grid (Shopify-style).
+ * 3-up on desktop, 2-up tablet, 1-up mobile. Balanced spacing.
+ */
 const Categories = ({ heading = true }: { heading?: boolean }) => {
   const [cats, setCats] = useState<Cat[]>([]);
 
@@ -42,70 +40,137 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
   const display = cats.length > 0 ? cats : FALLBACK_CATEGORIES;
 
   return (
-    <section id="categories" className={`relative ${heading ? "py-28 md:py-40" : "py-14 md:py-20"} bg-blush/20`}>
-      <div className="container">
+    <section className="py-16 md:py-20">
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         {heading && (
-          <div className="max-w-2xl mx-auto text-center mb-20">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-12">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              style={{ fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "hsl(34 58% 52%)", marginBottom: "1.25rem", fontWeight: 500 }}
-            >
-              Explore
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="font-display leading-[1.04] tracking-[-0.03em]"
-              style={{ fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3.6rem)" }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             >
-              Crafted Categories
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              <p
+                className="font-semibold uppercase mb-3"
+                style={{ fontSize: "11px", color: "#C9964A", letterSpacing: "0.25em" }}
+              >
+                Categories
+              </p>
+              <h2
+                className="font-display"
+                style={{
+                  fontWeight: 400,
+                  fontSize: "clamp(1.85rem, 3.8vw, 2.6rem)",
+                  lineHeight: 1.1,
+                  letterSpacing: "-0.02em",
+                  color: "#3D2B1F",
+                }}
+              >
+                Curated{" "}
+                <em
+                  className="font-serif italic"
+                  style={{ color: "#C9964A", fontWeight: 400 }}
+                >
+                  collections.
+                </em>
+              </h2>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="mt-5"
-              style={{ fontSize: "clamp(0.92rem, 1.3vw, 1.02rem)", color: "hsl(25 10% 46%)", fontWeight: 380, lineHeight: 1.72 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             >
-              From keychains to wedding heirlooms, find the perfect handmade keepsake for every moment.
-            </motion.p>
+              <Link
+                to="/categories"
+                className="inline-flex items-center gap-2 transition-colors"
+                style={{
+                  fontSize: "12px",
+                  letterSpacing: "0.12em",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  color: "#3D2B1F",
+                  paddingBottom: "4px",
+                  borderBottom: "1px solid #C9964A",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#3D2B1F")}
+              >
+                Shop All Categories
+                <ArrowUpRight style={{ width: 14, height: 14 }} />
+              </Link>
+            </motion.div>
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-          {display.map((c, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          {display.slice(0, 6).map((c, i) => (
             <motion.div
               key={c.id}
-              initial={{ opacity: 0, y: 40, scale: 0.93 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -8 }}
-              className="group relative rounded-3xl overflow-hidden shadow-card bg-card-grad card-3d"
+              transition={{ duration: 0.65, delay: (i % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -6 }}
+              className="group relative overflow-hidden"
+              style={{
+                borderRadius: "20px",
+                background: "#ffffff",
+                border: "1px solid #e5e0d8",
+              }}
             >
               <Link to={`/category/${c.slug}`} className="block">
-                <div className="relative overflow-hidden aspect-[3/4]">
+                <div className="relative overflow-hidden" style={{ aspectRatio: "4 / 5" }}>
                   <img
                     src={resolveImage(c.image_url)}
                     alt={c.name}
                     loading="lazy"
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                    style={{ transitionDuration: "1400ms" }}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/65 via-foreground/10 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gold/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="absolute inset-0 rounded-3xl border-2 border-gold/0 group-hover:border-gold/25 transition-all duration-500 pointer-events-none" />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 p-5">
-                  <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.25em] text-background/60 mb-1.5">
-                    Shop now
-                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                  {/* Soft dark gradient at bottom for legibility */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to top, rgba(61,43,31,0.72) 0%, rgba(61,43,31,0.15) 45%, transparent 70%)",
+                    }}
+                  />
+                  {/* Title overlay */}
+                  <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
+                    <div
+                      className="flex items-center gap-1.5 mb-1.5 transition-all duration-500 group-hover:translate-x-1"
+                      style={{
+                        fontSize: "10px",
+                        letterSpacing: "0.22em",
+                        textTransform: "uppercase",
+                        fontWeight: 600,
+                        color: "rgba(250,247,244,0.75)",
+                      }}
+                    >
+                      Shop Now
+                      <ArrowUpRight
+                        style={{
+                          width: 12,
+                          height: 12,
+                          opacity: 0.7,
+                        }}
+                      />
+                    </div>
+                    <h3
+                      className="font-display"
+                      style={{
+                        fontWeight: 500,
+                        fontSize: "clamp(1.1rem, 1.6vw, 1.35rem)",
+                        color: "#FAF7F4",
+                        letterSpacing: "-0.01em",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {c.name}
+                    </h3>
                   </div>
-                  <div className="font-display text-xl md:text-2xl text-background leading-tight">{c.name}</div>
                 </div>
               </Link>
             </motion.div>
