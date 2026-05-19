@@ -1,31 +1,23 @@
 import Hero from "@/components/site/Hero";
-import TrustBar from "@/components/site/TrustBar";
+import StatsStrip from "@/components/site/StatsStrip";
 import Categories from "@/components/site/Categories";
-import Showcase from "@/components/site/Showcase";
-import About from "@/components/site/About";
 import WhyUs from "@/components/site/WhyUs";
-import Testimonials from "@/components/site/Testimonials";
-import CustomOrderExperience from "@/components/site/CustomOrderExperience";
+import HowItWorks from "@/components/site/HowItWorks";
 import Gallery from "@/components/site/Gallery";
-import HomepageFAQ from "@/components/site/HomepageFAQ";
-import Contact from "@/components/site/Contact";
+import HomeCTA from "@/components/site/HomeCTA";
 
 const Index = () => (
   <>
     <h1 className="sr-only">
-      Mohika Art - Luxury Handmade Resin Gifts, Personalized Keepsakes &amp; Wedding Memory Preservation
+      Mohika Art – Luxury Handmade Resin Gifts, Personalized Keepsakes &amp; Wedding Memory Preservation
     </h1>
     <Hero />
-    <TrustBar />
+    <StatsStrip />
     <Categories />
-    <Showcase />
-    <About />
     <WhyUs />
-    <Testimonials />
-    <CustomOrderExperience />
+    <HowItWorks />
     <Gallery />
-    <HomepageFAQ />
-    <Contact />
+    <HomeCTA />
   </>
 );
 

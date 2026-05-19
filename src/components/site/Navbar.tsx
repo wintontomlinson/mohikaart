@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
 import { Monogram, Wordmark } from "@/components/site/Logo";
 
-/* ── nav links ── */
 const links = [
   { to: "/",        label: "Home" },
   { to: "/shop",    label: "Shop" },
@@ -41,7 +40,6 @@ const Navbar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  /* scroll tracking */
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
@@ -54,7 +52,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* close on route change */
   useEffect(() => {
     setOpen(false);
     setMoreOpen(false);
@@ -62,7 +59,6 @@ const Navbar = () => {
     setSearchOpen(false);
   }, [pathname]);
 
-  /* close dropdowns on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
@@ -72,7 +68,6 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  /* keyboard shortcut: / opens search */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "/" && !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
@@ -102,9 +97,8 @@ const Navbar = () => {
       initial={{ y: -120, opacity: 0 }}
       animate={{ y: hide ? -120 : 0, opacity: 1 }}
       transition={{ duration: hide ? 0.3 : 0.7, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 inset-x-0 z-50"
+      className="fixed top-[36px] inset-x-0 z-50"
     >
-      {/* ── Main nav bar ── */}
       <div
         className="transition-all duration-500"
         style={{
@@ -116,9 +110,9 @@ const Navbar = () => {
             : "0 1px 0 hsl(34 30% 88%/0.3)",
         }}
       >
-        <nav className="max-w-[1360px] mx-auto px-5 md:px-10 flex items-center justify-between h-[60px] md:h-[68px]">
+        <nav className="max-w-[1280px] mx-auto px-8 flex items-center justify-between h-[64px]">
 
-          {/* ── LOGO ── */}
+          {/* LOGO */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group" aria-label="Mohika Art home">
             <span className="inline-flex items-center transition-transform duration-400 group-hover:scale-[1.04]">
               <Monogram size={36} tone="foreground" />
@@ -126,7 +120,7 @@ const Navbar = () => {
             <Wordmark className="hidden sm:block" />
           </Link>
 
-          {/* ── DESKTOP NAV ── */}
+          {/* DESKTOP NAV */}
           <ul className="hidden lg:flex items-center gap-0">
             {links.map((l) => {
               const isActive = l.to === "/" ? pathname === "/" : pathname.startsWith(l.to);
@@ -135,7 +129,7 @@ const Navbar = () => {
                   <NavLink
                     to={l.to}
                     end={l.to === "/"}
-                    className="group relative px-[14px] py-2.5 inline-flex flex-col items-center"
+                    className="nav-link-underline group relative px-[14px] py-2.5 inline-flex flex-col items-center"
                   >
                     <span
                       className="text-[11px] tracking-[0.09em] uppercase font-semibold transition-all duration-250"
@@ -145,25 +139,12 @@ const Navbar = () => {
                     >
                       {l.label}
                     </span>
-                    <motion.span
-                      className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"
-                      animate={{
-                        width: isActive ? "20px" : "0px",
-                        opacity: isActive ? 1 : 0,
-                      }}
-                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                      style={{ height: "2px", background: "hsl(34 58% 52%)" }}
-                    />
-                    <span
-                      className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full opacity-0 group-hover:opacity-40 transition-all duration-250"
-                      style={{ height: "2px", width: "12px", background: "hsl(34 58% 52%)" }}
-                    />
                   </NavLink>
                 </li>
               );
             })}
 
-            {/* ── More dropdown ── */}
+            {/* More dropdown */}
             <li className="relative" ref={moreRef}>
               <button
                 onClick={() => setMoreOpen((v) => !v)}
@@ -295,7 +276,7 @@ const Navbar = () => {
             </li>
           </ul>
 
-          {/* ── RIGHT ACTIONS ── */}
+          {/* RIGHT ACTIONS */}
           <div className="flex items-center gap-1 md:gap-1.5">
 
             {/* Search */}
@@ -423,7 +404,7 @@ const Navbar = () => {
         </nav>
       </div>
 
-      {/* ── MOBILE DRAWER ── */}
+      {/* MOBILE DRAWER */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -439,7 +420,7 @@ const Navbar = () => {
               boxShadow: "0 24px 56px -12px hsl(22 22% 22%/0.14)",
             }}
           >
-            <div className="max-w-[1360px] mx-auto px-4 py-2 pb-4">
+            <div className="max-w-[1280px] mx-auto px-8 py-2 pb-4">
               {/* Mobile search */}
               <form onSubmit={submitSearch} className="mb-3 mt-1">
                 <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-foreground/[0.04] border border-foreground/[0.08]">

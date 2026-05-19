@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, Search, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import PageHeader from "@/components/site/PageHeader";
 import { ProductCard, Product } from "@/components/site/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
+import catWedding from "@/assets/cat-wedding.jpg";
 
 type Cat = { id: string; name: string; slug: string };
 
@@ -18,8 +17,8 @@ const ShopPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [animKey, setAnimKey] = useState(0);
 
-  // Sync URL ?q= with local search (both directions)
   useEffect(() => {
     const q = searchParams.get("q") ?? "";
     if (q !== search) setSearch(q);
@@ -63,16 +62,59 @@ const ShopPage = () => {
     return list;
   }, [products, active, sort, search]);
 
+  const handleFilterChange = (slug: string) => {
+    setActive(slug);
+    setAnimKey((k) => k + 1);
+  };
+
   return (
     <>
-      <PageHeader
-        eyebrow="Shop"
-        title={<>The full <em className="not-italic text-gold-grad">collection</em>.</>}
-        subtitle="Handcrafted resin keepsakes, every piece poured, set and finished by hand."
-      />
+      {/* Hero Banner */}
+      <section
+        className="relative overflow-hidden"
+        style={{ background: "#FAF7F4" }}
+      >
+        <div className="max-w-[1280px] mx-auto px-8 py-20 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div>
+            <span
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                color: "#C9964A",
+                fontWeight: 500,
+              }}
+            >
+              Shop
+            </span>
+            <h1
+              className="font-display mt-3"
+              style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", fontWeight: 300, lineHeight: 1.05 }}
+            >
+              The full{" "}
+              <em className="not-italic" style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>
+                collection
+              </em>
+              .
+            </h1>
+            <p className="mt-4" style={{ fontSize: "15px", color: "hsl(25 10% 46%)", lineHeight: 1.7, maxWidth: "400px" }}>
+              Handcrafted resin keepsakes, every piece poured, set and finished by hand.
+            </p>
+          </div>
+          <div className="flex items-center justify-center">
+            <img
+              src={catWedding}
+              alt="Wedding keepsake resin art"
+              className="w-full max-w-[380px] rounded-2xl object-cover shadow-lg"
+              style={{ aspectRatio: "4/5" }}
+            />
+          </div>
+        </div>
+      </section>
 
-      <section className="py-12 md:py-16">
-        <div className="container">
+      {/* Products Section */}
+      <section className="py-20">
+        <div className="max-w-[1280px] mx-auto px-8">
 
           {/* Filters bar */}
           <div className="flex flex-col gap-4 mb-12">
@@ -84,7 +126,7 @@ const ShopPage = () => {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search products…"
-                className="w-full pl-11 pr-10 py-3 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 transition-shadow"
+                className="w-full pl-11 pr-10 py-3 rounded-full border border-[#e5e0d8] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#C9964A]/30 transition-shadow"
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -97,16 +139,36 @@ const ShopPage = () => {
               {/* Category pills */}
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setActive("all")}
-                  className={`px-5 py-2.5 rounded-full text-xs tracking-[0.08em] uppercase font-medium transition-all duration-300 ${active === "all" ? "bg-foreground text-background shadow-soft" : "glass hover:shadow-soft"}`}
+                  onClick={() => handleFilterChange("all")}
+                  className="px-5 py-2.5 rounded-full text-xs tracking-[0.08em] uppercase font-medium transition-all duration-300"
+                  style={active === "all"
+                    ? { background: "#3D2B1F", color: "#fff" }
+                    : { border: "1px solid #e5e0d8", background: "transparent", color: "#3D2B1F" }
+                  }
+                  onMouseEnter={(e) => {
+                    if (active !== "all") e.currentTarget.style.background = "#FAF7F4";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (active !== "all") e.currentTarget.style.background = "transparent";
+                  }}
                 >
                   All
                 </button>
                 {cats.map((c) => (
                   <button
                     key={c.id}
-                    onClick={() => setActive(c.slug)}
-                    className={`px-5 py-2.5 rounded-full text-xs tracking-[0.08em] uppercase font-medium transition-all duration-300 ${active === c.slug ? "bg-foreground text-background shadow-soft" : "glass hover:shadow-soft"}`}
+                    onClick={() => handleFilterChange(c.slug)}
+                    className="px-5 py-2.5 rounded-full text-xs tracking-[0.08em] uppercase font-medium transition-all duration-300"
+                    style={active === c.slug
+                      ? { background: "#3D2B1F", color: "#fff" }
+                      : { border: "1px solid #e5e0d8", background: "transparent", color: "#3D2B1F" }
+                    }
+                    onMouseEnter={(e) => {
+                      if (active !== c.slug) e.currentTarget.style.background = "#FAF7F4";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (active !== c.slug) e.currentTarget.style.background = "transparent";
+                    }}
                   >
                     {c.name}
                   </button>
@@ -122,7 +184,7 @@ const ShopPage = () => {
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as typeof sort)}
-                  className="px-4 py-2.5 rounded-full border border-border bg-background text-xs tracking-[0.06em] focus:outline-none focus:ring-2 focus:ring-gold/30 cursor-pointer"
+                  className="px-4 py-2.5 rounded-full border border-[#e5e0d8] bg-white text-xs tracking-[0.06em] focus:outline-none focus:ring-2 focus:ring-[#C9964A]/30 cursor-pointer"
                 >
                   <option value="featured">Featured</option>
                   <option value="price-asc">Price: Low to High</option>
@@ -133,65 +195,41 @@ const ShopPage = () => {
           </div>
 
           {/* Products grid */}
-          <AnimatePresence mode="wait">
-            {error ? (
-              <motion.div
-                key="error"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center py-24"
+          {error ? (
+            <div className="text-center py-24">
+              <p className="font-serif text-xl text-muted-foreground mb-2">Couldn't load products</p>
+              <p className="text-sm text-muted-foreground/70 mb-6">Please check your connection and try again.</p>
+              <button
+                onClick={() => setRetryCount(c => c + 1)}
+                className="px-6 py-3 rounded-full text-xs tracking-[0.1em] uppercase"
+                style={{ background: "#3D2B1F", color: "#FAF7F4" }}
               >
-                <p className="font-serif text-xl text-muted-foreground mb-2">Couldn't load products</p>
-                <p className="text-sm text-muted-foreground/70 mb-6">Please check your connection and try again.</p>
-                <button
-                  onClick={() => setRetryCount(c => c + 1)}
-                  className="px-6 py-3 rounded-full bg-foreground text-background text-xs tracking-[0.1em] uppercase"
-                >
-                  Retry
-                </button>
-              </motion.div>
-            ) : loading ? (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
+                Retry
+              </button>
+            </div>
+          ) : loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-xl bg-gray-100 animate-pulse" style={{ aspectRatio: "1/1" }} />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-24">
+              <p className="font-serif text-xl text-muted-foreground mb-2">No products found</p>
+              <p className="text-sm text-muted-foreground/70">Try a different category or search term</p>
+              <button
+                onClick={() => { setActive("all"); setSearch(""); }}
+                className="mt-6 px-6 py-3 rounded-full text-xs tracking-[0.1em] uppercase"
+                style={{ background: "#3D2B1F", color: "#FAF7F4" }}
               >
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="rounded-3xl bg-muted/40 aspect-[4/5] animate-pulse" />
-                ))}
-              </motion.div>
-            ) : filtered.length === 0 ? (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center py-24"
-              >
-                <div className="w-16 h-16 rounded-full bg-blush/30 flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="font-serif text-xl text-muted-foreground mb-2">No products found</p>
-                <p className="text-sm text-muted-foreground/70">Try a different category or search term</p>
-                <button
-                  onClick={() => { setActive("all"); setSearch(""); }}
-                  className="mt-6 px-6 py-3 rounded-full bg-foreground text-background text-xs tracking-[0.1em] uppercase"
-                >
-                  Clear Filters
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="grid"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
-              >
-                {filtered.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}
-              </motion.div>
-            )}
-          </AnimatePresence>
+                Clear Filters
+              </button>
+            </div>
+          ) : (
+            <div key={animKey} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}
+            </div>
+          )}
         </div>
       </section>
     </>

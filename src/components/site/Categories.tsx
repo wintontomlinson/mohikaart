@@ -1,24 +1,17 @@
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import catWedding from "@/assets/cat-wedding.jpg";
 import catTray from "@/assets/cat-tray.jpg";
-import catCouple from "@/assets/cat-couple.jpg";
 import catFrame from "@/assets/cat-frame.jpg";
 import catKeychain from "@/assets/cat-keychain.jpg";
+import catCouple from "@/assets/cat-couple.jpg";
 import catHamper from "@/assets/cat-hamper.jpg";
 
 type Cat = { id: string; name: string; slug: string; image_url: string | null };
 
-/**
- * Used when the live `categories` table returns 0 rows (fresh installs,
- * pre-seed previews) so the homepage still feels complete. Slugs and
- * display names are kept in lockstep with SEED_EXAMPLE_DATA.sql so
- * deep-links land on a real category page the moment the seed runs.
- */
 const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-wedding",   name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
   { id: "fb-frames",    name: "Photo Frames",      slug: "photo-frames",      image_url: catFrame },
@@ -30,6 +23,7 @@ const FALLBACK_CATEGORIES: Cat[] = [
 
 const Categories = ({ heading = true }: { heading?: boolean }) => {
   const [cats, setCats] = useState<Cat[]>([]);
+  const ref = useScrollReveal<HTMLDivElement>();
 
   useEffect(() => {
     supabase
@@ -39,76 +33,78 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
       .then(({ data }) => setCats((data ?? []) as Cat[]));
   }, []);
 
-  const display = cats.length > 0 ? cats : FALLBACK_CATEGORIES;
+  const display = cats.length >= 6 ? cats.slice(0, 6) : FALLBACK_CATEGORIES;
 
   return (
-    <section id="categories" className={`relative ${heading ? "py-28 md:py-40" : "py-14 md:py-20"} bg-blush/20`}>
-      <div className="container">
+    <section className="py-20" style={{ background: "#FAF7F4" }}>
+      <div className="max-w-[1280px] mx-auto px-8">
         {heading && (
-          <div className="max-w-2xl mx-auto text-center mb-20">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              style={{ fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "hsl(34 58% 52%)", marginBottom: "1.25rem", fontWeight: 500 }}
+          <div className="text-center mb-12">
+            <span
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                color: "#C9964A",
+                fontWeight: 500,
+              }}
             >
               Explore
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="font-display leading-[1.04] tracking-[-0.03em]"
-              style={{ fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3.6rem)" }}
+            </span>
+            <h2
+              className="font-display mt-3"
+              style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 300 }}
             >
               Crafted Categories
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="mt-5"
-              style={{ fontSize: "clamp(0.92rem, 1.3vw, 1.02rem)", color: "hsl(25 10% 46%)", fontWeight: 380, lineHeight: 1.72 }}
-            >
-              From keychains to wedding heirlooms, find the perfect handmade keepsake for every moment.
-            </motion.p>
+            </h2>
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-          {display.map((c, i) => (
-            <motion.div
+        <div
+          ref={ref}
+          className="scroll-reveal grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
+          {display.map((c) => (
+            <Link
               key={c.id}
-              initial={{ opacity: 0, y: 40, scale: 0.93 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -8 }}
-              className="group relative rounded-3xl overflow-hidden shadow-card bg-card-grad card-3d"
+              to={`/category/${c.slug}`}
+              className="group relative overflow-hidden"
+              style={{ height: "220px", borderRadius: "12px" }}
             >
-              <Link to={`/category/${c.slug}`} className="block">
-                <div className="relative overflow-hidden aspect-[3/4]">
-                  <img
-                    src={resolveImage(c.image_url)}
-                    alt={c.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                    style={{ transitionDuration: "1400ms" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/65 via-foreground/10 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gold/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="absolute inset-0 rounded-3xl border-2 border-gold/0 group-hover:border-gold/25 transition-all duration-500 pointer-events-none" />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 p-5">
-                  <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.25em] text-background/60 mb-1.5">
-                    Shop now
-                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                  </div>
-                  <div className="font-display text-xl md:text-2xl text-background leading-tight">{c.name}</div>
-                </div>
-              </Link>
-            </motion.div>
+              <img
+                src={resolveImage(c.image_url)}
+                alt={c.name}
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-[250ms] ease-out group-hover:scale-[1.03]"
+              />
+              {/* Dark gradient overlay */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 40%, transparent 60%)",
+                }}
+              />
+              {/* Title */}
+              <div className="absolute bottom-0 left-0 p-4">
+                <h3 className="text-white font-bold" style={{ fontSize: "18px" }}>
+                  {c.name}
+                </h3>
+              </div>
+              {/* SHOP NOW pill on hover */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-[250ms]">
+                <span
+                  className="inline-flex items-center px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-semibold"
+                  style={{ background: "#FAF7F4", color: "#3D2B1F" }}
+                >
+                  Shop Now
+                </span>
+              </div>
+              {/* Hover shadow & lift */}
+              <div
+                className="absolute inset-0 transition-all duration-[250ms] ease-out group-hover:-translate-y-1 group-hover:shadow-lg rounded-[12px]"
+                style={{ pointerEvents: "none" }}
+              />
+            </Link>
           ))}
         </div>
       </div>
