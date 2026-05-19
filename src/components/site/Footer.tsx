@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Instagram, Mail, MessageCircle, Heart, ArrowRight } from "lucide-react";
+import { Instagram, Mail, MessageCircle, ArrowRight, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Monogram, Wordmark } from "@/components/site/Logo";
 import { useStoreSettings, isPlaceholderPhone } from "@/lib/settings";
@@ -18,83 +19,263 @@ const Footer = () => {
       return;
     }
     if (isPlaceholderPhone(phone)) {
-      toast.error("We will be in touch soon - please contact us via Instagram for now.");
+      toast.error("We will be in touch soon. Please contact us via Instagram for now.");
       return;
     }
     const digits = (phone || "").replace(/\D/g, "");
-    const message = `Hi Mohika! I'd like to join your inner circle - my email is ${trimmed}.`;
+    const message = `Hi Mohika! I'd like to join your inner circle. My email is ${trimmed}.`;
     const href = `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
     window.open(href, "_blank", "noopener,noreferrer");
-    toast.success("Opening WhatsApp - drop your email there too if it didn't carry over.");
+    toast.success("Opening WhatsApp. Drop your email there too if it didn't carry over.");
     setNewsletterEmail("");
   };
 
+  const phoneDigits = (phone || "").replace(/\D/g, "");
+
   return (
-    <footer className="bg-foreground text-background">
-      <div className="container py-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-start">
+    <footer
+      className="relative overflow-hidden"
+      style={{ background: "#3D2B1F", color: "#FAF7F4" }}
+    >
+      {/* Subtle gold gradient line at top */}
+      <div
+        aria-hidden
+        style={{
+          height: "1px",
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(201,150,74,0.5) 50%, transparent 100%)",
+        }}
+      />
 
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2.5 mb-3">
-              <Monogram size={32} tone="background" />
+      {/* Main footer content */}
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-20 pb-8">
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-10">
+          {/* Brand column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-4"
+          >
+            <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
+              <Monogram size={40} tone="background" />
               <Wordmark variant="dark" />
-            </div>
-            <p className="text-[12px] text-background/45 leading-relaxed max-w-[220px]">
-              Handcrafted resin keepsakes that preserve your precious moments forever.
+            </Link>
+            <p
+              style={{
+                fontSize: "14px",
+                lineHeight: 1.75,
+                color: "rgba(250,247,244,0.65)",
+                maxWidth: "320px",
+              }}
+            >
+              Handcrafted resin keepsakes that preserve your most cherished moments
+              forever. Made one piece at a time, by hand, in India.
             </p>
-          </div>
 
-          {/* Quick Links */}
-          <div>
-            <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Explore</p>
-            <ul className="space-y-2">
+            {/* Social icons */}
+            <div className="mt-7 flex items-center gap-3">
               {[
-                { to: "/shop", label: "Shop" },
+                {
+                  icon: MessageCircle,
+                  href: `https://wa.me/${phoneDigits}`,
+                  label: "WhatsApp",
+                  external: true,
+                },
+                {
+                  icon: Instagram,
+                  href: `https://instagram.com/${(instagram || "mohikaart").replace(/^@/, "")}`,
+                  label: "Instagram",
+                  external: true,
+                },
+                {
+                  icon: Mail,
+                  href: `mailto:${email}`,
+                  label: "Email",
+                  external: false,
+                },
+              ].map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target={s.external ? "_blank" : undefined}
+                  rel={s.external ? "noopener noreferrer" : undefined}
+                  aria-label={s.label}
+                  className="flex items-center justify-center transition-all duration-300"
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "9999px",
+                    border: "1px solid rgba(250,247,244,0.15)",
+                    color: "rgba(250,247,244,0.7)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#C9964A";
+                    e.currentTarget.style.borderColor = "#C9964A";
+                    e.currentTarget.style.color = "#3D2B1F";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.borderColor = "rgba(250,247,244,0.15)";
+                    e.currentTarget.style.color = "rgba(250,247,244,0.7)";
+                  }}
+                >
+                  <s.icon strokeWidth={1.6} style={{ width: 16, height: 16 }} />
+                </a>
+              ))}
+            </div>
+          </motion.div>
+
+
+
+          {/* Explore links */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-2"
+          >
+            <h4
+              className="font-semibold uppercase mb-5"
+              style={{
+                fontSize: "11px",
+                letterSpacing: "0.25em",
+                color: "#C9964A",
+              }}
+            >
+              Shop
+            </h4>
+            <ul className="space-y-3">
+              {[
+                { to: "/shop", label: "All Products" },
                 { to: "/categories", label: "Categories" },
-                { to: "/about", label: "About" },
-                { to: "/contact", label: "Contact" },
+                { to: "/wedding", label: "Wedding" },
+                { to: "/corporate", label: "Corporate" },
+                { to: "/gallery", label: "Gallery" },
               ].map((l) => (
                 <li key={l.to}>
-                  <Link to={l.to} className="text-[12px] text-background/45 hover:text-background transition-colors">
+                  <Link
+                    to={l.to}
+                    className="transition-colors"
+                    style={{
+                      fontSize: "14px",
+                      color: "rgba(250,247,244,0.65)",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "#C9964A")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "rgba(250,247,244,0.65)")
+                    }
+                  >
                     {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
-          {/* Help */}
-          <div>
-            <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Help</p>
-            <ul className="space-y-2">
+          {/* Help links */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-2"
+          >
+            <h4
+              className="font-semibold uppercase mb-5"
+              style={{
+                fontSize: "11px",
+                letterSpacing: "0.25em",
+                color: "#C9964A",
+              }}
+            >
+              Help
+            </h4>
+            <ul className="space-y-3">
               {[
+                { to: "/about", label: "About" },
+                { to: "/contact", label: "Contact" },
                 { to: "/shipping", label: "Shipping" },
                 { to: "/care-guide", label: "Care Guide" },
                 { to: "/faq", label: "FAQ" },
-                { to: "/wedding", label: "Wedding" },
               ].map((l) => (
                 <li key={l.to}>
-                  <Link to={l.to} className="text-[12px] text-background/45 hover:text-background transition-colors">
+                  <Link
+                    to={l.to}
+                    className="transition-colors"
+                    style={{
+                      fontSize: "14px",
+                      color: "rgba(250,247,244,0.65)",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "#C9964A")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "rgba(250,247,244,0.65)")
+                    }
+                  >
                     {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
-          {/* Newsletter (sits to the LEFT of Contact on lg+).
-              Real WhatsApp opt-in: tapping the arrow opens wa.me with a
-              prefilled message containing the typed email so Mohika can
-              follow up manually. The submit short-circuits with a soft
-              Instagram fallback when the store phone is still the
-              placeholder so unconfigured deployments never open chats to
-              `919999999999`. */}
-          <div className="col-span-2 md:col-span-2 lg:col-span-1">
-            <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Newsletter</p>
-            <p className="font-display text-base text-background/85 leading-snug mb-1.5">Join the inner circle</p>
-            <p className="text-[12px] text-background/45 leading-relaxed mb-3 max-w-[260px]">
-              Drop your email - we will send drop alerts and the occasional welcome surprise on WhatsApp.
+
+
+          {/* Newsletter */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-4"
+          >
+            <h4
+              className="font-semibold uppercase mb-5"
+              style={{
+                fontSize: "11px",
+                letterSpacing: "0.25em",
+                color: "#C9964A",
+              }}
+            >
+              Inner Circle
+            </h4>
+            <p
+              className="font-display mb-3"
+              style={{
+                fontSize: "20px",
+                fontWeight: 400,
+                lineHeight: 1.25,
+                letterSpacing: "-0.01em",
+                color: "#FAF7F4",
+              }}
+            >
+              Drop alerts, behind the scenes,{" "}
+              <em
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontStyle: "italic",
+                  color: "#C9964A",
+                }}
+              >
+                a quiet welcome.
+              </em>
+            </p>
+            <p
+              className="mb-5"
+              style={{
+                fontSize: "13px",
+                lineHeight: 1.7,
+                color: "rgba(250,247,244,0.55)",
+              }}
+            >
+              Join our list to be the first to know about limited drops and seasonal
+              collections.
             </p>
             <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2">
               <input
@@ -102,54 +283,148 @@ const Footer = () => {
                 required
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="you@email.com"
                 aria-label="Email address"
-                className="flex-1 min-w-0 px-3 py-2 rounded-full bg-background/[0.06] border border-background/[0.12] text-[12px] text-background placeholder:text-background/30 focus:outline-none focus:border-gold/60 transition-colors"
+                className="flex-1 min-w-0 transition-colors"
+                style={{
+                  height: "44px",
+                  paddingLeft: "18px",
+                  paddingRight: "18px",
+                  borderRadius: "9999px",
+                  background: "rgba(250,247,244,0.06)",
+                  border: "1px solid rgba(250,247,244,0.12)",
+                  fontSize: "14px",
+                  color: "#FAF7F4",
+                  outline: "none",
+                }}
+                onFocus={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(201,150,74,0.6)")
+                }
+                onBlur={(e) =>
+                  (e.currentTarget.style.borderColor = "rgba(250,247,244,0.12)")
+                }
               />
               <button
                 type="submit"
-                aria-label="Continue on WhatsApp"
-                className="shrink-0 w-9 h-9 rounded-full bg-gold/80 hover:bg-gold text-foreground flex items-center justify-center transition-colors"
+                aria-label="Subscribe"
+                className="shrink-0 flex items-center justify-center transition-all duration-300"
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "9999px",
+                  background: "#C9964A",
+                  color: "#3D2B1F",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#FAF7F4";
+                  e.currentTarget.style.transform = "translateX(2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#C9964A";
+                  e.currentTarget.style.transform = "translateX(0)";
+                }}
               >
-                <ArrowRight className="w-4 h-4" strokeWidth={1.8} />
+                <ArrowRight strokeWidth={2} style={{ width: 16, height: 16 }} />
               </button>
             </form>
-          </div>
 
-          {/* Contact */}
-          <div>
-            <p className="text-[9px] uppercase tracking-[0.25em] text-gold/70 mb-3 font-semibold">Contact</p>
-            <ul className="space-y-2.5">
-              <li>
-                <a href={`https://wa.me/${encodeURIComponent((phone || "").replace(/\D/g, ""))}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[12px] text-background/45 hover:text-background transition-colors">
-                  <MessageCircle className="w-3.5 h-3.5 text-gold/60" />
-                  {phone_display || "+91 98765 43210"}
-                </a>
-              </li>
-              <li>
-                <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[12px] text-background/45 hover:text-background transition-colors">
-                  <Instagram className="w-3.5 h-3.5 text-gold/60" />
-                  @{instagram || "mohikaart"}
-                </a>
-              </li>
-              <li>
-                <a href={`mailto:${email}`} className="flex items-center gap-2 text-[12px] text-background/45 hover:text-background transition-colors">
-                  <Mail className="w-3.5 h-3.5 text-gold/60" />
-                  {email || "hello@mohikaart.com"}
-                </a>
-              </li>
-            </ul>
-          </div>
+            {/* Contact info */}
+            <div className="mt-7 space-y-2.5">
+              <a
+                href={`https://wa.me/${phoneDigits}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 transition-colors"
+                style={{
+                  fontSize: "13px",
+                  color: "rgba(250,247,244,0.6)",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "rgba(250,247,244,0.6)")
+                }
+              >
+                <MessageCircle strokeWidth={1.6} style={{ width: 14, height: 14, color: "#C9964A" }} />
+                {phone_display || "+91 98765 43210"}
+              </a>
+              <div
+                className="flex items-center gap-2.5"
+                style={{
+                  fontSize: "13px",
+                  color: "rgba(250,247,244,0.6)",
+                }}
+              >
+                <MapPin strokeWidth={1.6} style={{ width: 14, height: 14, color: "#C9964A" }} />
+                Made in India · Ships nationwide
+              </div>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Bottom */}
-        <div className="mt-8 pt-5 border-t border-background/[0.08] flex flex-col sm:flex-row justify-between items-center gap-2 text-[10px] text-background/25">
-          <div className="flex items-center gap-1">
-            © {new Date().getFullYear()} Mohika Art. Made with
-            <Heart className="w-2.5 h-2.5 text-gold/40 fill-gold/25" />
-            in India.
+        {/* Divider */}
+        <div
+          className="mt-16 mb-6"
+          style={{
+            height: "1px",
+            background: "rgba(250,247,244,0.08)",
+          }}
+        />
+
+        {/* Bottom row */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div
+            style={{
+              fontSize: "12px",
+              color: "rgba(250,247,244,0.4)",
+              letterSpacing: "0.02em",
+            }}
+          >
+            © {new Date().getFullYear()} Mohika Art. All rights reserved.
           </div>
-          <div>Ships Pan India</div>
+          <div className="flex items-center gap-6">
+            <Link
+              to="/shipping"
+              className="transition-colors"
+              style={{
+                fontSize: "12px",
+                color: "rgba(250,247,244,0.4)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "rgba(250,247,244,0.4)")
+              }
+            >
+              Shipping
+            </Link>
+            <Link
+              to="/faq"
+              className="transition-colors"
+              style={{
+                fontSize: "12px",
+                color: "rgba(250,247,244,0.4)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "rgba(250,247,244,0.4)")
+              }
+            >
+              FAQ
+            </Link>
+            <Link
+              to="/care-guide"
+              className="transition-colors"
+              style={{
+                fontSize: "12px",
+                color: "rgba(250,247,244,0.4)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "rgba(250,247,244,0.4)")
+              }
+            >
+              Care Guide
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

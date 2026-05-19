@@ -5,7 +5,6 @@ import Showcase from "@/components/site/Showcase";
 import WhyUs from "@/components/site/WhyUs";
 import CustomOrderExperience from "@/components/site/CustomOrderExperience";
 import Testimonials from "@/components/site/Testimonials";
-import HomepageFAQ from "@/components/site/HomepageFAQ";
 
 const Index = () => (
   <>
@@ -19,7 +18,6 @@ const Index = () => (
     <WhyUs />
     <CustomOrderExperience />
     <Testimonials />
-    <HomepageFAQ />
   </>
 );
 
