@@ -165,7 +165,7 @@ const AdminTestimonials = () => {
 
             <div className="flex items-center justify-between pt-3 border-t border-border">
               <span className="text-[10px] uppercase tracking-widest text-amber-700 italic">
-                {t.product || "—"}
+                {t.product || ":"}
               </span>
               <label className="flex items-center cursor-pointer">
                 <input

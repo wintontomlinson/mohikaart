@@ -204,7 +204,7 @@ const CareGuidePage = () => (
             fontWeight: 600,
           }}
         >
-          — A note from Mohika
+          A note from Mohika
         </motion.div>
       </div>
     </section>

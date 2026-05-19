@@ -175,7 +175,7 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  // Always start admin pages at the top — prevents the visual "white gap"
+  // Always start admin pages at the top, prevents the visual "white gap"
   // that appears when navigating into /admin from a scrolled storefront page.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
@@ -317,7 +317,7 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
       className="bg-muted/30 flex"
       style={{
         minHeight: "100dvh",
-        // Explicitly anchor to the absolute viewport top — guards against
+        // Explicitly anchor to the absolute viewport top, guards against
         // rare layouts where the admin tree gets pushed down by stale
         // scroll position, browser autofill insets, or chrome quirks.
         marginTop: 0,

@@ -19,7 +19,7 @@ const values = [
   {
     icon: Heart,
     title: "Made by Hand",
-    body: "No machines. Every piece is poured, set, and finished personally — each one signed by us.",
+    body: "No machines. Every piece is poured, set, and finished personally, each one signed by us.",
   },
   {
     icon: Sparkles,
@@ -95,7 +95,7 @@ const AboutPage = () => (
                 heirlooms.
               </p>
               <p>
-                Today, every piece carries that same intention — meticulous detail, reverence
+                Today, every piece carries that same intention, meticulous detail, reverence
                 for your story, and a refusal to compromise on quality. We don&apos;t make mass
                 products. We make memories.
               </p>
@@ -288,10 +288,10 @@ const AboutPage = () => (
                 color: "hsl(25 10% 42%)",
               }}
             >
-              Every Mohika piece passes through the same pair of hands — those of our founder.
+              Every Mohika piece passes through the same pair of hands, those of our founder.
               From the first sketch to the final wax-sealed package, you&apos;re holding a
               story that&apos;s been told one careful step at a time. No assembly lines, no
-              shortcuts — only patience, intention, and the quiet thrill of watching memory
+              shortcuts, only patience, intention, and the quiet thrill of watching memory
               set in resin.
             </p>
             <p
@@ -302,7 +302,7 @@ const AboutPage = () => (
                 fontWeight: 500,
               }}
             >
-              — Mohika
+              Mohika
             </p>
           </motion.div>
         </div>
@@ -386,7 +386,7 @@ const AboutPage = () => (
             letterSpacing: "-0.01em",
           }}
         >
-          Crafted with patience —{" "}
+          Crafted with patience,{" "}
           <em style={{ color: "#C9964A" }}>
             each piece takes 7&ndash;14 days of careful work.
           </em>

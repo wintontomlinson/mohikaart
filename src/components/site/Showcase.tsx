@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useProducts, ProductCard } from "./ProductCard";
 
 /**
- * Best Sellers — premium ecommerce grid section.
+ * Best Sellers, premium ecommerce grid section.
  * Shows 6 featured products in a clean 3-col layout (Shopify luxury style).
  */
 const Showcase = () => {

@@ -1,8 +1,8 @@
 /**
- * Mohika Art — Premium Modern Brand Lockup
+ * Mohika Art. Premium Modern Brand Lockup
  *
- * Wordmark — Refined "Mohika" + italic gold "Art" using Playfair Display.
- * Monogram — Modern minimalist mark: a flowing "M" with a gold accent dot,
+ * Wordmark. Refined "Mohika" + italic gold "Art" using Playfair Display.
+ * Monogram. Modern minimalist mark: a flowing "M" with a gold accent dot,
  *            framed in a soft circular border. Premium, memorable, scalable.
  *
  * Both use design tokens for tone control on light/dark surfaces.
@@ -87,7 +87,7 @@ export const Monogram = ({
         </linearGradient>
       </defs>
 
-      {/* Outer ring — subtle premium frame */}
+      {/* Outer ring, subtle premium frame */}
       <circle
         cx="32"
         cy="32"
@@ -97,7 +97,7 @@ export const Monogram = ({
         strokeWidth="1.4"
       />
 
-      {/* Modern italic M — clean geometric shape */}
+      {/* Modern italic M, clean geometric shape */}
       <path
         d="M 18 44 L 18 22 L 26 22 L 32 36 L 38 22 L 46 22 L 46 44"
         fill="none"

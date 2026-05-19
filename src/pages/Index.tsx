@@ -7,7 +7,7 @@ import Testimonials from "@/components/site/Testimonials";
 import HomepageFAQ from "@/components/site/HomepageFAQ";
 
 /**
- * Homepage — clean, conversion-focused luxury ecommerce flow.
+ * Homepage, clean, conversion-focused luxury ecommerce flow.
  *
  * Section order (matches user spec):
  *   1. Hero
@@ -22,7 +22,7 @@ import HomepageFAQ from "@/components/site/HomepageFAQ";
 const Index = () => (
   <>
     <h1 className="sr-only">
-      Mohika Art — Luxury Handmade Resin Gifts, Personalised Keepsakes &amp;
+      Mohika Art. Luxury Handmade Resin Gifts, Personalised Keepsakes &amp;
       Wedding Memory Preservation
     </h1>
     <Hero />

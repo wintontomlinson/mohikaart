@@ -23,7 +23,7 @@ const FALLBACK_CATEGORIES: Cat[] = [
 ];
 
 /**
- * Categories — clean luxury ecommerce grid (Shopify-style).
+ * Categories, clean luxury ecommerce grid (Shopify-style).
  * 3-up on desktop, 2-up tablet, 1-up mobile. Balanced spacing.
  */
 const Categories = ({ heading = true }: { heading?: boolean }) => {

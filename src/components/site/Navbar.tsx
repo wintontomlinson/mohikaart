@@ -375,7 +375,7 @@ const Navbar = () => {
 
             <div className="hidden md:block w-px h-4 rounded-full bg-foreground/10 mx-1" />
 
-            {/* Shop CTA — desktop */}
+            {/* Shop CTA, desktop */}
             <motion.div
               className="hidden md:block"
               whileHover={{ y: -1.5 }}
@@ -404,7 +404,7 @@ const Navbar = () => {
               </Link>
             </motion.div>
 
-            {/* Hamburger — mobile */}
+            {/* Hamburger, mobile */}
             <motion.button
               onClick={() => setOpen((v) => !v)}
               className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center text-foreground/55 hover:text-foreground transition-all duration-200"

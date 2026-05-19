@@ -47,7 +47,7 @@ const inBox = [
   {
     icon: Package,
     title: "Premium velvet box",
-    body: "Lined in soft champagne velvet — designed to be reused as a keepsake holder.",
+    body: "Lined in soft champagne velvet, designed to be reused as a keepsake holder.",
   },
   {
     icon: Award,
@@ -62,7 +62,7 @@ const inBox = [
   {
     icon: Ribbon,
     title: "Satin ribbon & seal",
-    body: "Hand-tied silk ribbon and wax seal — ready to gift the moment it arrives.",
+    body: "Hand-tied silk ribbon and wax seal, ready to gift the moment it arrives.",
   },
 ];
 
@@ -139,7 +139,7 @@ const ShippingPage = () => (
             maxWidth: "52ch",
           }}
         >
-          Every Mohika piece travels in a velvet box, wrapped in tissue and tied with satin —
+          Every Mohika piece travels in a velvet box, wrapped in tissue and tied with satin,
           ready to gift the moment it arrives.
         </motion.p>
       </div>
@@ -304,7 +304,7 @@ const ShippingPage = () => (
                 color: "hsl(25 10% 42%)",
               }}
             >
-              Our packaging is part of the gift — designed to be opened slowly, kept on a
+              Our packaging is part of the gift, designed to be opened slowly, kept on a
               shelf, and remembered.
             </p>
 
@@ -425,7 +425,7 @@ const ShippingPage = () => (
               }}
             >
               The moment your order ships, we send a tracking link via WhatsApp and email.
-              Mohika personally checks every shipment until it lands at your door — if
+              Mohika personally checks every shipment until it lands at your door, if
               anything looks off, we are already on it.
             </p>
             <Link
@@ -498,7 +498,7 @@ const ShippingPage = () => (
             maxWidth: "44ch",
           }}
         >
-          From metros to small towns — if there is a pincode, we can reach it. International
+          From metros to small towns, if there is a pincode, we can reach it. International
           shipping launching in 2025.
         </motion.p>
 

@@ -158,7 +158,7 @@ const GalleryPage = () => {
             className="mt-7 text-base md:text-lg leading-relaxed"
             style={{ color: "rgba(61,43,31,0.72)", maxWidth: 600 }}
           >
-            From delicate name keychains to preserved wedding bouquets — every
+            From delicate name keychains to preserved wedding bouquets, every
             piece tells a story. Step inside our studio.
           </motion.p>
 
@@ -312,7 +312,7 @@ const GalleryPage = () => {
               Nothing here yet.
             </h2>
             <p className="text-sm" style={{ color: "rgba(61,43,31,0.6)" }}>
-              Check back soon — we add fresh studio shots every week.
+              Check back soon, we add fresh studio shots every week.
             </p>
           </div>
         )}
@@ -361,7 +361,7 @@ const GalleryPage = () => {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Image — clicking it should NOT close */}
+            {/* Image, clicking it should NOT close */}
             <motion.img
               key={activeImage.src}
               initial={{ opacity: 0, scale: 0.9 }}

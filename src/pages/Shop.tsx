@@ -11,7 +11,7 @@ type Cat = { id: string; name: string; slug: string };
 // Cinematic easing curve used across the page
 const LUXE_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-// Subtle floating gold particles for the hero — 5 dots at fixed positions,
+// Subtle floating gold particles for the hero, 5 dots at fixed positions,
 // each gently drifts up/down on its own loop. Pure decoration.
 const GoldParticles = () => {
   const particles = [
@@ -112,7 +112,7 @@ const ShopPage = () => {
         <GoldParticles />
 
         <div className="relative max-w-[1280px] mx-auto px-6 lg:px-8 grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left — copy */}
+          {/* Left, copy */}
           <div className="relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -183,7 +183,7 @@ const ShopPage = () => {
             />
           </div>
 
-          {/* Right — hero image */}
+          {/* Right, hero image */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

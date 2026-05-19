@@ -147,7 +147,7 @@ const ContactPage = () => {
       info: phone_display,
       href: `https://wa.me/${phoneDigits}`,
       external: true,
-      hint: "Fastest replies — usually within minutes",
+      hint: "Fastest replies, usually within minutes",
     },
     {
       icon: Phone,
@@ -377,7 +377,7 @@ const ContactPage = () => {
                         lineHeight: 1.6,
                       }}
                     >
-                      Tell us a little about your idea — names, dates, colors, the moment
+                      Tell us a little about your idea, names, dates, colors, the moment
                       you&apos;re preserving.
                     </p>
 

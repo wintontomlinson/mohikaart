@@ -20,7 +20,7 @@ const SECTION_TITLES: Record<string, string> = {
   "Care & Returns": "Care, Returns & Policies",
 };
 
-// Group FAQs into 4 broader sections — merging duplicates by display title.
+// Group FAQs into 4 broader sections, merging duplicates by display title.
 const buildSections = () => {
   const map = new Map<string, { q: string; a: string }[]>();
   for (const g of FAQ_GROUPS) {
@@ -98,7 +98,7 @@ const FAQPage = () => {
             }}
           >
             Everything you might want to know about ordering, customizing, caring for and
-            returning your Mohika keepsake — in one place.
+            returning your Mohika keepsake, in one place.
           </motion.p>
         </div>
       </section>

@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useProducts, ProductCard } from "./ProductCard";
 
 /**
- * Featured Products — editorial 4-up showcase.
+ * Featured Products, editorial 4-up showcase.
  * Sits above Best Sellers as a curated "this week's picks" feel.
  * Uses the same product schema; pulls top 4 featured items.
  */

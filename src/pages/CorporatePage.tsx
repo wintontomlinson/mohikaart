@@ -13,7 +13,7 @@ const useCases = [
   {
     icon: Users,
     title: "Employee Gifts",
-    body: "Onboarding kits, milestones, festive hampers — branded keepsakes your team will keep at their desk.",
+    body: "Onboarding kits, milestones, festive hampers, branded keepsakes your team will keep at their desk.",
   },
   {
     icon: Handshake,
@@ -23,7 +23,7 @@ const useCases = [
   {
     icon: PartyPopper,
     title: "Event Souvenirs",
-    body: "Conferences, launches, weddings, retreats — meaningful favors guests carry home and remember.",
+    body: "Conferences, launches, weddings, retreats, meaningful favors guests carry home and remember.",
   },
 ];
 
@@ -121,7 +121,7 @@ const CorporatePage = () => (
             maxWidth: "56ch",
           }}
         >
-          Resin keepsakes for employee gifting, client appreciation, and event souvenirs —
+          Resin keepsakes for employee gifting, client appreciation, and event souvenirs,
           bespoke from 25 pieces upward. Subtle branding, refined packaging, on-time delivery.
         </motion.p>
 
@@ -477,7 +477,7 @@ const CorporatePage = () => (
             maxWidth: "44ch",
           }}
         >
-          Tell us what you&apos;re celebrating. We&apos;ll handle the rest — design,
+          Tell us what you&apos;re celebrating. We&apos;ll handle the rest, design,
           production, and delivery.
         </motion.p>
         <motion.div

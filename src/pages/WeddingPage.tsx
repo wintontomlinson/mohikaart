@@ -17,7 +17,7 @@ const tiers = [
     image: trayImg,
     title: "Bouquet Tray",
     price: "₹4,500",
-    blurb: "A wide resin tray cast around your bridal bouquet — meant for your console or coffee table.",
+    blurb: "A wide resin tray cast around your bridal bouquet, meant for your console or coffee table.",
     features: [
       "Full bouquet preservation",
       "Premium resin, gold leaf accents",
@@ -29,7 +29,7 @@ const tiers = [
     image: frameImg,
     title: "Floral Frame",
     price: "₹3,200",
-    blurb: "A wall-ready frame featuring pressed petals, your invite or vow excerpt — under museum-grade resin.",
+    blurb: "A wall-ready frame featuring pressed petals, your invite or vow excerpt, under museum-grade resin.",
     features: [
       "12×16in archival frame",
       "Pressed petals + invite card",
@@ -41,7 +41,7 @@ const tiers = [
     image: weddingImg,
     title: "Petal Coaster Set",
     price: "₹2,800",
-    blurb: "A set of four hand-poured coasters — each holding a single petal from your bouquet.",
+    blurb: "A set of four hand-poured coasters, each holding a single petal from your bouquet.",
     features: [
       "Set of 4 coasters",
       "One petal per coaster",
@@ -132,7 +132,7 @@ const WeddingPage = () => (
             maxWidth: "56ch",
           }}
         >
-          We preserve your wedding bouquet, dried flowers, and once-in-a-lifetime moments —
+          We preserve your wedding bouquet, dried flowers, and once-in-a-lifetime moments,
           into resin keepsakes that hold time still.
         </motion.p>
 
@@ -216,7 +216,7 @@ const WeddingPage = () => (
             maxWidth: "44ch",
           }}
         >
-          Three signature ways to hold your wedding day forever — choose the one that fits
+          Three signature ways to hold your wedding day forever, choose the one that fits
           your home.
         </p>
       </motion.div>
@@ -488,7 +488,7 @@ const WeddingPage = () => (
             fontWeight: 600,
           }}
         >
-          — Riya & Arjun, Mumbai
+          Riya & Arjun, Mumbai
         </div>
       </motion.div>
     </section>

@@ -57,7 +57,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
   const clear = useCallback(() => setItems([]), []);
 
-  // Cross-tab sync — listen for updates from other tabs
+  // Cross-tab sync, listen for updates from other tabs
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key !== KEY || e.newValue === null) return;
