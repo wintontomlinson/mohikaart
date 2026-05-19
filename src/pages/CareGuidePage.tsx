@@ -1,95 +1,211 @@
-import PageHeader from "@/components/site/PageHeader";
 import { motion } from "framer-motion";
 import { Sun, Droplets, Sparkles, ShieldAlert, ThumbsUp, Clock } from "lucide-react";
 
-const tips = [
-  { icon: Sun,        title: "Avoid Direct Sunlight",  desc: "Long exposure to direct sun may slowly yellow the resin. Display indoors or in shaded, well-lit spots." },
-  { icon: Droplets,   title: "Keep Dry",               desc: "Resin is water-resistant but not waterproof. Wipe with a soft, dry cloth. Never submerge in water." },
-  { icon: Sparkles,   title: "Clean with Care",        desc: "Use a microfiber cloth. For stubborn marks, a drop of mild soap on a damp cloth is enough." },
-  { icon: ShieldAlert,title: "Handle with Love",       desc: "Resin is durable but not unbreakable. Avoid drops and keep away from sharp impact or corners." },
-  { icon: ThumbsUp,   title: "Display Proudly",        desc: "Your piece is UV-coated and scratch-resistant. It's made to be admired, touched, and gifted." },
-  { icon: Clock,      title: "Long-Lasting Beauty",    desc: "With basic care, your Mohika Art piece will remain gallery-worthy for decades to come." },
-];
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+};
 
-const facts = [
+const cards = [
   {
-    title: "Tiny bubbles are natural.",
-    desc: "Each piece is poured by hand; small inclusions are part of the charm - not a defect.",
+    icon: Sun,
+    title: "Keep out of direct sunlight",
+    body: "Resin can yellow over time when exposed to direct UV. Display in indirect light.",
   },
   {
-    title: "Color may vary slightly.",
-    desc: "Real flowers, dried petals, and natural pigments shift gently between batches - making each piece truly one-of-a-kind.",
+    icon: Droplets,
+    title: "Avoid water exposure",
+    body: "Wipe with dry microfiber cloth. Never submerge or soak.",
   },
   {
-    title: "Cured & food-safe surface.",
-    desc: "Our resin is fully cured before shipping, safe to touch, but not recommended for hot drinks directly on the surface.",
+    icon: Sparkles,
+    title: "Polish gently",
+    body: "Use the included microfiber cloth. Avoid harsh chemicals.",
   },
   {
-    title: "Heat-sensitive.",
-    desc: "Avoid leaving your piece in hot cars or near heat sources for extended periods. Store in room temperature.",
+    icon: ShieldAlert,
+    title: "Heat sensitive",
+    body: "Keep away from radiators and direct heat above 60°C.",
+  },
+  {
+    icon: ThumbsUp,
+    title: "Handle with care",
+    body: "While durable, drops on hard surfaces may chip the corners.",
+  },
+  {
+    icon: Clock,
+    title: "Lifetime piece",
+    body: "With proper care, your keepsake will last a lifetime.",
   },
 ];
 
 const CareGuidePage = () => (
   <>
-    <PageHeader
-      eyebrow="Care Guide"
-      title={<>Keep your keepsake <em className="not-italic text-gold-grad">timeless.</em></>}
-      subtitle="A few gentle habits will keep your Mohika Art piece looking gallery-worthy for decades. Here's everything you need to know."
-    />
-
-    {/* Tips grid */}
-    <section>
-      <div className="container">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
-          {tips.map((t, i) => (
-            <motion.div
-              key={t.title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.07 }}
-              className="glass rounded-3xl p-8 shadow-soft hover:shadow-luxe transition-all duration-500 group"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
-                <t.icon className="w-5 h-5 text-gold" />
-              </div>
-              <h3 className="font-display text-xl mb-3">{t.title}</h3>
-              <p className="text-muted-foreground leading-relaxed text-sm">{t.desc}</p>
-            </motion.div>
-          ))}
-        </div>
+    {/* HERO */}
+    <section
+      className="relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(180deg, #FAF7F4 0%, rgba(250,247,244,0.6) 60%, transparent 100%)",
+      }}
+    >
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-28 pb-16 md:pt-36 md:pb-24 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="font-semibold uppercase mb-6"
+          style={{
+            fontSize: "11px",
+            color: "#C9964A",
+            letterSpacing: "0.25em",
+          }}
+        >
+          Care Guide
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="font-display mx-auto"
+          style={{
+            fontWeight: 400,
+            fontSize: "clamp(2.5rem, 5vw, 3.8rem)",
+            lineHeight: 1.05,
+            letterSpacing: "-0.02em",
+            color: "#3D2B1F",
+            maxWidth: "20ch",
+          }}
+        >
+          Care for your{" "}
+          <em
+            className="font-serif italic"
+            style={{ color: "#C9964A", fontWeight: 400 }}
+          >
+            keepsake.
+          </em>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="mt-6 mx-auto"
+          style={{
+            fontSize: "16px",
+            lineHeight: 1.75,
+            color: "hsl(25 10% 42%)",
+            maxWidth: "52ch",
+          }}
+        >
+          A few small habits will keep your Mohika piece gallery-worthy for decades. Here is
+          everything you need to know.
+        </motion.p>
       </div>
     </section>
 
-    {/* Fun facts */}
-    <section className="bg-blush/20">
-      <div className="container max-w-3xl">
-        <div className="eyebrow mb-5">Good to Know</div>
-        <h2
-          className="font-display leading-[1.04] mb-10"
-          style={{ fontWeight: 300, fontSize: "clamp(1.8rem, 3vw, 2.8rem)" }}
-        >
-          A few things about{" "}
-          <em className="not-italic text-gold-grad" style={{ fontStyle: "italic", fontFamily: "var(--font-serif)" }}>
-            handmade resin.
-          </em>
-        </h2>
-        <div className="space-y-5">
-          {facts.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, x: -16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
-              className="frost-card rounded-2xl p-6"
+    {/* CARE CARDS */}
+    <section className="max-w-[1280px] mx-auto px-6 lg:px-8 py-20">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {cards.map((c, i) => (
+          <motion.div
+            key={c.title}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{
+              duration: 0.7,
+              delay: i * 0.08,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            whileHover={{ y: -6 }}
+            className="p-8 transition-all duration-500"
+            style={{
+              background: "#ffffff",
+              border: "1px solid #e5e0d8",
+              borderRadius: "20px",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow =
+                "0 20px 50px -15px rgba(61,43,31,0.15)";
+              e.currentTarget.style.borderColor = "rgba(201,150,74,0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.borderColor = "#e5e0d8";
+            }}
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "14px",
+                background: "#FAF7F4",
+              }}
             >
-              <strong className="text-foreground font-semibold block mb-1">{f.title}</strong>
-              <p className="text-muted-foreground leading-relaxed text-sm">{f.desc}</p>
-            </motion.div>
-          ))}
-        </div>
+              <c.icon
+                strokeWidth={1.6}
+                style={{ width: 22, height: 22, color: "#C9964A" }}
+              />
+            </div>
+            <h3
+              className="mt-5"
+              style={{
+                fontSize: "16px",
+                fontWeight: 500,
+                color: "#3D2B1F",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {c.title}
+            </h3>
+            <p
+              className="mt-2"
+              style={{
+                fontSize: "13px",
+                lineHeight: 1.7,
+                color: "#6B7280",
+              }}
+            >
+              {c.body}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+
+    {/* CLOSING NOTE */}
+    <section style={{ background: "#FAF7F4" }}>
+      <div className="max-w-2xl mx-auto px-6 lg:px-8 py-20 text-center">
+        <motion.p
+          {...fadeUp}
+          className="font-display italic mx-auto"
+          style={{
+            fontWeight: 400,
+            fontSize: "clamp(1.4rem, 2.6vw, 1.8rem)",
+            lineHeight: 1.4,
+            letterSpacing: "-0.01em",
+            color: "#3D2B1F",
+            fontStyle: "italic",
+          }}
+        >
+          Treat it like a memory, not a product. It will outlive us both.
+        </motion.p>
+        <motion.div
+          {...fadeUp}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          className="mt-6 uppercase"
+          style={{
+            fontSize: "11px",
+            color: "#C9964A",
+            letterSpacing: "0.25em",
+            fontWeight: 600,
+          }}
+        >
+          — A note from Mohika
+        </motion.div>
       </div>
     </section>
   </>
