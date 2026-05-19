@@ -5,20 +5,20 @@ const HomeCTA = () => (
     <div className="max-w-[1280px] mx-auto px-8 text-center">
       <h2
         className="font-display"
-        style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 400, lineHeight: 1.15 }}
+        style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1, color: "#3D2B1F" }}
       >
-        Let's craft something unforgettable.
+        Ready to preserve your moment?
       </h2>
       <p
         className="mt-4 mx-auto"
         style={{
           maxWidth: "480px",
           fontSize: "15px",
-          color: "hsl(25 10% 46%)",
-          lineHeight: 1.7,
+          color: "hsl(25 10% 42%)",
+          lineHeight: 1.75,
         }}
       >
-        Share your story—a name, a date, a preserved bouquet—and we'll turn it into a one-of-a-kind resin keepsake, handmade just for you.
+        Every piece begins with a conversation. Share your idea — a name, a date, a pressed bouquet — and we'll craft something truly extraordinary, just for you.
       </p>
       <div className="mt-8">
         <Link
@@ -27,7 +27,7 @@ const HomeCTA = () => (
           style={{
             height: "48px",
             minWidth: "160px",
-            padding: "0 32px",
+            padding: "0 28px",
             background: "#3D2B1F",
             color: "#FAF7F4",
             fontSize: "13px",
@@ -35,7 +35,7 @@ const HomeCTA = () => (
             letterSpacing: "0.04em",
           }}
         >
-          Start Your Custom Order →
+          Begin Your Custom Piece &rarr;
         </Link>
       </div>
       <a
@@ -45,7 +45,7 @@ const HomeCTA = () => (
         className="inline-block mt-4"
         style={{ fontSize: "13px", color: "#C9964A", textDecoration: "underline" }}
       >
-        Or message us on WhatsApp
+        Prefer WhatsApp? Message us directly &rarr;
       </a>
     </div>
   </section>

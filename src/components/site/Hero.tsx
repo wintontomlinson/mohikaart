@@ -50,22 +50,21 @@ const Hero = () => {
         >
           <p
             className="eyebrow mb-4"
-            style={{ fontSize: "11px", letterSpacing: "0.25em" }}
+            style={{ fontSize: "11px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#C9964A", fontWeight: 600 }}
           >
-            {content.eyebrow || "Handcrafted Resin Art"}
+            {content.eyebrow || "Artisan Resin Keepsakes"}
           </p>
 
           <h1
             className="font-display"
             style={{
-              fontSize: "clamp(2.5rem, 5vw, 3.25rem)",
+              fontSize: "clamp(2.5rem, 5vw, 3.5rem)",
               fontWeight: 400,
               lineHeight: 1.1,
-              letterSpacing: "-0.02em",
               color: "#3D2B1F",
             }}
           >
-            Designed with detail.
+            Where moments become
             <br />
             <em
               style={{
@@ -75,7 +74,7 @@ const Hero = () => {
                 color: "#C9964A",
               }}
             >
-              Delivered with devotion.
+              timeless.
             </em>
           </h1>
 
@@ -85,10 +84,10 @@ const Hero = () => {
               fontSize: "15px",
               lineHeight: 1.75,
               color: "hsl(25 10% 42%)",
-              maxWidth: "420px",
+              maxWidth: "480px",
             }}
           >
-            {content.subheadline || "Each piece is poured, polished and packaged by hand—preserving your memories in crystal-clear resin that lasts a lifetime."}
+            {content.subheadline || "We hand-pour crystal-clear resin around your most cherished memories — names, pressed flowers, wedding dates — creating heirloom-quality keepsakes that last generations."}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -105,7 +104,7 @@ const Hero = () => {
                 letterSpacing: "0.04em",
               }}
             >
-              Shop Now
+              Explore Collection
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
@@ -122,7 +121,7 @@ const Hero = () => {
                 background: "transparent",
               }}
             >
-              View Gallery
+              View Our Work
             </Link>
           </div>
         </motion.div>

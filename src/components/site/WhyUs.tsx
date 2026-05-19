@@ -2,12 +2,12 @@ import { Hand, Sparkles, Gem, Package, Gift, Truck } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const items = [
-  { icon: Hand,     title: "Handmade Precision",  desc: "Every piece poured, set and polished by hand with quiet patience." },
-  { icon: Sparkles, title: "Fully Customized",    desc: "Names, dates, dried bouquets—designed entirely around your story." },
-  { icon: Gem,      title: "Premium Resin",       desc: "Crystal clear, non-yellowing, jeweller-grade epoxy that lasts a lifetime." },
-  { icon: Package,  title: "Secure Packaging",    desc: "Multi-layered luxury packaging—your gift arrives flawless." },
-  { icon: Gift,     title: "Gifting Perfect",     desc: "Includes elegant gift box, ribbon and a handwritten note." },
-  { icon: Truck,    title: "Pan India Delivery",  desc: "Shipped safely across India with real-time tracking. Free on all orders." },
+  { icon: Hand,     title: "Artisan Craftsmanship",  desc: "Each piece is meticulously poured, cured, and polished by hand over multiple days." },
+  { icon: Sparkles, title: "Bespoke Designs",        desc: "Your vision brought to life — every detail customised to your exact specifications." },
+  { icon: Gem,      title: "Museum-Grade Resin",     desc: "We use only crystal-clear, UV-resistant, non-yellowing epoxy that preserves forever." },
+  { icon: Package,  title: "Luxury Packaging",       desc: "Presented in velvet-lined boxes with ribbon, tissue, and a handwritten note." },
+  { icon: Gift,     title: "Gift-Ready Always",      desc: "Every order arrives beautifully wrapped — perfect for gifting without any extra effort." },
+  { icon: Truck,    title: "Nationwide Delivery",    desc: "Insured shipping across India with real-time tracking. Always free, always careful." },
 ];
 
 const WhyUs = () => {
@@ -17,16 +17,19 @@ const WhyUs = () => {
     <section className="py-20">
       <div className="max-w-[1280px] mx-auto px-8">
         <div className="mb-12">
-          <p className="eyebrow mb-3" style={{ fontSize: "11px", letterSpacing: "0.25em" }}>
-            Why Mohika Art
+          <p
+            className="eyebrow mb-3"
+            style={{ fontSize: "11px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#C9964A", fontWeight: 600 }}
+          >
+            The Mohika Difference
           </p>
           <h2
             className="font-display"
-            style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1 }}
+            style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1, color: "#3D2B1F" }}
           >
-            Designed with detail.{" "}
+            Crafted with intention.{" "}
             <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>
-              Delivered with devotion.
+              Delivered with care.
             </em>
           </h2>
         </div>
@@ -58,8 +61,8 @@ const WhyUs = () => {
                 {it.title}
               </h3>
               <p
-                className="mt-2 leading-relaxed"
-                style={{ fontSize: "13px", color: "rgb(107 114 128)" }}
+                className="mt-2"
+                style={{ fontSize: "13px", color: "rgb(107 114 128)", lineHeight: 1.6 }}
               >
                 {it.desc}
               </p>

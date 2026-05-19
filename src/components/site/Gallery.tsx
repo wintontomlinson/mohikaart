@@ -10,9 +10,13 @@ const Gallery = () => (
       <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <h2
           className="font-display"
-          style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1 }}
+          style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1, color: "#3D2B1F" }}
         >
-          From our studio to your heart.
+          A glimpse into our{" "}
+          <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>
+            studio
+          </em>
+          .
         </h2>
         <a
           href="https://instagram.com/mohikaart"
@@ -20,7 +24,7 @@ const Gallery = () => (
           rel="noopener noreferrer"
           style={{ fontSize: "13px", color: "#C9964A", fontWeight: 500 }}
         >
-          @MOHIKAART ↗
+          @MOHIKAART &rarr;
         </a>
       </div>
 

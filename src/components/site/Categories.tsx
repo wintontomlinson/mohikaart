@@ -40,15 +40,15 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
           <div className="mb-12">
             <p
               className="eyebrow mb-3"
-              style={{ fontSize: "11px", letterSpacing: "0.25em" }}
+              style={{ fontSize: "11px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#C9964A", fontWeight: 600 }}
             >
-              Explore
+              Collections
             </p>
             <h2
               className="font-display"
-              style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1 }}
+              style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1, color: "#3D2B1F" }}
             >
-              Crafted Categories
+              Curated for Every Occasion
             </h2>
           </div>
         )}

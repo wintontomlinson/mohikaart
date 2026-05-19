@@ -1,10 +1,10 @@
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const steps = [
-  { n: "01", title: "Share Your Idea", desc: "Tell us about the moment, name or memory you want to preserve." },
-  { n: "02", title: "Approve Design", desc: "We sketch, mock-up and confirm every detail before pouring." },
-  { n: "03", title: "Handmade Creation", desc: "Crafted patiently: flowers placed, resin poured, polished by hand." },
-  { n: "04", title: "Delivered with Love", desc: "Wrapped in luxury packaging and shipped safely to your door." },
+  { n: "01", title: "Share Your Vision", desc: "Tell us about the memory you'd like to preserve — a name, a date, dried flowers from a special day." },
+  { n: "02", title: "Design Approval", desc: "We create a detailed mockup for your review. Nothing is poured until every element is perfect." },
+  { n: "03", title: "Handcrafted Creation", desc: "Your piece is carefully assembled and poured in our studio, then cured and polished to perfection." },
+  { n: "04", title: "Delivered to You", desc: "Wrapped in our signature luxury packaging and shipped with care directly to your doorstep." },
 ];
 
 const HowItWorks = () => {
@@ -24,7 +24,7 @@ const HowItWorks = () => {
               marginBottom: "12px",
             }}
           >
-            The Process
+            Our Process
           </p>
           <h2
             className="font-display"
@@ -35,9 +35,9 @@ const HowItWorks = () => {
               color: "#ffffff",
             }}
           >
-            How ordering{" "}
+            From concept to{" "}
             <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>
-              works
+              keepsake
             </em>
             .
           </h2>
@@ -80,8 +80,8 @@ const HowItWorks = () => {
                 {s.title}
               </h3>
               <p
-                className="mt-2 leading-relaxed"
-                style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)" }}
+                className="mt-2"
+                style={{ fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: 1.6 }}
               >
                 {s.desc}
               </p>
