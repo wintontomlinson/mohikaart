@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import catWedding from "@/assets/cat-wedding.jpg";
@@ -20,6 +21,15 @@ const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-hampers",   name: "Gift Hampers",      slug: "gift-hampers",      image_url: catHamper },
 ];
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
+
 const Categories = ({ heading = true }: { heading?: boolean }) => {
   const [cats, setCats] = useState<Cat[]>([]);
 
@@ -35,12 +45,17 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
 
   return (
     <section id="categories" className="py-20">
-      <div className="max-w-[1280px] mx-auto px-8">
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         {heading && (
-          <div className="mb-12">
+          <motion.div
+            className="mb-14"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          >
             <p
-              className="eyebrow mb-3"
-              style={{ fontSize: "11px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#C9964A", fontWeight: 600 }}
+              style={{ fontSize: "11px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#C9964A", fontWeight: 600, marginBottom: "12px" }}
             >
               Collections
             </p>
@@ -48,55 +63,65 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
               className="font-display"
               style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1, color: "#3D2B1F" }}
             >
-              Curated for Every Occasion
+              Curated for Every{" "}
+              <em style={{ fontFamily: "var(--font-serif)", fontStyle: "italic", color: "#C9964A" }}>
+                Occasion
+              </em>
             </h2>
-          </div>
+          </motion.div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {display.map((c) => (
-            <Link
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {display.map((c, i) => (
+            <motion.div
               key={c.id}
-              to={`/category/${c.slug}`}
-              className="category-card group relative overflow-hidden rounded-[12px]"
-              style={{ height: "220px" }}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
             >
-              <img
-                src={resolveImage(c.image_url)}
-                alt={c.name}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[250ms] ease-out group-hover:scale-[1.03]"
-              />
-              {/* Dark gradient overlay */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 40%, transparent 60%)",
-                }}
-              />
-              {/* Title */}
-              <div className="absolute bottom-0 left-0 p-4">
-                <span className="text-white font-bold" style={{ fontSize: "18px" }}>
-                  {c.name}
-                </span>
-              </div>
-              {/* SHOP NOW pill on hover */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-[250ms] ease-out">
-                <span
-                  className="inline-block rounded-full px-4 py-1.5"
-                  style={{
-                    background: "#C9964A",
-                    color: "#ffffff",
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  SHOP NOW
-                </span>
-              </div>
-            </Link>
+              <Link
+                to={`/category/${c.slug}`}
+                className="group relative overflow-hidden rounded-[20px] block transition-all duration-500"
+                style={{ height: "280px", border: "1px solid transparent" }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(201,150,74,0.3)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "transparent"; }}
+              >
+                <img
+                  src={resolveImage(c.image_url)}
+                  alt={c.name}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[600ms] ease-out group-hover:scale-[1.08]"
+                />
+                {/* Dark gradient overlay */}
+                <div className="absolute inset-0"
+                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.20) 40%, transparent 60%)" }}
+                />
+                {/* Title */}
+                <div className="absolute bottom-0 left-0 p-6">
+                  <span className="font-display text-white" style={{ fontSize: "20px", fontWeight: 500 }}>
+                    {c.name}
+                  </span>
+                </div>
+                {/* SHOP NOW pill on hover */}
+                <div className="absolute bottom-6 right-6 translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-[400ms] ease-out">
+                  <span
+                    className="inline-block rounded-full px-5 py-2"
+                    style={{
+                      background: "#C9964A",
+                      color: "#ffffff",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    SHOP NOW
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>
