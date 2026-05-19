@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import catWedding from "@/assets/cat-wedding.jpg";
@@ -13,12 +11,6 @@ import catHamper from "@/assets/cat-hamper.jpg";
 
 type Cat = { id: string; name: string; slug: string; image_url: string | null };
 
-/**
- * Used when the live `categories` table returns 0 rows (fresh installs,
- * pre-seed previews) so the homepage still feels complete. Slugs and
- * display names are kept in lockstep with SEED_EXAMPLE_DATA.sql so
- * deep-links land on a real category page the moment the seed runs.
- */
 const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-wedding",   name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
   { id: "fb-frames",    name: "Photo Frames",      slug: "photo-frames",      image_url: catFrame },
@@ -42,73 +34,69 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
   const display = cats.length > 0 ? cats : FALLBACK_CATEGORIES;
 
   return (
-    <section id="categories" className={`relative ${heading ? "py-28 md:py-40" : "py-14 md:py-20"} bg-blush/20`}>
-      <div className="container">
+    <section id="categories" className="py-20">
+      <div className="max-w-[1280px] mx-auto px-8">
         {heading && (
-          <div className="max-w-2xl mx-auto text-center mb-20">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              style={{ fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "hsl(34 58% 52%)", marginBottom: "1.25rem", fontWeight: 500 }}
+          <div className="mb-12">
+            <p
+              className="eyebrow mb-3"
+              style={{ fontSize: "11px", letterSpacing: "0.25em" }}
             >
               Explore
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="font-display leading-[1.04] tracking-[-0.03em]"
-              style={{ fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3.6rem)" }}
+            </p>
+            <h2
+              className="font-display"
+              style={{ fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", fontWeight: 400, lineHeight: 1.1 }}
             >
               Crafted Categories
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="mt-5"
-              style={{ fontSize: "clamp(0.92rem, 1.3vw, 1.02rem)", color: "hsl(25 10% 46%)", fontWeight: 380, lineHeight: 1.72 }}
-            >
-              From keychains to wedding heirlooms, find the perfect handmade keepsake for every moment.
-            </motion.p>
+            </h2>
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
-          {display.map((c, i) => (
-            <motion.div
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {display.map((c) => (
+            <Link
               key={c.id}
-              initial={{ opacity: 0, y: 40, scale: 0.93 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -8 }}
-              className="group relative rounded-3xl overflow-hidden shadow-card bg-card-grad card-3d"
+              to={`/category/${c.slug}`}
+              className="category-card group relative overflow-hidden rounded-[12px]"
+              style={{ height: "220px" }}
             >
-              <Link to={`/category/${c.slug}`} className="block">
-                <div className="relative overflow-hidden aspect-[3/4]">
-                  <img
-                    src={resolveImage(c.image_url)}
-                    alt={c.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                    style={{ transitionDuration: "1400ms" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-foreground/65 via-foreground/10 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gold/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="absolute inset-0 rounded-3xl border-2 border-gold/0 group-hover:border-gold/25 transition-all duration-500 pointer-events-none" />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 p-5">
-                  <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-[0.25em] text-background/60 mb-1.5">
-                    Shop now
-                    <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                  </div>
-                  <div className="font-display text-xl md:text-2xl text-background leading-tight">{c.name}</div>
-                </div>
-              </Link>
-            </motion.div>
+              <img
+                src={resolveImage(c.image_url)}
+                alt={c.name}
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[250ms] ease-out group-hover:scale-[1.03]"
+              />
+              {/* Dark gradient overlay */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 40%, transparent 60%)",
+                }}
+              />
+              {/* Title */}
+              <div className="absolute bottom-0 left-0 p-4">
+                <span className="text-white font-bold" style={{ fontSize: "18px" }}>
+                  {c.name}
+                </span>
+              </div>
+              {/* SHOP NOW pill on hover */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-[250ms] ease-out">
+                <span
+                  className="inline-block rounded-full px-4 py-1.5"
+                  style={{
+                    background: "#C9964A",
+                    color: "#ffffff",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  SHOP NOW
+                </span>
+              </div>
+            </Link>
           ))}
         </div>
       </div>
