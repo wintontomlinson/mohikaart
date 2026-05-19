@@ -74,7 +74,7 @@ const FeaturedProducts = () => {
           </motion.div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
           {data.length > 0
             ? data.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)
             : Array.from({ length: 4 }).map((_, i) => (

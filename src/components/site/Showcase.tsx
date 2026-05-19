@@ -8,7 +8,7 @@ import { useProducts, ProductCard } from "./ProductCard";
  * Shows 6 featured products in a clean 3-col layout (Shopify luxury style).
  */
 const Showcase = () => {
-  const { data } = useProducts({ featured: true, limit: 6 });
+  const { data } = useProducts({ featured: true, limit: 8 });
 
   return (
     <section className="py-16 md:py-20" style={{ background: "#FAF7F4" }}>
@@ -73,10 +73,10 @@ const Showcase = () => {
           </motion.div>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
           {data.length > 0
             ? data.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)
-            : Array.from({ length: 6 }).map((_, i) => (
+            : Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={`skeleton-${i}`}
                   className="aspect-square animate-pulse"

@@ -104,24 +104,24 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {display.slice(0, 6).map((c, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
+          {display.slice(0, 8).map((c, i) => (
             <motion.div
               key={c.id}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: (i % 3) * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -6 }}
+              transition={{ duration: 0.65, delay: (i % 4) * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -4 }}
               className="group relative overflow-hidden"
               style={{
-                borderRadius: "20px",
+                borderRadius: "16px",
                 background: "#ffffff",
                 border: "1px solid #e5e0d8",
               }}
             >
               <Link to={`/category/${c.slug}`} className="block">
-                <div className="relative overflow-hidden" style={{ aspectRatio: "4 / 5" }}>
+                <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
                   <img
                     src={resolveImage(c.image_url)}
                     alt={c.name}
@@ -134,35 +134,16 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
                     className="absolute inset-0"
                     style={{
                       background:
-                        "linear-gradient(to top, rgba(61,43,31,0.72) 0%, rgba(61,43,31,0.15) 45%, transparent 70%)",
+                        "linear-gradient(to top, rgba(61,43,31,0.78) 0%, rgba(61,43,31,0.15) 50%, transparent 75%)",
                     }}
                   />
                   {/* Title overlay */}
-                  <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
-                    <div
-                      className="flex items-center gap-1.5 mb-1.5 transition-all duration-500 group-hover:translate-x-1"
-                      style={{
-                        fontSize: "10px",
-                        letterSpacing: "0.22em",
-                        textTransform: "uppercase",
-                        fontWeight: 600,
-                        color: "rgba(250,247,244,0.75)",
-                      }}
-                    >
-                      Shop Now
-                      <ArrowUpRight
-                        style={{
-                          width: 12,
-                          height: 12,
-                          opacity: 0.7,
-                        }}
-                      />
-                    </div>
+                  <div className="absolute inset-x-0 bottom-0 p-3 md:p-4">
                     <h3
                       className="font-display"
                       style={{
                         fontWeight: 500,
-                        fontSize: "clamp(1.1rem, 1.6vw, 1.35rem)",
+                        fontSize: "clamp(0.95rem, 1.3vw, 1.15rem)",
                         color: "#FAF7F4",
                         letterSpacing: "-0.01em",
                         lineHeight: 1.2,
@@ -170,6 +151,19 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
                     >
                       {c.name}
                     </h3>
+                    <div
+                      className="flex items-center gap-1 mt-1 transition-all duration-500 group-hover:translate-x-1"
+                      style={{
+                        fontSize: "9.5px",
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        fontWeight: 600,
+                        color: "rgba(250,247,244,0.7)",
+                      }}
+                    >
+                      Shop Now
+                      <ArrowUpRight style={{ width: 11, height: 11, opacity: 0.7 }} />
+                    </div>
                   </div>
                 </div>
               </Link>

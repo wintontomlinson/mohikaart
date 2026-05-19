@@ -617,13 +617,41 @@ const Hero = () => {
         </div>
       </motion.div>
 
-      {/* ── MARQUEE STRIP ── */}
+      {/* ── MARQUEE STRIP ── premium ecommerce brand pillars */}
       <div className="relative mt-auto">
         <div className="gold-divider" />
         <div
-          className="overflow-hidden py-3.5"
+          className="relative overflow-hidden py-4"
           style={{ background: "transparent" }}
+          onMouseEnter={(e) => {
+            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
+            if (track) track.style.animationPlayState = "paused";
+          }}
+          onMouseLeave={(e) => {
+            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
+            if (track) track.style.animationPlayState = "running";
+          }}
         >
+          {/* Soft fade gradients on left/right edges */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-0 z-10"
+            style={{
+              width: "120px",
+              background:
+                "linear-gradient(to right, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.6) 60%, transparent 100%)",
+            }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 right-0 z-10"
+            style={{
+              width: "120px",
+              background:
+                "linear-gradient(to left, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.6) 60%, transparent 100%)",
+            }}
+          />
+
           <div className="marquee-strip flex whitespace-nowrap">
             {[...Array(2)].map((_, i) => (
               <span key={i} className="flex shrink-0 items-center">
@@ -641,15 +669,31 @@ const Hero = () => {
                 ].map((t) => (
                   <span
                     key={t}
-                    className="px-7 font-display text-foreground/30"
-                    style={{ fontWeight: 300, fontSize: "clamp(0.82rem, 1.3vw, 1rem)", letterSpacing: "0.04em" }}
+                    className="px-7 font-display marquee-pill"
+                    style={{
+                      fontWeight: 400,
+                      fontSize: "clamp(0.85rem, 1.3vw, 1.05rem)",
+                      letterSpacing: "0.04em",
+                      color: "hsl(25 10% 32%)",
+                      transition: "color 0.4s cubic-bezier(0.22,1,0.36,1)",
+                      cursor: "default",
+                    }}
                   >
                     {t}
                     <motion.span
-                      className="mx-4 opacity-60 inline-block"
-                      style={{ color: "hsl(34 58% 52%)" }}
-                      animate={{ rotate: [0, 180, 360] }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      className="mx-5 inline-block"
+                      style={{
+                        color: "hsl(34 58% 52%)",
+                        fontSize: "0.85em",
+                      }}
+                      animate={{
+                        rotate: [0, 360],
+                        scale: [1, 1.15, 1],
+                      }}
+                      transition={{
+                        rotate: { duration: 6, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+                      }}
                     >
                       ✦
                     </motion.span>

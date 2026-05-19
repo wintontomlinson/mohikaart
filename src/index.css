@@ -362,3 +362,10 @@
 .marquee-strip {
   animation: marquee-scroll 32s linear infinite;
 }
+
+
+
+/* ── Marquee Pill Hover ── */
+.marquee-pill:hover {
+  color: #C9964A !important;
+}
