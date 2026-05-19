@@ -43,11 +43,22 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
 
   return (
     <article
-      className="group rounded-[12px] overflow-hidden bg-white transition-shadow duration-300 hover:shadow-lg"
+      className="group rounded-[16px] overflow-hidden bg-white"
       style={{
-        border: "0.5px solid #e5e0d8",
-        animation: `countup-fade 0.5s ease both`,
-        animationDelay: `${(index % 9) * 80}ms`,
+        border: "1px solid #e5e0d8",
+        animation: `countup-fade 0.6s ease both`,
+        animationDelay: `${(index % 9) * 100}ms`,
+        transition: "transform 500ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1), border-color 500ms cubic-bezier(0.22, 1, 0.36, 1)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-8px)";
+        e.currentTarget.style.boxShadow = "0 24px 60px -16px rgba(61,43,31,0.2)";
+        e.currentTarget.style.borderColor = "rgba(201,150,74,0.3)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.borderColor = "#e5e0d8";
       }}
     >
       <Link to={`/product/${p.slug}`} className="block">
@@ -57,47 +68,66 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
             src={resolveImage(p.image_url)}
             alt={p.name}
             loading="lazy"
-            className="w-full h-full object-cover rounded-t-[12px] transition-transform duration-300 group-hover:scale-[1.06]"
+            className="w-full h-full object-cover rounded-t-[16px] transition-transform duration-[600ms] ease-out group-hover:scale-[1.08]"
           />
 
           {/* Hover overlay with Quick View */}
-          <div className="absolute inset-0 flex items-end justify-center pb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 60%)" }}
+          <div
+            className="absolute inset-0 flex items-end justify-center pb-8 opacity-0 group-hover:opacity-100 transition-all duration-[400ms] ease-out translate-y-4 group-hover:translate-y-0 pointer-events-none"
+            style={{ background: "linear-gradient(to top, rgba(0,0,0,0.50) 0%, transparent 65%)" }}
           >
-            <span className="flex items-center gap-2 text-white text-xs font-medium tracking-wide uppercase">
+            <span className="flex items-center gap-2 text-white text-[11px] font-medium tracking-[0.12em] uppercase">
               <Eye className="w-4 h-4" />
               Quick View
             </span>
           </div>
 
+          {/* Badge */}
+          {p.badge && (
+            <span
+              className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.1em]"
+              style={{ background: "rgba(201,150,74,0.1)", color: "#C9964A" }}
+            >
+              {p.badge}
+            </span>
+          )}
+
           {/* Wishlist button */}
           <button
             onClick={handleWishlist}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-200"
+            className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center shadow-sm"
             style={{
-              background: "rgba(255,255,255,0.9)",
-              transform: heartBounce ? "scale(1.25)" : "scale(1)",
+              background: "rgba(255,255,255,0.95)",
+              transition: "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+              transform: heartBounce ? "scale(1.3)" : "scale(1)",
             }}
             aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           >
             <Heart
-              className="w-3.5 h-3.5"
+              className="w-4 h-4"
               style={{
                 color: wished ? "#e05a6d" : "#3D2B1F",
                 fill: wished ? "#e05a6d" : "none",
+                transition: "all 200ms ease",
               }}
             />
           </button>
         </div>
 
         {/* Content area */}
-        <div className="p-4">
-          <h3 className="font-medium text-[15px] leading-snug" style={{ color: "#3D2B1F" }}>
+        <div className="p-5">
+          <h3
+            className="font-medium text-[16px] leading-snug truncate"
+            style={{ color: "#3D2B1F", fontFamily: "var(--font-display)" }}
+          >
             {p.name}
           </h3>
 
-          <div className="flex items-baseline gap-2 mt-1.5">
-            <span className="font-semibold text-[14px]" style={{ color: "#C9964A" }}>
+          <div className="flex items-baseline gap-2.5 mt-2">
+            <span
+              className="font-semibold text-[18px]"
+              style={{ color: "#C9964A", fontFamily: "var(--font-display)" }}
+            >
               {formatINR(Number(p.price))}
             </span>
             {p.original_price && Number(p.original_price) > Number(p.price) && (
@@ -107,25 +137,16 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
             )}
           </div>
 
-          {p.badge && (
-            <span
-              className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide"
-              style={{ background: "#FAF7F4", color: "#C9964A", border: "1px solid #e5e0d8" }}
-            >
-              {p.badge}
-            </span>
-          )}
-
-          {/* Add to Cart / Customize button */}
+          {/* Add to Cart button */}
           <button
             onClick={handleAdd}
-            className="w-full mt-3 rounded-full h-[38px] text-xs uppercase tracking-wide font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className="w-full mt-4 rounded-full h-[42px] text-[12px] uppercase tracking-[0.12em] font-medium opacity-0 group-hover:opacity-100 transition-all duration-[400ms] ease-out"
             style={{
               background: adding ? "#C9964A" : "#3D2B1F",
               color: "#FAF7F4",
             }}
           >
-            {adding ? "Added!" : "Add to Cart"}
+            {adding ? "Added ✓" : "Add to Cart"}
           </button>
         </div>
       </Link>
@@ -158,7 +179,7 @@ export const useProducts = (filter?: { featured?: boolean; categorySlug?: string
 };
 
 export const ProductGrid = ({ products }: { products: Product[] }) => (
-  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
     {products.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}
   </div>
 );

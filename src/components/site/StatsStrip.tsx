@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 interface StatItem {
   target: number;
@@ -8,7 +9,7 @@ interface StatItem {
 
 const stats: StatItem[] = [
   { target: 2000, suffix: "+", label: "HAPPY CUSTOMERS" },
-  { target: 4.9, suffix: "★", label: "AVERAGE RATING" },
+  { target: 4.9, suffix: "\u2605", label: "AVERAGE RATING" },
   { target: 100, suffix: "%", label: "HANDMADE" },
 ];
 
@@ -64,35 +65,45 @@ const StatsStrip = () => {
   }, []);
 
   return (
-    <section
+    <motion.section
       ref={ref}
-      className="w-full flex items-center justify-center"
-      style={{ height: "88px", background: "#3D2B1F" }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="relative w-full flex items-center justify-center overflow-hidden"
+      style={{ height: "100px", background: "linear-gradient(135deg, #3D2B1F 0%, #2C1F14 100%)" }}
     >
-      <div className="max-w-[1280px] w-full mx-auto px-8 flex items-center justify-center gap-12 md:gap-20">
-        {stats.map((stat) => (
-          <div key={stat.label} className="flex flex-col items-center text-center">
-            <span
-              className="font-display"
-              style={{ fontSize: "28px", color: "#C9964A", lineHeight: 1.2 }}
-            >
-              <AnimatedNumber target={stat.target} suffix={stat.suffix} animate={inView} />
-            </span>
-            <span
-              style={{
-                fontSize: "11px",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "#ffffff",
-                marginTop: "4px",
-              }}
-            >
-              {stat.label}
-            </span>
+      <div className="max-w-[1280px] w-full mx-auto px-6 lg:px-8 flex items-center justify-center gap-8 md:gap-16 lg:gap-20">
+        {stats.map((stat, idx) => (
+          <div key={stat.label} className="flex items-center gap-8 md:gap-16 lg:gap-20">
+            <div className="flex flex-col items-center text-center">
+              <span
+                className="font-display"
+                style={{ fontSize: "32px", color: "#C9964A", lineHeight: 1.2 }}
+              >
+                <AnimatedNumber target={stat.target} suffix={stat.suffix} animate={inView} />
+              </span>
+              <span
+                style={{
+                  fontSize: "10px",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.6)",
+                  marginTop: "6px",
+                }}
+              >
+                {stat.label}
+              </span>
+            </div>
+            {/* Gold divider between items */}
+            {idx < stats.length - 1 && (
+              <div className="hidden md:block w-[1px] h-10 bg-[#C9964A]/20" />
+            )}
           </div>
         ))}
       </div>
-    </section>
+    </motion.section>
   );
 };
 
