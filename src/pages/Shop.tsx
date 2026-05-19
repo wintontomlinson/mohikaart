@@ -76,20 +76,19 @@ const ShopPage = () => {
           <div className="grid md:grid-cols-2 gap-10 items-center">
             {/* Left */}
             <div>
-              <p className="eyebrow mb-4">Shop</p>
+              <p className="eyebrow mb-4">Our Collection</p>
               <h1
                 className="font-display font-light leading-[1.08]"
                 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)" }}
               >
-                The full{" "}
-                <em className="not-italic italic" style={{ color: "#C9964A" }}>
+                Explore the full{" "}
+                <em className="not-italic italic" style={{ color: "#C9964A", fontFamily: "var(--font-serif)" }}>
                   collection
                 </em>
                 .
               </h1>
               <p className="mt-5 text-[15px] leading-relaxed text-gray-500 max-w-md">
-                Handcrafted resin keepsakes, every piece poured, set and finished by hand. Browse our
-                full range of keychains, frames, wedding keepsakes, and more.
+                Every piece in our catalogue is handcrafted to order — poured with patience, polished with precision, and packaged with pride.
               </p>
             </div>
 

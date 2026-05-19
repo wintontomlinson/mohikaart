@@ -5,18 +5,18 @@ import workspaceImg from "@/assets/gallery-workspace.jpg";
 const values = [
   {
     icon: Leaf,
-    title: "Eco-conscious",
-    desc: "We source sustainable materials and minimize waste in every step of our process.",
+    title: "Sustainably Made",
+    desc: "Responsibly sourced materials, minimal packaging waste, and eco-conscious processes at every step.",
   },
   {
     icon: Heart,
-    title: "Made with love",
-    desc: "Each piece is poured, set, and finished by hand with patience and care.",
+    title: "Poured with Devotion",
+    desc: "No machines, no shortcuts. Every single piece is assembled and finished entirely by hand.",
   },
   {
     icon: Sparkles,
-    title: "Every piece is unique",
-    desc: "No two creations are alike — your keepsake is truly one of a kind.",
+    title: "One of a Kind",
+    desc: "Your memories are unique — and so is every keepsake we create. No two pieces are ever the same.",
   },
 ];
 
@@ -37,20 +37,16 @@ const AboutPage = () => {
                 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)" }}
               >
                 Born from{" "}
-                <em className="not-italic italic" style={{ color: "#C9964A" }}>
-                  love
+                <em className="not-italic italic" style={{ color: "#C9964A", fontFamily: "var(--font-serif)" }}>
+                  passion
                 </em>
-                , made by hand.
+                , perfected by hand.
               </h1>
               <p className="mt-6 text-[15px] leading-relaxed text-gray-500 max-w-md">
-                Mohika Art began as a quiet experiment with resin, dried flowers, and the desire to
-                preserve fleeting moments. What started at a small kitchen table has grown into a
-                studio devoted to handcrafted keepsakes.
+                Mohika Art began in 2021 as a small experiment — a kitchen table, a bottle of resin, and the simple desire to hold onto fleeting moments. What started as a personal obsession with preservation has grown into a studio dedicated to transforming life's milestones into tactile, lasting art.
               </p>
               <p className="mt-4 text-[15px] leading-relaxed text-gray-500 max-w-md">
-                Every piece we create tells a story — a wedding date, a child's first name, a
-                favourite flower pressed in time. We believe the most meaningful gifts are the ones
-                made slowly, with intention.
+                Today, every piece we create carries that same founding spirit: meticulous attention to detail, a reverence for the stories behind each order, and a commitment to quality that we refuse to compromise.
               </p>
             </div>
 
@@ -71,7 +67,7 @@ const AboutPage = () => {
       <section className="py-20">
         <div className="max-w-[1280px] mx-auto px-8">
           <h2 className="font-display text-center mb-12" style={{ fontSize: "clamp(1.85rem, 4vw, 3rem)" }}>
-            What we stand for
+            Our Guiding Principles
           </h2>
 
           <div ref={revealRef} className="scroll-reveal grid md:grid-cols-3 gap-4">
@@ -99,7 +95,7 @@ const AboutPage = () => {
           <div className="flex items-center justify-center gap-3 mt-12">
             <Clock className="w-5 h-5 shrink-0" style={{ color: "#C9964A" }} />
             <span className="text-[14px] text-gray-500">
-              Crafted with patience — each piece takes 7–14 days
+              Crafted with patience — each piece requires 7–14 days of careful work.
             </span>
           </div>
         </div>

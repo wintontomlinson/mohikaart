@@ -64,11 +64,14 @@ const GalleryPage = () => {
             className="font-display font-light"
             style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)" }}
           >
-            Our work speaks for itself.
+            Our work speaks{" "}
+            <em className="not-italic italic" style={{ color: "#C9964A", fontFamily: "var(--font-serif)" }}>
+              for itself
+            </em>
+            .
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-gray-500 max-w-lg">
-            A peek inside our studio: the pours, the petals, the packaging, the people. Every image
-            tells the story of a moment preserved.
+            From delicate name keychains to preserved wedding bouquets — a curated look at the pieces that have left our studio and found their forever homes.
           </p>
 
           {/* Filter tabs */}

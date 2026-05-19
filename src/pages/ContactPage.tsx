@@ -80,20 +80,19 @@ const ContactPage = () => {
       {/* Header */}
       <section className="py-20" style={{ background: "#FAF7F4" }}>
         <div className="max-w-[1280px] mx-auto px-8">
-          <p className="eyebrow mb-4">Get in Touch</p>
+          <p className="eyebrow mb-4">Start a Conversation</p>
           <h1
             className="font-display font-light leading-[1.08]"
             style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)" }}
           >
-            Let's build a{" "}
-            <em className="not-italic italic" style={{ color: "#C9964A" }}>
-              memory
+            Let's create something{" "}
+            <em className="not-italic italic" style={{ color: "#C9964A", fontFamily: "var(--font-serif)" }}>
+              extraordinary
             </em>
             .
           </h1>
           <p className="mt-5 text-[15px] leading-relaxed text-gray-500 max-w-lg">
-            Reach out on WhatsApp, Instagram or fill out the inquiry form below. We usually reply
-            within 24 hours.
+            Whether you have a clear vision or just a spark of an idea — reach out. We'll guide you through every step of bringing your keepsake to life.
           </p>
         </div>
       </section>
@@ -105,7 +104,7 @@ const ContactPage = () => {
             {/* Left Column - Contact Info */}
             <div>
               <h2 className="font-display mb-6" style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}>
-                Get in touch
+                Reach us directly
               </h2>
               <div ref={revealRef} className="scroll-reveal space-y-4">
                 {/* WhatsApp */}
@@ -124,11 +123,11 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <div className="text-[14px] font-medium" style={{ color: "#3D2B1F" }}>
-                      WhatsApp Order
+                      WhatsApp
                     </div>
                     <div className="text-[13px] text-gray-500 mt-0.5">{phone_display}</div>
                     <div className="text-[12px] mt-1" style={{ color: "#C9964A" }}>
-                      Usually faster on WhatsApp
+                      Fastest way to reach us — replies within minutes
                     </div>
                   </div>
                 </a>
@@ -147,7 +146,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <div className="text-[14px] font-medium" style={{ color: "#3D2B1F" }}>
-                      Phone
+                      Call Us
                     </div>
                     <div className="text-[13px] text-gray-500 mt-0.5">{phone_display}</div>
                   </div>
@@ -204,7 +203,7 @@ const ContactPage = () => {
                 className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium mb-6"
                 style={{ background: "#EAF3DE", color: "#27500A" }}
               >
-                ⚡ We respond within 24 hours
+                ⚡ We typically respond within 24 hours
               </span>
 
               {success ? (
@@ -220,11 +219,10 @@ const ContactPage = () => {
                     <Check className="w-7 h-7" style={{ color: "#27500A" }} />
                   </div>
                   <h3 className="font-display text-2xl mb-3" style={{ color: "#3D2B1F" }}>
-                    We'll be in touch within 24 hours!
+                    Your inquiry has been received!
                   </h3>
                   <p className="text-[14px] text-gray-500 max-w-sm leading-relaxed">
-                    Thank you for reaching out. We've received your inquiry and will get back to you
-                    as soon as possible with ideas and next steps.
+                    Thank you for trusting us with your vision. Our team will review your details and reach out within 24 hours to discuss next steps.
                   </p>
                 </div>
               ) : (
@@ -235,10 +233,10 @@ const ContactPage = () => {
                   style={{ border: "1px solid #e5e0d8" }}
                 >
                   <h3 className="font-display text-xl mb-1" style={{ color: "#3D2B1F" }}>
-                    Inquiry Form
+                    Custom Order Inquiry
                   </h3>
                   <p className="text-[13px] text-gray-500 mb-6">
-                    Tell us about your custom dream piece.
+                    Tell us about the piece you envision and we'll get back to you within 24 hours.
                   </p>
 
                   <div className="space-y-4">
@@ -359,7 +357,7 @@ const ContactPage = () => {
       <section className="py-20" style={{ background: "#FAF7F4" }}>
         <div className="max-w-[1280px] mx-auto px-8">
           <h2 className="font-display text-center mb-10" style={{ fontSize: "clamp(1.85rem, 4vw, 3rem)" }}>
-            Frequently Asked Questions
+            Common Questions
           </h2>
 
           <div className="max-w-2xl mx-auto space-y-3">
