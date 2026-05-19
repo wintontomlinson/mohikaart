@@ -103,22 +103,22 @@ const Navbar = () => {
       animate={{ y: hide ? -120 : 0, opacity: 1 }}
       transition={{ duration: hide ? 0.3 : 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="fixed inset-x-0 z-50"
-      style={{ top: "36px" }}
+      style={{ top: "38px" }}
     >
       {/* ── Main nav bar ── */}
       <div
         className="transition-all duration-500"
         style={{
           height: "64px",
-          background: scrolled ? "hsl(36 42% 99%/0.97)" : "hsl(36 42% 99%/0.82)",
-          backdropFilter: "blur(22px) saturate(180%)",
-          WebkitBackdropFilter: "blur(22px) saturate(180%)",
+          background: scrolled ? "rgba(250,247,244,0.92)" : "rgba(250,247,244,0.82)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
           boxShadow: scrolled
-            ? "0 1px 0 hsl(34 30% 86%/0.8), 0 6px 24px -8px hsl(22 22% 22%/0.08)"
+            ? "0 1px 0 rgba(0,0,0,0.04), 0 4px 20px -4px rgba(61,43,31,0.06)"
             : "0 1px 0 hsl(34 30% 88%/0.3)",
         }}
       >
-        <nav className="max-w-[1280px] mx-auto px-8 flex items-center justify-between h-full">
+        <nav className="max-w-[1280px] mx-auto px-6 lg:px-8 flex items-center justify-between h-full">
 
           {/* ── LOGO ── */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group" aria-label="Mohika Art home">
@@ -401,13 +401,13 @@ const Navbar = () => {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="lg:hidden overflow-hidden"
             style={{
-              background: "hsl(36 42% 99%/0.98)",
-              backdropFilter: "blur(28px) saturate(170%)",
+              background: "rgba(250,247,244,0.92)",
+              backdropFilter: "blur(20px) saturate(180%)",
               borderBottom: "1px solid hsl(34 30% 88%/0.6)",
               boxShadow: "0 24px 56px -12px hsl(22 22% 22%/0.14)",
             }}
           >
-            <div className="max-w-[1280px] mx-auto px-8 py-2 pb-4">
+            <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-2 pb-4">
               {/* Mobile search */}
               <form onSubmit={submitSearch} className="mb-3 mt-1">
                 <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-foreground/[0.04] border border-foreground/[0.08]">
