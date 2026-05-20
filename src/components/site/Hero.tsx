@@ -58,7 +58,7 @@ function TiltCard({ children, className = "", style = {} }: { children: React.Re
 
 const Hero = () => {
   const { data: content } = useHeroContent();
-  const [hero, setHero] = useState<string>("https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=1200&q=90");
+  const [hero, setHero] = useState<string>(heroFallback);
   const ref = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
 
