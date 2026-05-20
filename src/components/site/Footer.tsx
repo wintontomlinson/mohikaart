@@ -1,185 +1,177 @@
-import { Instagram, Mail, MessageCircle, ArrowRight, Heart } from "lucide-react";
+import { Instagram, Mail, MessageCircle, MapPin, Phone, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Monogram, Wordmark } from "@/components/site/Logo";
 import { useStoreSettings } from "@/lib/settings";
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 const Footer = () => {
-  const { phone, email, instagram } = useStoreSettings();
+  const { phone, phone_display, email, instagram } = useStoreSettings();
   const phoneDigits = (phone || "").replace(/\D/g, "");
 
-  const quickLinks = [
-    { to: "/", label: "Home" },
-    { to: "/shop", label: "Shop" },
-    { to: "/about", label: "About" },
-    { to: "/gallery", label: "Gallery" },
-    { to: "/contact", label: "Contact" },
-  ];
-
-  const policyLinks = [
-    { to: "/shipping", label: "Shipping Policy" },
-    { to: "/shipping", label: "Return Policy" },
-    { to: "/faq", label: "FAQ" },
-    { to: "/care-guide", label: "Care Guide" },
-  ];
-
-  const socials = [
-    {
-      icon: Instagram,
-      href: `https://instagram.com/${(instagram || "mohikaart").replace(/^@/, "")}`,
-      label: "Instagram",
-    },
-    {
-      icon: MessageCircle,
-      href: `https://wa.me/${phoneDigits}`,
-      label: "WhatsApp",
-    },
-    {
-      icon: Mail,
-      href: `mailto:${email}`,
-      label: "Email",
-    },
-  ];
-
   return (
-    <footer
-      className="relative overflow-hidden"
-      style={{ background: "#2d2d2d", color: "#FAF7F4" }}
-    >
-      {/* Gold gradient line at top */}
-      <div
-        aria-hidden
-        style={{
-          height: "1px",
-          background: "linear-gradient(90deg, transparent 0%, rgba(201,150,74,0.5) 50%, transparent 100%)",
-        }}
-      />
+    <footer style={{ background: "#1a1208", color: "#fdf9f0" }}>
+      {/* Gold line */}
+      <div aria-hidden style={{ height: "1px", background: "linear-gradient(90deg, transparent, #c9a84c, transparent)" }} />
 
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-16 pb-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-          {/* Brand column */}
+      {/* Main content */}
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-16 pb-10">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-10 lg:gap-8">
+
+          {/* Brand */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="col-span-2 md:col-span-4"
           >
-            <Link to="/" className="inline-flex items-center gap-2.5 mb-5">
-              <Monogram size={36} tone="background" />
-              <Wordmark variant="dark" />
+            <Link to="/" className="inline-block mb-5">
+              <h3 className="font-serif text-2xl italic" style={{ color: "#c9a84c", fontWeight: 400 }}>
+                Mohika Art
+              </h3>
             </Link>
-            <p style={{ fontSize: "14px", lineHeight: 1.7, color: "rgba(250,247,244,0.6)", maxWidth: "280px" }}>
-              Handcrafted resin keepsakes that preserve your most cherished moments. Made with love in India.
+            <p className="text-[13px] leading-relaxed mb-6" style={{ color: "rgba(253,249,240,0.5)", maxWidth: 280 }}>
+              Handcrafted resin keepsakes that preserve your most cherished moments. Every piece poured with love.
             </p>
-          </motion.div>
-
-          {/* Quick Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <h4
-              className="font-semibold uppercase mb-5"
-              style={{ fontSize: "11px", letterSpacing: "0.25em", color: "#C9964A" }}
-            >
-              Quick Links
-            </h4>
-            <ul className="space-y-3">
-              {quickLinks.map((l) => (
-                <li key={l.label}>
-                  <Link
-                    to={l.to}
-                    className="text-sm transition-colors duration-300 hover:text-[#C9964A]"
-                    style={{ color: "rgba(250,247,244,0.6)" }}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Policies */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <h4
-              className="font-semibold uppercase mb-5"
-              style={{ fontSize: "11px", letterSpacing: "0.25em", color: "#C9964A" }}
-            >
-              Policies
-            </h4>
-            <ul className="space-y-3">
-              {policyLinks.map((l, i) => (
-                <li key={`${l.label}-${i}`}>
-                  <Link
-                    to={l.to}
-                    className="text-sm transition-colors duration-300 hover:text-[#C9964A]"
-                    style={{ color: "rgba(250,247,244,0.6)" }}
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Connect */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.26, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <h4
-              className="font-semibold uppercase mb-5"
-              style={{ fontSize: "11px", letterSpacing: "0.25em", color: "#C9964A" }}
-            >
-              Connect
-            </h4>
-            <div className="flex items-center gap-3">
-              {socials.map((s) => (
+            {/* Social */}
+            <div className="flex items-center gap-2.5">
+              {[
+                { icon: Instagram, href: `https://instagram.com/${(instagram || "mohikaart").replace(/^@/, "")}`, label: "Instagram" },
+                { icon: MessageCircle, href: `https://wa.me/${phoneDigits}`, label: "WhatsApp" },
+                { icon: Mail, href: `mailto:${email || "hello@mohikaart.com"}`, label: "Email" },
+              ].map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 hover:bg-[#C9964A] hover:border-[#C9964A] hover:text-[#2d2d2d]"
-                  style={{ borderColor: "rgba(250,247,244,0.15)", color: "rgba(250,247,244,0.7)" }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-[#c9a84c] hover:text-[#1a1208]"
+                  style={{ background: "rgba(253,249,240,0.06)", color: "rgba(253,249,240,0.5)" }}
                 >
                   <s.icon className="w-4 h-4" strokeWidth={1.6} />
                 </a>
               ))}
             </div>
           </motion.div>
+
+          {/* Shop */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.08, ease: EASE }}
+            className="col-span-1 md:col-span-2"
+          >
+            <h4 className="text-[10px] uppercase tracking-[0.2em] font-semibold mb-4" style={{ color: "#c9a84c" }}>Shop</h4>
+            <ul className="space-y-2.5">
+              {[
+                { to: "/shop", label: "All Products" },
+                { to: "/category/name-keychains", label: "Keychains" },
+                { to: "/category/photo-frames", label: "Frames" },
+                { to: "/category/wedding-keepsakes", label: "Wedding" },
+                { to: "/category/resin-trays", label: "Trays" },
+              ].map((l) => (
+                <li key={l.label}>
+                  <Link to={l.to} className="text-[13px] transition-colors duration-200 hover:text-[#c9a84c]" style={{ color: "rgba(253,249,240,0.5)" }}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Company */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.14, ease: EASE }}
+            className="col-span-1 md:col-span-2"
+          >
+            <h4 className="text-[10px] uppercase tracking-[0.2em] font-semibold mb-4" style={{ color: "#c9a84c" }}>Company</h4>
+            <ul className="space-y-2.5">
+              {[
+                { to: "/about", label: "About Us" },
+                { to: "/gallery", label: "Gallery" },
+                { to: "/custom-order", label: "Custom Order" },
+                { to: "/contact", label: "Contact" },
+                { to: "/faq", label: "FAQ" },
+              ].map((l) => (
+                <li key={l.label}>
+                  <Link to={l.to} className="text-[13px] transition-colors duration-200 hover:text-[#c9a84c]" style={{ color: "rgba(253,249,240,0.5)" }}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Contact info */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
+            className="col-span-2 md:col-span-4"
+          >
+            <h4 className="text-[10px] uppercase tracking-[0.2em] font-semibold mb-4" style={{ color: "#c9a84c" }}>Get In Touch</h4>
+            <div className="space-y-3">
+              <a
+                href={`https://wa.me/${phoneDigits}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 text-[13px] transition-colors hover:text-[#c9a84c]"
+                style={{ color: "rgba(253,249,240,0.5)" }}
+              >
+                <Phone className="w-3.5 h-3.5" style={{ color: "#c9a84c" }} />
+                {phone_display || "+91 99999 99999"}
+              </a>
+              <a
+                href={`mailto:${email || "hello@mohikaart.com"}`}
+                className="flex items-center gap-2.5 text-[13px] transition-colors hover:text-[#c9a84c]"
+                style={{ color: "rgba(253,249,240,0.5)" }}
+              >
+                <Mail className="w-3.5 h-3.5" style={{ color: "#c9a84c" }} />
+                {email || "hello@mohikaart.com"}
+              </a>
+              <div className="flex items-center gap-2.5 text-[13px]" style={{ color: "rgba(253,249,240,0.5)" }}>
+                <MapPin className="w-3.5 h-3.5" style={{ color: "#c9a84c" }} />
+                Made in India · Ships Nationwide
+              </div>
+            </div>
+
+            {/* Mini CTA */}
+            <Link
+              to="/custom-order"
+              className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-full text-[10px] tracking-[0.1em] uppercase font-semibold transition-all duration-300 hover:scale-105"
+              style={{ background: "#c9a84c", color: "#1a1208" }}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Custom Order
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </motion.div>
         </div>
 
-        {/* Divider */}
-        <div className="mt-12 mb-6" style={{ height: "1px", background: "rgba(250,247,244,0.08)" }} />
-
-        {/* Bottom bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-3">
-          <p style={{ fontSize: "12px", color: "rgba(250,247,244,0.4)" }}>
-            © 2024 Mohika Art. Made with{" "}
-            <Heart className="inline w-3 h-3 text-red-400" style={{ fill: "currentColor" }} />{" "}
-            in India
-          </p>
-          <div className="flex items-center gap-5">
-            <Link to="/shipping" className="text-xs transition-colors duration-300 hover:text-[#C9964A]" style={{ color: "rgba(250,247,244,0.4)" }}>
-              Shipping
-            </Link>
-            <Link to="/faq" className="text-xs transition-colors duration-300 hover:text-[#C9964A]" style={{ color: "rgba(250,247,244,0.4)" }}>
-              FAQ
-            </Link>
-            <Link to="/care-guide" className="text-xs transition-colors duration-300 hover:text-[#C9964A]" style={{ color: "rgba(250,247,244,0.4)" }}>
-              Care Guide
-            </Link>
+        {/* Bottom */}
+        <div className="mt-12 pt-6" style={{ borderTop: "1px solid rgba(253,249,240,0.06)" }}>
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-[11px]" style={{ color: "rgba(253,249,240,0.3)" }}>
+              © 2024 Mohika Art. All rights reserved.
+            </p>
+            <div className="flex items-center gap-5">
+              {[
+                { to: "/shipping", label: "Shipping" },
+                { to: "/care-guide", label: "Care Guide" },
+                { to: "/faq", label: "FAQ" },
+              ].map((l) => (
+                <Link key={l.label} to={l.to} className="text-[11px] transition-colors duration-200 hover:text-[#c9a84c]" style={{ color: "rgba(253,249,240,0.3)" }}>
+                  {l.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
