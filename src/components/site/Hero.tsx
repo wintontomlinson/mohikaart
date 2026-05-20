@@ -63,11 +63,8 @@ const Hero = () => {
   const reduceMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const yLeft  = useTransform(scrollYProgress, [0, 1], [0, -60]);
   const yRight = useTransform(scrollYProgress, [0, 1], [0, -30]);
   const yImage = useTransform(scrollYProgress, [0, 1], [0, 50]);
-  const fadeOp = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const scaleContent = useTransform(scrollYProgress, [0, 0.5], [1, 0.97]);
 
   useEffect(() => {
     supabase
@@ -104,15 +101,11 @@ const Hero = () => {
     >
       {/* ── Animated mesh blobs ── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <motion.div
-          style={{ y: yLeft }}
-          className="absolute -top-56 -left-52 h-[56rem] w-[56rem] rounded-full bg-blush/20 blur-[110px]"
+        <div
+          className="absolute -top-56 -left-52 h-[56rem] w-[56rem] rounded-full bg-blush/20 blur-[110px] will-change-transform"
         />
-        <motion.div
-          style={{ y: yRight }}
-          className="absolute -right-56 -top-4 h-[62rem] w-[62rem] rounded-full bg-champagne/18 blur-[130px]"
-          animate={{ scale: [1, 1.06, 1] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        <div
+          className="absolute -right-56 -top-4 h-[62rem] w-[62rem] rounded-full bg-champagne/18 blur-[130px] will-change-transform"
         />
         <motion.div
           className="absolute bottom-0 left-1/3 h-[28rem] w-[28rem] rounded-full blur-[90px]"
@@ -122,7 +115,7 @@ const Hero = () => {
         />
 
         {/* Gold dust particles */}
-        {!reduceMotion && [...Array(8)].map((_, i) => (
+        {!reduceMotion && [...Array(4)].map((_, i) => (
           <motion.span
             key={i}
             className="absolute rounded-full"
@@ -170,14 +163,15 @@ const Hero = () => {
       </div>
 
       {/* ── MAIN LAYOUT ── */}
-      <motion.div
-        style={{ opacity: fadeOp, scale: scaleContent }}
+      <div
         className="relative mx-auto flex w-full max-w-[1360px] flex-1 flex-col items-start gap-8 px-5 pb-8 pt-[72px] md:flex-row md:items-center md:gap-0 md:px-10 md:pb-8 md:pt-[84px]"
       >
 
         {/* ══ LEFT (45%) ══ */}
         <motion.div
-          style={{ y: yLeft }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="flex w-full flex-col justify-center pb-6 md:w-[45%] md:pb-0 md:pr-10 lg:pr-16 xl:pr-20"
         >
           {/* Eyebrow breadcrumb */}
@@ -615,7 +609,7 @@ const Hero = () => {
             ))}
           </motion.div>
         </div>
-      </motion.div>
+      </div>
 
       {/* ── MARQUEE STRIP ── premium ecommerce brand pillars */}
       <div className="relative mt-auto">

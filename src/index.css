@@ -85,7 +85,7 @@
 
 @layer base {
   * { @apply border-border; }
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: auto; }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-sans);
@@ -351,6 +351,17 @@
   padding: 0;
   min-height: 100dvh;
   position: relative;
+}
+
+/* ── Smooth scroll performance ── */
+html {
+  overscroll-behavior: none;
+}
+body {
+  overscroll-behavior-y: none;
+}
+main {
+  will-change: transform;
 }
 
 
