@@ -46,7 +46,7 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
       className="group card-3d"
     >
       <Link to={`/product/${p.slug}`} className="block">
-        <div className="relative overflow-hidden rounded-3xl bg-card-grad shadow-card aspect-[4/5]">
+        <div className="relative overflow-hidden rounded-3xl bg-card-grad shadow-card aspect-square">
           <img
             src={resolveImage(p.image_url)}
             alt={p.name}

@@ -2,16 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
-import g1 from "@/assets/gallery-pouring.jpg";
-import g2 from "@/assets/gallery-packing.jpg";
-import g3 from "@/assets/gallery-flatlay.jpg";
-import g4 from "@/assets/gallery-workspace.jpg";
 import g5 from "@/assets/gallery-customer.jpg";
 import g6 from "@/assets/cat-couple.jpg";
 import catKeychain from "@/assets/cat-keychain.jpg";
 import catFrame from "@/assets/cat-frame.jpg";
 import catWedding from "@/assets/cat-wedding.jpg";
-import catHamper from "@/assets/cat-hamper.jpg";
 
 const LUXE_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -20,18 +15,20 @@ const TABS: Category[] = ["All", "Keychains", "Frames", "Wedding", "Packaging"];
 
 type GalleryItem = { src: string; alt: string; category: Exclude<Category, "All"> };
 
-// Each image used only once. Curated mix across all categories.
+// Each image used only once. Mix of local assets + HD Unsplash resin art photos.
 const IMAGES: GalleryItem[] = [
-  { src: g1, alt: "Resin being poured into a mould", category: "Wedding" },
+  { src: "https://images.unsplash.com/photo-1635405074683-96d6921a2a68?w=800&q=80", alt: "Crystal clear resin art with dried flowers", category: "Wedding" },
   { src: catKeychain, alt: "Personalised resin keychain", category: "Keychains" },
-  { src: g3, alt: "Studio flat lay of finished pieces", category: "Frames" },
+  { src: "https://images.unsplash.com/photo-1604076913837-52ab5f92b99d?w=800&q=80", alt: "Handcrafted resin pieces on wooden table", category: "Frames" },
   { src: catFrame, alt: "Pressed flower resin frame", category: "Frames" },
-  { src: g2, alt: "Hand-tied packaging being prepared", category: "Packaging" },
+  { src: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80", alt: "Luxury gift packaging with gold ribbon", category: "Packaging" },
   { src: catWedding, alt: "Preserved wedding bouquet keepsake", category: "Wedding" },
-  { src: g4, alt: "Inside the Mohika Art studio", category: "Keychains" },
+  { src: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80", alt: "Artisan workspace with resin materials", category: "Keychains" },
   { src: g6, alt: "Couple frame with custom names", category: "Frames" },
-  { src: catHamper, alt: "Curated luxury gifting hamper", category: "Packaging" },
-  { src: g5, alt: "A customer with her finished keepsake", category: "Wedding" },
+  { src: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=80", alt: "Premium handmade gift hamper set", category: "Packaging" },
+  { src: g5, alt: "Happy customer holding her keepsake", category: "Wedding" },
+  { src: "https://images.unsplash.com/photo-1606293926075-69a00dbfde81?w=800&q=80", alt: "Resin art with gold leaf details", category: "Keychains" },
+  { src: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&q=80", alt: "Elegant resin coasters with flowers", category: "Packaging" },
 ];
 
 // Floating gold particle decoration for the header
