@@ -1,8 +1,0 @@
-{
-  "startupCommands": [
-    "npm install; rm -rf node_modules/.vite; npm run dev -- --host 0.0.0.0 --port 8080"
-  ],
-  "projectId": "92d70ba6-8ee6-4d4c-a99a-7d5552c32ffb",
-  "templateId": "any",
-  "detectedFramework": "vite"
-}
