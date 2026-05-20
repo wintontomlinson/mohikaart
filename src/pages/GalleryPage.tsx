@@ -20,7 +20,7 @@ const TABS: Category[] = ["All", "Keychains", "Frames", "Wedding", "Packaging"];
 
 type GalleryItem = { src: string; alt: string; category: Exclude<Category, "All"> };
 
-// Hand-curated mix so each filter shows a varied set, and "All" feels rhythmic.
+// Each image used only once. Curated mix across all categories.
 const IMAGES: GalleryItem[] = [
   { src: g1, alt: "Resin being poured into a mould", category: "Wedding" },
   { src: catKeychain, alt: "Personalised resin keychain", category: "Keychains" },
@@ -28,12 +28,10 @@ const IMAGES: GalleryItem[] = [
   { src: catFrame, alt: "Pressed flower resin frame", category: "Frames" },
   { src: g2, alt: "Hand-tied packaging being prepared", category: "Packaging" },
   { src: catWedding, alt: "Preserved wedding bouquet keepsake", category: "Wedding" },
-  { src: g4, alt: "Inside the Mohika Art studio", category: "Packaging" },
-  { src: g6, alt: "Couple's frame with custom names", category: "Frames" },
+  { src: g4, alt: "Inside the Mohika Art studio", category: "Keychains" },
+  { src: g6, alt: "Couple frame with custom names", category: "Frames" },
   { src: catHamper, alt: "Curated luxury gifting hamper", category: "Packaging" },
   { src: g5, alt: "A customer with her finished keepsake", category: "Wedding" },
-  { src: catKeychain, alt: "Custom name keychain in resin", category: "Keychains" },
-  { src: g1, alt: "A second pour, tinted in soft champagne", category: "Keychains" },
 ];
 
 // Floating gold particle decoration for the header
