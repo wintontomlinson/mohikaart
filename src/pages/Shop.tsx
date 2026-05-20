@@ -243,7 +243,7 @@ const Shop = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5"
             >
               {filtered.map((p, i) => (
                 <motion.div
@@ -258,7 +258,7 @@ const Shop = () => {
                   onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
                 >
                   {/* Image container */}
-                  <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1" }}>
+                  <div className="relative overflow-hidden rounded-xl sm:rounded-2xl" style={{ aspectRatio: "1/1" }}>
                     <img
                       src={p.image}
                       alt={p.name}
@@ -268,7 +268,7 @@ const Shop = () => {
 
                     {/* Badge */}
                     <div
-                      className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] uppercase tracking-wider font-bold"
+                      className="absolute top-2 left-2 sm:top-3 sm:left-3 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] uppercase tracking-wider font-bold"
                       style={{ background: BADGE_STYLES[p.badge]?.bg, color: BADGE_STYLES[p.badge]?.color }}
                     >
                       {p.badge}
@@ -276,7 +276,7 @@ const Shop = () => {
 
                     {/* Discount */}
                     <div
-                      className="absolute top-3 right-12 px-2 py-1 rounded-full text-[9px] font-bold"
+                      className="absolute top-2 right-9 sm:top-3 sm:right-12 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-bold"
                       style={{ background: "#e53e3e", color: "#fff" }}
                     >
                       -{p.discount}%
@@ -285,46 +285,46 @@ const Shop = () => {
                     {/* Wishlist */}
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleWishlist(p.id); }}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                      className="absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
                       style={{ background: "rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
                     >
                       <Heart
-                        className="w-3.5 h-3.5 transition-all"
+                        className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-all"
                         style={{ color: wishlist.has(p.id) ? "#e53e3e" : "#999", fill: wishlist.has(p.id) ? "#e53e3e" : "none" }}
                       />
                     </button>
 
                     {/* Add to Cart bar (hover) */}
                     <div
-                      className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400"
+                      className="absolute inset-x-2 bottom-2 sm:inset-x-3 sm:bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400"
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); handleAddToCart(p); }}
-                        className="w-full py-2.5 rounded-full text-[10px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                        className="w-full py-2 sm:py-2.5 rounded-full text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5 transition-colors"
                         style={{ background: "#1a1208", color: "#fdf9f0" }}
                       >
-                        <Plus className="w-3.5 h-3.5" /> Add to Cart
+                        <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Add to Cart
                       </button>
                     </div>
                   </div>
 
                   {/* Card body */}
-                  <div className="mt-3 px-0.5">
-                    <div className="text-[9px] uppercase tracking-[0.18em] font-semibold mb-1" style={{ color: "#c9a84c" }}>
+                  <div className="mt-2.5 sm:mt-3 px-0.5">
+                    <div className="text-[8px] sm:text-[9px] uppercase tracking-[0.18em] font-semibold mb-0.5 sm:mb-1" style={{ color: "#c9a84c" }}>
                       Handmade · Customizable
                     </div>
-                    <h3 className="text-[13px] md:text-sm font-medium leading-tight mb-1.5" style={{ color: "#1a1208", wordBreak: "break-word" }}>
+                    <h3 className="text-[12px] sm:text-[13px] md:text-sm font-medium leading-tight mb-1 sm:mb-1.5" style={{ color: "#1a1208", wordBreak: "break-word" }}>
                       {p.name}
                     </h3>
-                    <div className="flex items-center gap-0.5 mb-1.5">
+                    <div className="flex items-center gap-0.5 mb-1 sm:mb-1.5">
                       {[...Array(5)].map((_, j) => (
-                        <Star key={j} className="w-3 h-3" style={{ fill: j < Math.floor(p.rating) ? "#c9a84c" : "#e5dfd3", color: j < Math.floor(p.rating) ? "#c9a84c" : "#e5dfd3" }} />
+                        <Star key={j} className="w-2.5 h-2.5 sm:w-3 sm:h-3" style={{ fill: j < Math.floor(p.rating) ? "#c9a84c" : "#e5dfd3", color: j < Math.floor(p.rating) ? "#c9a84c" : "#e5dfd3" }} />
                       ))}
-                      <span className="text-[10px] ml-1" style={{ color: "rgba(26,18,8,0.45)" }}>({p.reviews})</span>
+                      <span className="text-[9px] sm:text-[10px] ml-1" style={{ color: "rgba(26,18,8,0.45)" }}>({p.reviews})</span>
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-semibold text-sm" style={{ color: "#1a1208" }}>{formatINR(p.price)}</span>
-                      <span className="text-xs line-through" style={{ color: "rgba(26,18,8,0.4)" }}>{formatINR(p.mrp)}</span>
+                    <div className="flex items-baseline gap-1.5 sm:gap-2">
+                      <span className="font-semibold text-[13px] sm:text-sm" style={{ color: "#1a1208" }}>{formatINR(p.price)}</span>
+                      <span className="text-[10px] sm:text-xs line-through" style={{ color: "rgba(26,18,8,0.4)" }}>{formatINR(p.mrp)}</span>
                     </div>
                   </div>
                 </motion.div>
