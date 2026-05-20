@@ -199,8 +199,8 @@ const ShopPage = () => {
               }}
             >
               <img
-                src={catWedding}
-                alt="Mohika Art handcrafted resin keepsake"
+                src="https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=900&q=85"
+                alt="Handcrafted resin art with preserved flowers"
                 loading="eager"
                 className="w-full h-full object-cover"
               />

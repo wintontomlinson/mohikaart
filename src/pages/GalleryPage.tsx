@@ -15,20 +15,20 @@ const TABS: Category[] = ["All", "Keychains", "Frames", "Wedding", "Packaging"];
 
 type GalleryItem = { src: string; alt: string; category: Exclude<Category, "All"> };
 
-// Each image used only once. Mix of local assets + HD Unsplash resin art photos.
+// Resin craft art HD images. Mix of local product shots + HD resin art from web.
 const IMAGES: GalleryItem[] = [
-  { src: "https://images.unsplash.com/photo-1635405074683-96d6921a2a68?w=800&q=80", alt: "Crystal clear resin art with dried flowers", category: "Wedding" },
-  { src: catKeychain, alt: "Personalised resin keychain", category: "Keychains" },
-  { src: "https://images.unsplash.com/photo-1604076913837-52ab5f92b99d?w=800&q=80", alt: "Handcrafted resin pieces on wooden table", category: "Frames" },
-  { src: catFrame, alt: "Pressed flower resin frame", category: "Frames" },
-  { src: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80", alt: "Luxury gift packaging with gold ribbon", category: "Packaging" },
-  { src: catWedding, alt: "Preserved wedding bouquet keepsake", category: "Wedding" },
-  { src: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80", alt: "Artisan workspace with resin materials", category: "Keychains" },
-  { src: g6, alt: "Couple frame with custom names", category: "Frames" },
-  { src: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=80", alt: "Premium handmade gift hamper set", category: "Packaging" },
-  { src: g5, alt: "Happy customer holding her keepsake", category: "Wedding" },
-  { src: "https://images.unsplash.com/photo-1606293926075-69a00dbfde81?w=800&q=80", alt: "Resin art with gold leaf details", category: "Keychains" },
-  { src: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800&q=80", alt: "Elegant resin coasters with flowers", category: "Packaging" },
+  { src: "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=800&q=85", alt: "Dried flowers preserved in crystal clear epoxy resin", category: "Wedding" },
+  { src: catKeychain, alt: "Custom name resin keychain with gold flakes", category: "Keychains" },
+  { src: "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=800&q=85", alt: "Handmade resin photo frame with pressed petals", category: "Frames" },
+  { src: catFrame, alt: "Floral resin frame with real dried roses", category: "Frames" },
+  { src: "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=85", alt: "Luxury resin art gift box with velvet ribbon", category: "Packaging" },
+  { src: catWedding, alt: "Wedding bouquet preserved in resin tray", category: "Wedding" },
+  { src: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=85", alt: "Resin art making process with dried botanicals", category: "Keychains" },
+  { src: g6, alt: "Couple name resin frame with flower petals", category: "Frames" },
+  { src: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=85", alt: "Artisan resin craft workspace with molds and pigments", category: "Packaging" },
+  { src: g5, alt: "Customer unboxing her custom resin keepsake", category: "Wedding" },
+  { src: "https://images.unsplash.com/photo-1582845512747-e42001c95638?w=800&q=85", alt: "Epoxy resin bookmark with real lavender stems", category: "Keychains" },
+  { src: "https://images.unsplash.com/photo-1490750967868-88aa4f1e0f09?w=800&q=85", alt: "Handpoured resin coasters with gold leaf finish", category: "Packaging" },
 ];
 
 // Floating gold particle decoration for the header
