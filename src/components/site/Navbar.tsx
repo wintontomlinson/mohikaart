@@ -12,7 +12,7 @@ import { Monogram, Wordmark } from "@/components/site/Logo";
 const links = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop", hasDropdown: true },
-  { to: "/contact", label: "Custom Order" },
+  { to: "/custom-order", label: "Custom Order" },
   { to: "/about", label: "About" },
   { to: "/gallery", label: "Gallery" },
   { to: "/contact", label: "Contact" },
@@ -480,7 +480,7 @@ const Navbar = () => {
 
                 {/* Other links: Custom Order, About, Gallery, Contact */}
                 {[
-                  { to: "/contact", label: "Custom Order" },
+                  { to: "/custom-order", label: "Custom Order" },
                   { to: "/about", label: "About" },
                   { to: "/gallery", label: "Gallery" },
                   { to: "/contact", label: "Contact" },

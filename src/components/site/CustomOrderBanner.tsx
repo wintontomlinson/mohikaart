@@ -83,7 +83,7 @@ const CustomOrderBanner = () => {
               transition={{ delay: 0.3, duration: 0.6 }}
             >
               <Link
-                to="/contact"
+                to="/custom-order"
                 className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-[11px] tracking-[0.12em] uppercase font-semibold overflow-hidden transition-all duration-300 hover:scale-105"
                 style={{
                   background: "#C9964A",

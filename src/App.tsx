@@ -16,6 +16,7 @@ import ProductPage from "./pages/ProductPage";
 import AboutPage from "./pages/AboutPage";
 import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
+import CustomOrderPage from "./pages/CustomOrderPage";
 import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 
@@ -79,6 +80,7 @@ const App = () => (
               <Route path="/about" element={<AboutPage />} />
               <Route path="/gallery" element={<GalleryPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/custom-order" element={<CustomOrderPage />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/wedding" element={<WeddingPage />} />
               <Route path="/corporate" element={<CorporatePage />} />
