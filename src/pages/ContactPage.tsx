@@ -8,11 +8,11 @@ import { useStoreSettings } from "@/lib/settings";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const FAQS = [
-  { q: "How long does delivery take?", a: "5-7 business days pan India. Custom orders: 7-10 working days." },
-  { q: "Do you ship outside India?", a: "Currently India only. International shipping coming soon!" },
-  { q: "Can I modify my order?", a: "Yes — within 24 hours of ordering. WhatsApp us to make changes." },
-  { q: "How to place a custom order?", a: "Fill our Custom Order form or WhatsApp us your idea directly." },
-  { q: "Product arrived damaged?", a: "Message us within 48 hours with photos — we'll replace it free." },
+  { q: "How long does delivery take?", a: "Standard orders: 5-7 business days across India. Custom orders take 7-10 working days to handcraft and deliver." },
+  { q: "Do you ship outside India?", a: "Currently we deliver pan-India only. International shipping is coming soon!" },
+  { q: "Can I modify my order after placing it?", a: "Yes, modifications are possible within 24 hours of placing your order. Simply WhatsApp us with the changes." },
+  { q: "How do I place a custom order?", a: "You can fill our Custom Order form on the website or directly WhatsApp us with your idea and requirements." },
+  { q: "What if my product arrives damaged?", a: "Please message us within 48 hours with photos of the damage. We offer a free replacement, no questions asked." },
 ];
 
 const SUBJECTS = ["Order Query", "Custom Order", "Shipping Issue", "Feedback", "Other"];
@@ -69,7 +69,7 @@ const ContactPage = () => {
               {" "}💌
             </h1>
             <p style={{ fontSize: "15px", color: "rgba(26,18,8,0.6)", maxWidth: 450, margin: "0 auto", lineHeight: 1.7 }}>
-              Questions, custom orders, or just want to say hi — we're always here.
+              Questions, custom orders, or just want to say hi? We're always here for you.
             </p>
           </motion.div>
         </div>
@@ -242,7 +242,7 @@ const ContactPage = () => {
       </section>
 
       {/* ━━ FAQ ACCORDION ━━ */}
-      <section className="py-14 md:py-20" style={{ background: "rgba(201,168,76,0.03)" }}>
+      <section className="py-14 md:py-20" style={{ background: "#f9f6f1" }}>
         <div className="max-w-[700px] mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -251,8 +251,11 @@ const ContactPage = () => {
             transition={{ duration: 0.7, ease: EASE }}
             className="text-center mb-10"
           >
+            <p className="text-[11px] uppercase tracking-[0.25em] font-semibold mb-3" style={{ color: "#c9a84c" }}>
+              FAQ
+            </p>
             <h2 className="font-display" style={{ fontWeight: 400, fontSize: "clamp(1.6rem, 3vw, 2.2rem)", letterSpacing: "-0.02em" }}>
-              Quick Answers
+              Frequently Asked Questions
             </h2>
           </motion.div>
 
@@ -273,7 +276,7 @@ const ContactPage = () => {
                     onClick={() => setOpenFaq(isOpen ? null : i)}
                     className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors hover:bg-white/60"
                   >
-                    <span className="text-sm font-medium pr-4" style={{ color: "#c9a84c" }}>{faq.q}</span>
+                    <span className="text-sm font-medium pr-4" style={{ color: "#1a1208" }}>{faq.q}</span>
                     <motion.span
                       animate={{ rotate: isOpen ? 180 : 0 }}
                       transition={{ duration: 0.25 }}
@@ -317,7 +320,7 @@ const ContactPage = () => {
               Prefer instant replies? 💬
             </h3>
             <p className="text-sm mb-7" style={{ color: "rgba(26,18,8,0.6)" }}>
-              Chat with us on WhatsApp — we usually reply within minutes!
+              Chat with us on WhatsApp. We usually reply within minutes!
             </p>
             <a
               href={`https://wa.me/${phoneDigits}?text=${encodeURIComponent("Hi Mohika! I have a question.")}`}

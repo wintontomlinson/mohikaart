@@ -158,7 +158,7 @@ const CustomOrderPage = () => {
             <span className="inline-block">✨</span>
           </h1>
           <p style={{ fontSize: "16px", lineHeight: 1.7, color: "rgba(61,43,31,0.65)", maxWidth: "500px", margin: "0 auto" }}>
-            Tell us what you have in mind — we'll craft it just for you
+            Tell us what you have in mind and we'll craft it just for you
           </p>
         </motion.div>
       </section>
@@ -296,7 +296,7 @@ const CustomOrderPage = () => {
                   value={form.details}
                   onChange={handleChange}
                   rows={4}
-                  placeholder="Describe your idea — name, colors, size, special message, reference images etc."
+                  placeholder="Describe your idea: name, colors, size, special message, reference images etc."
                   className={`${inputClass} resize-none`}
                 />
               </div>
@@ -457,7 +457,7 @@ const CustomOrderPage = () => {
             Prefer to chat directly?
           </h3>
           <p className="mb-5" style={{ fontSize: "14px", color: "rgba(61,43,31,0.6)" }}>
-            Skip the form — message us on WhatsApp for instant support
+            Skip the form and message us on WhatsApp for instant support
           </p>
           <a
             href={`https://wa.me/${phoneDigits}?text=${encodeURIComponent("Hi Mohika! I'd like to place a custom order. Here's my idea:")}`}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -43,13 +43,13 @@ const PRODUCTS: Product[] = [
   { id: 1, name: "Personalized Name Keychain", category: "keychain", price: 499, mrp: 699, badge: "BESTSELLER", discount: 29, image: catKeychain, rating: 4.9, reviews: 67, description: "A stunning resin keychain with your name or loved one's name embedded in gold foil. Perfect everyday carry or thoughtful gift." },
   { id: 2, name: "Couple Photo Frame", category: "frame", price: 1299, mrp: 1799, badge: "POPULAR", discount: 28, image: catFrame, rating: 4.8, reviews: 45, description: "Preserve your favorite couple moment in a handcrafted resin frame with dried flowers and gold accents." },
   { id: 3, name: "Bridal Bouquet Preservation", category: "wedding", price: 2499, mrp: 3499, badge: "PREMIUM", discount: 29, image: catWedding, rating: 5.0, reviews: 34, description: "Your wedding bouquet preserved forever in crystal-clear resin. A timeless heirloom piece." },
-  { id: 4, name: "Floral Resin Bookmark", category: "bookmark", price: 349, mrp: 499, badge: "NEW", discount: 30, image: catBookmark, rating: 4.7, reviews: 28, description: "Delicate pressed flowers sealed in resin — a beautiful companion for your reading time." },
+  { id: 4, name: "Floral Resin Bookmark", category: "bookmark", price: 349, mrp: 499, badge: "NEW", discount: 30, image: catBookmark, rating: 4.7, reviews: 28, description: "Delicate pressed flowers sealed in resin. A beautiful companion for your reading time." },
   { id: 5, name: "Ocean Resin Coaster Set (Set of 4)", category: "coaster", price: 899, mrp: 1199, badge: "POPULAR", discount: 25, image: catCouple, rating: 4.6, reviews: 52, description: "Ocean-inspired resin coasters with swirling blues and golds. Functional art for your table." },
   { id: 6, name: "Luxury Gift Hamper", category: "hamper", price: 2999, mrp: 3749, badge: "PREMIUM", discount: 20, image: catHamper, rating: 4.9, reviews: 19, description: "A curated collection of handcrafted resin pieces beautifully boxed for special occasions." },
   { id: 7, name: "Floral Heart Resin Tray", category: "tray", price: 1199, mrp: 1549, badge: "BESTSELLER", discount: 22, image: catTray, rating: 4.8, reviews: 73, description: "Heart-shaped resin tray filled with preserved flowers. Perfect for jewelry or as a decorative piece." },
   { id: 8, name: "Custom Name Resin Tray", category: "tray", price: 1499, mrp: 1799, badge: "POPULAR", discount: 18, image: heroTray, rating: 4.7, reviews: 41, description: "A personalized resin tray with your name in elegant calligraphy. Ideal gift or home accent." },
   { id: 9, name: "Wedding Memory Frame", category: "wedding", price: 1899, mrp: 2499, badge: "BESTSELLER", discount: 25, image: galleryCustomer, rating: 4.9, reviews: 56, description: "Capture your wedding day in a custom resin frame with flowers from your actual celebration." },
-  { id: 10, name: "Mini Keychains Bundle (Set of 3)", category: "keychain", price: 999, mrp: 1499, badge: "NEW", discount: 35, image: galleryFlat, rating: 4.5, reviews: 38, description: "Three mini personalized keychains — perfect for bridesmaids, friends, or family gifts." },
+  { id: 10, name: "Mini Keychains Bundle (Set of 3)", category: "keychain", price: 999, mrp: 1499, badge: "NEW", discount: 35, image: galleryFlat, rating: 4.5, reviews: 38, description: "Three mini personalized keychains. Perfect for bridesmaids, friends, or family gifts." },
   { id: 11, name: "Dried Flower Bookmark Set (Set of 3)", category: "bookmark", price: 699, mrp: 949, badge: "POPULAR", discount: 28, image: galleryPouring, rating: 4.6, reviews: 31, description: "A set of three unique bookmarks with different pressed flower arrangements." },
   { id: 12, name: "Corporate Gift Box", category: "hamper", price: 3499, mrp: 4099, badge: "PREMIUM", discount: 15, image: galleryPacking, rating: 4.8, reviews: 22, description: "Elegant corporate gift box with branded resin pieces. Perfect for teams and clients." },
 ];
@@ -74,25 +74,6 @@ const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
 
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   COUNTER HOOK
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function useCountUp(target: number, inView: boolean, duration = 1200) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const step = target / (duration / 16);
-    const id = setInterval(() => {
-      start += step;
-      if (start >= target) { setVal(target); clearInterval(id); }
-      else setVal(Math.floor(start));
-    }, 16);
-    return () => clearInterval(id);
-  }, [inView, target, duration]);
-  return val;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    FORMAT PRICE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function formatINR(n: number) {
@@ -107,21 +88,7 @@ const Shop = () => {
   const [sortBy, setSortBy] = useState("featured");
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const [statsInView, setStatsInView] = useState(false);
   const { add } = useCart();
-
-  // Observe stats section
-  useEffect(() => {
-    const node = statsRef.current;
-    if (!node) return;
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setStatsInView(true); }, { threshold: 0.3 });
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, []);
-
-  const ordersCount = useCountUp(2000, statsInView);
-  const yearsCount = useCountUp(3, statsInView, 800);
 
   // Filter & sort
   const filtered = (() => {
@@ -184,26 +151,6 @@ const Shop = () => {
             <p style={{ fontSize: "15px", color: "rgba(26,18,8,0.6)", maxWidth: 420, margin: "0 auto" }}>
               Handcrafted with love, personalized just for you
             </p>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            ref={statsRef}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex items-center justify-center gap-8 md:gap-12 mt-8"
-          >
-            {[
-              { value: `${ordersCount.toLocaleString()}+`, label: "Orders" },
-              { value: "4.9★", label: "Rating" },
-              { value: `${yearsCount} Yrs`, label: "Of Artistry" },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="font-display text-xl md:text-2xl" style={{ color: "#c9a84c" }}>{s.value}</div>
-                <div className="text-[10px] uppercase tracking-wider mt-0.5" style={{ color: "rgba(26,18,8,0.5)" }}>{s.label}</div>
-              </div>
-            ))}
           </motion.div>
         </div>
       </section>
@@ -504,7 +451,7 @@ const Shop = () => {
                 {/* Customizable note */}
                 <div className="rounded-xl p-3.5 mb-5" style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.15)" }}>
                   <p className="text-xs" style={{ color: "rgba(26,18,8,0.7)" }}>
-                    ✏️ Share details after ordering — we'll craft it just for you
+                    ✏️ Share details after ordering and we'll craft it just for you
                   </p>
                 </div>
 

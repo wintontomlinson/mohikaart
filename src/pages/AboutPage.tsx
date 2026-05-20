@@ -75,7 +75,7 @@ const AboutPage = () => {
               className="text-base md:text-lg mb-8"
               style={{ color: "rgba(26,18,8,0.6)", maxWidth: 440, lineHeight: 1.7 }}
             >
-              Every piece tells a story — yours.
+              Every piece tells a story. Yours.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -169,8 +169,8 @@ const AboutPage = () => {
             </h2>
             <div className="space-y-4 text-[15px] leading-relaxed" style={{ color: "rgba(26,18,8,0.65)" }}>
               <p>Mohika Art was born in 2021 from a deep love for handcrafted beauty and the desire to turn fleeting moments into lasting keepsakes.</p>
-              <p>Every piece is handpoured using premium crystal-clear resin, real dried flowers, gold leaf detailing — no two pieces are ever the same.</p>
-              <p>Each creation is made to order, fully personalized to your vision. We don't believe in mass production — only in making things with heart.</p>
+              <p>Every piece is handpoured using premium crystal-clear resin, real dried flowers, gold leaf detailing. No two pieces are ever the same.</p>
+              <p>Each creation is made to order, fully personalized to your vision. We don't believe in mass production, only in making things with heart.</p>
               <p>Today, we're proud to have crafted 2000+ memories and delivered them across India. Thank you for trusting us with yours.</p>
             </div>
             <Link
@@ -206,7 +206,7 @@ const AboutPage = () => {
             {[
               { emoji: "🌸", title: "100% Handmade", desc: "No machines, no mass production. Every piece poured by hand with care." },
               { emoji: "✨", title: "Premium Materials", desc: "Real dried flowers, genuine gold leaf, crystal-clear premium resin." },
-              { emoji: "💌", title: "Fully Personalized", desc: "Made to your exact vision — names, dates, colors, flowers, everything." },
+              { emoji: "💌", title: "Fully Personalized", desc: "Made to your exact vision. Names, dates, colors, flowers, everything." },
               { emoji: "🚚", title: "Pan India Delivery", desc: "Carefully packed and safely delivered to your doorstep." },
             ].map((card, i) => (
               <motion.div
@@ -285,7 +285,7 @@ const AboutPage = () => {
               Mohika
             </h3>
             <p className="text-[15px] leading-relaxed mb-6" style={{ color: "rgba(26,18,8,0.65)", maxWidth: 480, margin: "0 auto" }}>
-              Hi! I'm the artist and founder behind Mohika Art. I started this journey in 2021 with a simple belief — that your memories deserve to be preserved beautifully. Each piece I make carries a little piece of my heart.
+              Hi! I'm the artist and founder behind Mohika Art. I started this journey in 2021 with a simple belief: that your memories deserve to be preserved beautifully. Each piece I make carries a little piece of my heart.
             </p>
             <a
               href="https://instagram.com/mohikaart"
