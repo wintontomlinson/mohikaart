@@ -8,7 +8,7 @@ import g2 from "@/assets/gallery-packing.jpg";
 import g3 from "@/assets/gallery-flatlay.jpg";
 import g4 from "@/assets/gallery-workspace.jpg";
 import g5 from "@/assets/gallery-customer.jpg";
-import g6 from "@/assets/cat-couple.jpg";
+const g6 = "/placeholder.svg";
 
 const GALLERY_KEYS = ["gallery_1", "gallery_2", "gallery_3", "gallery_4", "gallery_5", "gallery_6"];
 const FALLBACKS = [g1, g2, g3, g4, g5, g6];

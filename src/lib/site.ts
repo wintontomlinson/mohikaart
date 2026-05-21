@@ -1,13 +1,13 @@
 // Maps seed-data /src-asset/<file> tokens to bundled ES asset URLs.
 // Real admin uploads use full https URLs from storage and bypass this map.
 import hero from "@/assets/hero-resin-tray.jpg";
-import keychain from "@/assets/cat-keychain.jpg";
-import frame from "@/assets/cat-frame.jpg";
-import tray from "@/assets/cat-tray.jpg";
-import wedding from "@/assets/cat-wedding.jpg";
-import couple from "@/assets/cat-couple.jpg";
+const keychain = "/placeholder.svg";
+const frame = "/placeholder.svg";
+const tray = "/placeholder.svg";
+const wedding = "/placeholder.svg";
+const couple = "/placeholder.svg";
 import bookmark from "@/assets/cat-bookmark.jpg";
-import hamper from "@/assets/cat-hamper.jpg";
+const hamper = "/placeholder.svg";
 import pouring from "@/assets/gallery-pouring.jpg";
 import packing from "@/assets/gallery-packing.jpg";
 import flatlay from "@/assets/gallery-flatlay.jpg";

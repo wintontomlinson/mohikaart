@@ -5,13 +5,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 
-import catKeychain from "@/assets/cat-keychain.jpg";
-import catFrame from "@/assets/cat-frame.jpg";
-import catWedding from "@/assets/cat-wedding.jpg";
+const catKeychain = "/placeholder.svg";
+const catFrame = "/placeholder.svg";
+const catWedding = "/placeholder.svg";
 import catBookmark from "@/assets/cat-bookmark.jpg";
-import catTray from "@/assets/cat-tray.jpg";
-import catHamper from "@/assets/cat-hamper.jpg";
-import catCouple from "@/assets/cat-couple.jpg";
+const catTray = "/placeholder.svg";
+const catHamper = "/placeholder.svg";
+const catCouple = "/placeholder.svg";
 import heroTray from "@/assets/hero-resin-tray.jpg";
 
 const PRODUCTS = [
