@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Star, Heart, Plus, X, ArrowRight, ShoppingBag,
   Package, Truck, Sparkles, ChevronRight,
@@ -84,15 +84,30 @@ function formatINR(n: number) {
    MAIN COMPONENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const Shop = () => {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get("category") || "all";
+  const searchFromUrl = searchParams.get("q") || "";
+
+  const [activeCategory, setActiveCategory] = useState(categoryFromUrl);
   const [sortBy, setSortBy] = useState("featured");
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { add } = useCart();
 
+  // Sync URL params → state
+  useEffect(() => {
+    const cat = searchParams.get("category") || "all";
+    if (cat !== activeCategory) setActiveCategory(cat);
+  }, [searchParams]);
+
   // Filter & sort
   const filtered = (() => {
     let list = activeCategory === "all" ? [...PRODUCTS] : PRODUCTS.filter((p) => p.category === activeCategory);
+    // Search filter
+    if (searchFromUrl) {
+      const q = searchFromUrl.toLowerCase();
+      list = list.filter((p) => p.name.toLowerCase().includes(q) || p.category.includes(q));
+    }
     switch (sortBy) {
       case "price-asc": return list.sort((a, b) => a.price - b.price);
       case "price-desc": return list.sort((a, b) => b.price - a.price);
