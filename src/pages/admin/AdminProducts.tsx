@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
-import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, Download, Filter, MoreVertical } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
 

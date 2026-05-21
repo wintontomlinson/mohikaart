@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/site";
 import {
-  Package, ShoppingCart, IndianRupee, TrendingUp, TrendingDown, AlertCircle,
-  Mail, Sparkles, ArrowUpRight, MessageSquareQuote, BarChart3, Users, Ticket,
+  Package, ShoppingCart, IndianRupee, TrendingUp, TrendingDown,
+  Mail, Sparkles, MessageSquareQuote, BarChart3, Users, Ticket, Tag,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {

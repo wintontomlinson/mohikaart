@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Save, Eye, EyeOff, Globe, CreditCard, Store } from "lucide-react";
+import { Save, Eye, EyeOff, Settings as SettingsIcon, CreditCard, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { DEFAULT_SETTINGS, StoreSettings, useInvalidateStoreSettings } from "@/lib/settings";
 import { DEFAULT_SEO, SeoSettings, fetchSetting, saveSetting, useInvalidateSetting } from "@/lib/cms";
@@ -76,7 +76,7 @@ const AdminSettings = () => {
       </div>
 
       {/* Store Information */}
-      <SettingsCard icon={Store} title="Store Information" desc="Contact details shown across the site">
+      <SettingsCard icon={ShoppingCart} title="Store Information" desc="Contact details shown across the site">
         <div className="space-y-5">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="WhatsApp Number" hint="Include country code, digits only">
@@ -134,7 +134,7 @@ const AdminSettings = () => {
       </SettingsCard>
 
       {/* SEO Settings */}
-      <SettingsCard icon={Globe} title="SEO Settings" desc="Page title, description, and social share">
+      <SettingsCard icon={SettingsIcon} title="SEO Settings" desc="Page title, description, and social share">
         <div className="space-y-5">
           <Field label="Site Title" hint={`${seo.site_title.length}/60 characters`}>
             <input

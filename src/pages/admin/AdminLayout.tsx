@@ -1,10 +1,10 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import {
   LogOut, Package, Image as ImageIcon, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail, Sparkles, MessageSquareQuote,
   Megaphone, Ticket, Search, Eye, EyeOff, ShieldAlert, Users, BarChart3,
-  X, ChevronRight, Bell, Moon, Sun,
+  X,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import logo from "@/assets/mohika-mark.png";
@@ -157,7 +157,6 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [search, setSearch] = useState("");
   const { pathname } = useLocation();
-  const nav = useNavigate();
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
   useEffect(() => {

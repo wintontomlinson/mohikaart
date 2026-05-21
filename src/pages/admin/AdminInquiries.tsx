@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, ChevronDown, X, MessageSquare } from "lucide-react";
+import { Mail, ChevronDown, X, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 type Inquiry = {
@@ -111,7 +111,7 @@ const AdminInquiries = () => {
                   </td>
                   <td className="p-4 text-right">
                     <button onClick={() => setViewing(inq)} className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/30 hover:text-white/70 transition-colors">
-                      <MessageSquare className="w-4 h-4" />
+                      <Eye className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/site";
-import { Eye, X, ChevronDown, Search, Download, Package } from "lucide-react";
+import { Eye, X, ChevronDown, Search, Download } from "lucide-react";
 import { toast } from "sonner";
 
 type Order = {
