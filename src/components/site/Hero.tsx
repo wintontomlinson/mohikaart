@@ -67,13 +67,19 @@ const Hero = () => {
   const yImage = useTransform(scrollYProgress, [0, 1], [0, 50]);
 
   useEffect(() => {
+    // Use the first featured product image as hero, fallback to site_images
     supabase
-      .from("site_images")
+      .from("products")
       .select("image_url")
-      .eq("key", "hero")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.image_url) setHero(resolveImage(data.image_url));
+      .eq("featured", true)
+      .eq("in_stock", true)
+      .not("image_url", "is", null)
+      .order("sort_order")
+      .limit(1)
+      .then(({ data: prods }) => {
+        if (prods?.[0]?.image_url) {
+          setHero(resolveImage(prods[0].image_url));
+        }
       });
   }, []);
 

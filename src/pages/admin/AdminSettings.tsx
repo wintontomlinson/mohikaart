@@ -1,11 +1,37 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Save, Eye, EyeOff } from "lucide-react";
+import { Save, Eye, EyeOff, ToggleLeft, ToggleRight } from "lucide-react";
 import { toast } from "sonner";
 import { DEFAULT_SETTINGS, StoreSettings, useInvalidateStoreSettings } from "@/lib/settings";
 import { DEFAULT_SEO, SeoSettings, fetchSetting, saveSetting, useInvalidateSetting } from "@/lib/cms";
 
 type RazorpayConfig = { key_id: string; mode: "test" | "live"; secret_configured: boolean };
+
+type FeatureToggles = {
+  show_gallery: boolean;
+  show_testimonials: boolean;
+  show_newsletter: boolean;
+  show_whatsapp_fab: boolean;
+  show_announcement_bar: boolean;
+  show_instagram_section: boolean;
+  show_how_it_works: boolean;
+  show_custom_order_banner: boolean;
+  show_trust_bar: boolean;
+  show_faq_section: boolean;
+};
+
+const DEFAULT_FEATURES: FeatureToggles = {
+  show_gallery: true,
+  show_testimonials: true,
+  show_newsletter: true,
+  show_whatsapp_fab: true,
+  show_announcement_bar: true,
+  show_instagram_section: true,
+  show_how_it_works: true,
+  show_custom_order_banner: true,
+  show_trust_bar: true,
+  show_faq_section: true,
+};
 
 const inp = "w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-foreground/40 outline-none text-sm transition-colors";
 
@@ -13,10 +39,12 @@ const AdminSettings = () => {
   const [rzp, setRzp] = useState<RazorpayConfig>({ key_id: "", mode: "test", secret_configured: false });
   const [store, setStore] = useState<StoreSettings>(DEFAULT_SETTINGS);
   const [seo, setSeo] = useState<SeoSettings>(DEFAULT_SEO);
+  const [features, setFeatures] = useState<FeatureToggles>(DEFAULT_FEATURES);
   const [showKey, setShowKey] = useState(false);
   const [savingRzp, setSavingRzp] = useState(false);
   const [savingStore, setSavingStore] = useState(false);
   const [savingSeo, setSavingSeo] = useState(false);
+  const [savingFeatures, setSavingFeatures] = useState(false);
   const [loading, setLoading] = useState(true);
   const invalidateStore = useInvalidateStoreSettings();
   const invalidateSetting = useInvalidateSetting();
@@ -26,12 +54,16 @@ const AdminSettings = () => {
       supabase.from("app_settings").select("value").eq("key", "razorpay").maybeSingle(),
       supabase.from("app_settings").select("value").eq("key", "store").maybeSingle(),
       fetchSetting<SeoSettings>("seo", DEFAULT_SEO),
-    ]).then(([{ data: rzpData }, { data: storeData }, seoData]) => {
+      supabase.from("app_settings").select("value").eq("key", "features").maybeSingle(),
+    ]).then(([{ data: rzpData }, { data: storeData }, seoData, { data: featData }]) => {
       if (rzpData?.value && typeof rzpData.value === "object" && !Array.isArray(rzpData.value)) {
         setRzp(rzpData.value as any);
       }
       if (storeData?.value && typeof storeData.value === "object" && !Array.isArray(storeData.value)) {
         setStore({ ...DEFAULT_SETTINGS, ...(storeData.value as any) });
+      }
+      if (featData?.value && typeof featData.value === "object" && !Array.isArray(featData.value)) {
+        setFeatures({ ...DEFAULT_FEATURES, ...(featData.value as any) });
       }
       setSeo(seoData);
       setLoading(false);
@@ -62,6 +94,14 @@ const AdminSettings = () => {
     if (error) return toast.error(error.message);
     invalidateSetting("seo");
     toast.success("SEO settings saved");
+  };
+
+  const onSaveFeatures = async () => {
+    setSavingFeatures(true);
+    const { error } = await supabase.from("app_settings").upsert({ key: "features", value: features as any });
+    setSavingFeatures(false);
+    if (error) return toast.error(error.message);
+    toast.success("Feature toggles saved — refresh site to see changes");
   };
 
   if (loading) return (
@@ -237,6 +277,65 @@ const AdminSettings = () => {
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm disabled:opacity-60 hover:opacity-85 transition-opacity"
           >
             <Save className="w-4 h-4" /> {savingSeo ? "Saving…" : "Save SEO Settings"}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Feature Toggles ──────────────────────────────────── */}
+      <div className="bg-background rounded-2xl border border-border overflow-hidden">
+        <div className="px-6 py-5 border-b border-border">
+          <h2 className="font-display text-xl">Feature Toggles</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Turn sections and features on or off across the site. Changes apply after page refresh.
+          </p>
+        </div>
+        <div className="p-6 space-y-1">
+          {([
+            { key: "show_gallery",              label: "Gallery Section",         desc: "Studio gallery grid on homepage" },
+            { key: "show_testimonials",         label: "Testimonials",            desc: "Customer reviews section" },
+            { key: "show_newsletter",           label: "Newsletter Signup",       desc: "Email subscription in footer" },
+            { key: "show_whatsapp_fab",         label: "WhatsApp Button",         desc: "Floating WhatsApp chat button" },
+            { key: "show_announcement_bar",     label: "Announcement Bar",        desc: "Top bar with offers/messages" },
+            { key: "show_instagram_section",    label: "Instagram Section",       desc: "Instagram follow CTA on homepage" },
+            { key: "show_how_it_works",         label: "How It Works",            desc: "Step-by-step ordering guide" },
+            { key: "show_custom_order_banner",  label: "Custom Order Banner",     desc: "CTA banner for custom orders" },
+            { key: "show_trust_bar",            label: "Trust Bar",               desc: "Trust badges and guarantees" },
+            { key: "show_faq_section",          label: "FAQ Section",             desc: "Frequently asked questions on homepage" },
+          ] as { key: keyof FeatureToggles; label: string; desc: string }[]).map((f) => (
+            <div
+              key={f.key}
+              className="flex items-center justify-between py-3.5 px-1 border-b border-border/50 last:border-0"
+            >
+              <div>
+                <div className="text-sm font-medium">{f.label}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{f.desc}</div>
+              </div>
+              <button
+                onClick={() => setFeatures((prev) => ({ ...prev, [f.key]: !prev[f.key] }))}
+                className={`relative w-12 h-7 rounded-full transition-colors duration-200 ${
+                  features[f.key] ? "bg-emerald-500" : "bg-muted-foreground/20"
+                }`}
+                aria-label={`Toggle ${f.label}`}
+              >
+                <span
+                  className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    features[f.key] ? "translate-x-[22px]" : "translate-x-0.5"
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="px-6 py-4 border-t border-border flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            {Object.values(features).filter(Boolean).length}/{Object.keys(features).length} features enabled
+          </p>
+          <button
+            onClick={onSaveFeatures}
+            disabled={savingFeatures}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm disabled:opacity-60 hover:opacity-85 transition-opacity"
+          >
+            <Save className="w-4 h-4" /> {savingFeatures ? "Saving…" : "Save Toggles"}
           </button>
         </div>
       </div>

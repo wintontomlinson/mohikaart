@@ -27,16 +27,22 @@ const About = () => {
   const [img3, setImg3] = useState(flatlayFallback);
 
   useEffect(() => {
+    // Use product images for about section - pick 3 different products
     supabase
-      .from("site_images")
-      .select("key,image_url")
-      .in("key", ["about_1", "about_2", "about_3"])
-      .then(({ data }) => {
-        (data ?? []).forEach((row) => {
-          if (row.key === "about_1") setImg1(resolveImage(row.image_url));
-          if (row.key === "about_2") setImg2(resolveImage(row.image_url));
-          if (row.key === "about_3") setImg3(resolveImage(row.image_url));
-        });
+      .from("products")
+      .select("image_url")
+      .eq("in_stock", true)
+      .not("image_url", "is", null)
+      .order("sort_order")
+      .limit(6)
+      .then(({ data: prods }) => {
+        if (!prods?.length) return;
+        // Pick images at different positions for variety
+        if (prods[0]?.image_url) setImg1(resolveImage(prods[0].image_url));
+        if (prods[2]?.image_url) setImg2(resolveImage(prods[2].image_url));
+        else if (prods[1]?.image_url) setImg2(resolveImage(prods[1].image_url));
+        if (prods[4]?.image_url) setImg3(resolveImage(prods[4].image_url));
+        else if (prods[1]?.image_url) setImg3(resolveImage(prods[1].image_url));
       });
   }, []);
 

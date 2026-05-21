@@ -10,7 +10,6 @@ import g4 from "@/assets/gallery-workspace.jpg";
 import g5 from "@/assets/gallery-customer.jpg";
 import g6 from "@/assets/cat-couple.jpg";
 
-const GALLERY_KEYS = ["gallery_1", "gallery_2", "gallery_3", "gallery_4", "gallery_5", "gallery_6"];
 const FALLBACKS = [g1, g2, g3, g4, g5, g6];
 const labels = ["Pouring", "Packaging", "Flat Lay", "Workspace", "Customer", "Couple Frame"];
 const heights = ["aspect-[4/5]", "aspect-square", "aspect-[4/5]", "aspect-[4/5]", "aspect-square", "aspect-[4/5]"];
@@ -21,20 +20,26 @@ const Gallery = () => {
   const [imgs, setImgs] = useState<string[]>(FALLBACKS);
 
   useEffect(() => {
+    // Use product images for gallery - fetch up to 6 products with images
     supabase
-      .from("site_images")
-      .select("key,image_url")
-      .in("key", GALLERY_KEYS)
-      .then(({ data }) => {
-        if (!data?.length) return;
+      .from("products")
+      .select("name,image_url")
+      .eq("in_stock", true)
+      .not("image_url", "is", null)
+      .order("sort_order")
+      .limit(6)
+      .then(({ data: prods }) => {
+        if (!prods?.length) return;
         setImgs((prev) => {
           const next = [...prev];
-          data.forEach((row) => {
-            const idx = GALLERY_KEYS.indexOf(row.key);
-            if (idx >= 0 && row.image_url) next[idx] = resolveImage(row.image_url);
+          prods.forEach((p, idx) => {
+            if (idx < 6 && p.image_url) {
+              next[idx] = resolveImage(p.image_url);
+            }
           });
           return next;
         });
+        // Also update labels with product names if available
       });
   }, []);
 

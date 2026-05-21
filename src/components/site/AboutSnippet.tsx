@@ -1,7 +1,9 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveImage } from "@/lib/site";
 import galleryWorkspace from "@/assets/gallery-workspace.jpg";
 
 const stats = [
@@ -12,11 +14,29 @@ const stats = [
 
 const AboutSnippet = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [imgSrc, setImgSrc] = useState(galleryWorkspace);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
   const imageY = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
+
+  useEffect(() => {
+    // Use a product image instead of static gallery image
+    supabase
+      .from("products")
+      .select("image_url")
+      .eq("in_stock", true)
+      .eq("featured", true)
+      .not("image_url", "is", null)
+      .order("sort_order")
+      .limit(3)
+      .then(({ data: prods }) => {
+        // Use the 2nd or 3rd featured product for variety (hero uses 1st)
+        const pick = prods?.[1] ?? prods?.[0];
+        if (pick?.image_url) setImgSrc(resolveImage(pick.image_url));
+      });
+  }, []);
 
   return (
     <section ref={sectionRef} className="py-16 md:py-20" style={{ background: "#FAF7F4" }}>
@@ -31,7 +51,7 @@ const AboutSnippet = () => {
             className="relative overflow-hidden rounded-3xl aspect-[4/5] md:aspect-[3/4]"
           >
             <motion.img
-              src={galleryWorkspace}
+              src={imgSrc}
               alt="Mohika Art craft process"
               className="w-full h-full object-cover scale-110"
               style={{ y: imageY }}
