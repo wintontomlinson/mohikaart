@@ -35,13 +35,13 @@ const Footer = () => {
   ];
 
   const categoryLinks = [
-    { to: "/category/name-keychains", label: "Name Keychains" },
-    { to: "/category/photo-frames", label: "Photo Frames" },
-    { to: "/category/wedding-keepsakes", label: "Wedding Keepsakes" },
-    { to: "/category/resin-trays", label: "Resin Trays" },
-    { to: "/category/coaster-sets", label: "Coaster Sets" },
-    { to: "/category/bookmarks", label: "Bookmarks" },
-    { to: "/category/gift-hampers", label: "Gift Hampers" },
+    { to: "/shop?category=keychain", label: "Name Keychains" },
+    { to: "/shop?category=frame", label: "Photo Frames" },
+    { to: "/shop?category=wedding", label: "Wedding Keepsakes" },
+    { to: "/shop?category=tray", label: "Resin Trays" },
+    { to: "/shop?category=coaster", label: "Coaster Sets" },
+    { to: "/shop?category=bookmark", label: "Bookmarks" },
+    { to: "/shop?category=hamper", label: "Gift Hampers" },
   ];
 
   const helpLinks = [

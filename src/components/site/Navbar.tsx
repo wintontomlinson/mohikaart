@@ -20,13 +20,13 @@ const links = [
 
 const shopDropdownLinks = [
   { to: "/shop", label: "All Products" },
-  { to: "/category/name-keychains", label: "Name Keychains" },
-  { to: "/category/photo-frames", label: "Photo Frames" },
-  { to: "/category/wedding-keepsakes", label: "Wedding Keepsakes" },
-  { to: "/category/resin-trays", label: "Resin Trays" },
-  { to: "/category/coaster-sets", label: "Coaster Sets" },
-  { to: "/category/bookmarks", label: "Bookmarks" },
-  { to: "/category/gift-hampers", label: "Gift Hampers" },
+  { to: "/shop?category=keychain", label: "Name Keychains" },
+  { to: "/shop?category=frame", label: "Photo Frames" },
+  { to: "/shop?category=wedding", label: "Wedding Keepsakes" },
+  { to: "/shop?category=tray", label: "Resin Trays" },
+  { to: "/shop?category=coaster", label: "Coaster Sets" },
+  { to: "/shop?category=bookmark", label: "Bookmarks" },
+  { to: "/shop?category=hamper", label: "Gift Hampers" },
 ];
 
 const Navbar = () => {
@@ -147,7 +147,7 @@ const Navbar = () => {
                     >
                       <span
                         className="flex items-center gap-1 text-[11px] tracking-[0.09em] uppercase font-semibold transition-all duration-250"
-                        style={{ color: shopOpen || pathname.startsWith("/shop") || pathname.startsWith("/category") ? "#3D2B1F" : "rgba(61,43,31,0.5)" }}
+                        style={{ color: shopOpen || pathname.startsWith("/shop") ? "#3D2B1F" : "rgba(61,43,31,0.5)" }}
                       >
                         {l.label}
                         <motion.span
@@ -161,8 +161,8 @@ const Navbar = () => {
                       <motion.span
                         className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full"
                         animate={{
-                          width: pathname.startsWith("/shop") || pathname.startsWith("/category") ? "20px" : "0px",
-                          opacity: pathname.startsWith("/shop") || pathname.startsWith("/category") ? 1 : 0,
+                          width: pathname.startsWith("/shop") ? "20px" : "0px",
+                          opacity: pathname.startsWith("/shop") ? 1 : 0,
                         }}
                         transition={{ type: "spring", stiffness: 400, damping: 32 }}
                         style={{ height: "2px", background: "#C9964A" }}

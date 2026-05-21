@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Star, Heart, Plus, X, ArrowRight, ShoppingBag,
   Package, Truck, Sparkles, ChevronRight,
@@ -84,11 +84,29 @@ function formatINR(n: number) {
    MAIN COMPONENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const Shop = () => {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get("category") || "all";
+  const [activeCategory, setActiveCategory] = useState(categoryFromUrl);
   const [sortBy, setSortBy] = useState("featured");
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { add } = useCart();
+
+  // Sync URL → state when URL changes (e.g. browser back/forward)
+  useEffect(() => {
+    const cat = searchParams.get("category") || "all";
+    if (cat !== activeCategory) setActiveCategory(cat);
+  }, [searchParams]);
+
+  // Update URL when category changes via pill click
+  const handleCategoryChange = (slug: string) => {
+    setActiveCategory(slug);
+    if (slug === "all") {
+      setSearchParams({}, { replace: true });
+    } else {
+      setSearchParams({ category: slug }, { replace: true });
+    }
+  };
 
   // Filter & sort
   const filtered = (() => {
@@ -178,7 +196,7 @@ const Shop = () => {
                 return (
                   <button
                     key={c.slug}
-                    onClick={() => setActiveCategory(c.slug)}
+                    onClick={() => handleCategoryChange(c.slug)}
                     className="shrink-0 transition-all duration-300"
                     style={{
                       padding: "6px 16px",
@@ -239,7 +257,7 @@ const Shop = () => {
               <h3 className="font-display text-xl mb-2" style={{ color: "#1a1208" }}>No products found</h3>
               <p className="text-sm mb-5" style={{ color: "rgba(26,18,8,0.55)" }}>Try a different category</p>
               <button
-                onClick={() => setActiveCategory("all")}
+                onClick={() => handleCategoryChange("all")}
                 className="px-6 py-2.5 rounded-full text-[11px] uppercase tracking-wider font-semibold"
                 style={{ background: "#1a1208", color: "#fdf9f0" }}
               >

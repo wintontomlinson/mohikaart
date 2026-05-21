@@ -19,30 +19,30 @@ type Cat = { id: string; name: string; slug: string; image_url: string | null; t
 
 /* Premium image mapping — matches categories to the best product images */
 const PREMIUM_IMAGES: Record<string, string> = {
-  "name-keychains": catKeychain,
-  "photo-frames": catFrame,
-  "wedding-keepsakes": catWedding,
-  "bookmarks": catBookmark,
-  "coaster-sets": catTray,
-  "gift-hampers": catHamper,
+  "keychain": catKeychain,
+  "frame": catFrame,
+  "wedding": catWedding,
+  "bookmark": catBookmark,
+  "coaster": catTray,
+  "hamper": catHamper,
 };
 
 const CATEGORY_TAGLINES: Record<string, string> = {
-  "name-keychains": "Personalized resin art",
-  "photo-frames": "Preserve your moments",
-  "wedding-keepsakes": "Timeless memories",
-  "bookmarks": "Floral resin elegance",
-  "coaster-sets": "Functional luxury",
-  "gift-hampers": "Curated with love",
+  "keychain": "Personalized resin art",
+  "frame": "Preserve your moments",
+  "wedding": "Timeless memories",
+  "bookmark": "Floral resin elegance",
+  "coaster": "Functional luxury",
+  "hamper": "Curated with love",
 };
 
 const FALLBACK_CATEGORIES: Cat[] = [
-  { id: "fb-keychains", name: "Name Keychains", slug: "name-keychains", image_url: catKeychain },
-  { id: "fb-frames", name: "Photo Frames", slug: "photo-frames", image_url: catFrame },
-  { id: "fb-wedding", name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
-  { id: "fb-bookmarks", name: "Bookmarks", slug: "bookmarks", image_url: catBookmark },
-  { id: "fb-coasters", name: "Coaster Sets", slug: "coaster-sets", image_url: catTray },
-  { id: "fb-hampers", name: "Gift Hampers", slug: "gift-hampers", image_url: catHamper },
+  { id: "fb-keychains", name: "Name Keychains", slug: "keychain", image_url: catKeychain },
+  { id: "fb-frames", name: "Photo Frames", slug: "frame", image_url: catFrame },
+  { id: "fb-wedding", name: "Wedding Keepsakes", slug: "wedding", image_url: catWedding },
+  { id: "fb-bookmarks", name: "Bookmarks", slug: "bookmark", image_url: catBookmark },
+  { id: "fb-coasters", name: "Coaster Sets", slug: "coaster", image_url: catTray },
+  { id: "fb-hampers", name: "Gift Hampers", slug: "hamper", image_url: catHamper },
 ];
 
 const Categories = ({ heading = true }: { heading?: boolean }) => {
@@ -105,7 +105,7 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
               transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
             >
               <Link
-                to="/categories"
+                to="/shop"
                 className="inline-flex items-center gap-2 transition-colors duration-300 hover:text-[#C9964A]"
                 style={{
                   fontSize: "12px",
@@ -146,7 +146,7 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
                 e.currentTarget.style.boxShadow = "0 4px 16px -8px rgba(26,18,8,0.08)";
               }}
             >
-              <Link to={`/category/${c.slug}`} className="block">
+              <Link to={`/shop?category=${c.slug}`} className="block">
                 {/* Image container — bright, sharp, no dark overlay */}
                 <div
                   className="relative overflow-hidden rounded-2xl"
