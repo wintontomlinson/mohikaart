@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Star, Heart, Plus, X, ArrowRight, ShoppingBag,
   Package, Truck, Sparkles, ChevronRight,
@@ -84,11 +84,29 @@ function formatINR(n: number) {
    MAIN COMPONENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const Shop = () => {
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryFromUrl = searchParams.get("category") || "all";
+  const [activeCategory, setActiveCategory] = useState(categoryFromUrl);
   const [sortBy, setSortBy] = useState("featured");
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { add } = useCart();
+
+  // Sync URL → state when URL changes (e.g. browser back/forward)
+  useEffect(() => {
+    const cat = searchParams.get("category") || "all";
+    if (cat !== activeCategory) setActiveCategory(cat);
+  }, [searchParams]);
+
+  // Update URL when category changes via pill click
+  const handleCategoryChange = (slug: string) => {
+    setActiveCategory(slug);
+    if (slug === "all") {
+      setSearchParams({}, { replace: true });
+    } else {
+      setSearchParams({ category: slug }, { replace: true });
+    }
+  };
 
   // Filter & sort
   const filtered = (() => {
@@ -157,59 +175,69 @@ const Shop = () => {
 
 
       {/* ── STICKY FILTER BAR ── */}
-      <section
-        className="sticky top-[60px] md:top-[68px] z-30 border-y"
-        style={{ borderColor: "rgba(26,18,8,0.08)", background: "rgba(253,249,240,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+      <div
+        className="sticky top-0 z-40 will-change-transform"
+        style={{ isolation: "isolate" }}
       >
-        <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-4">
-          {/* Category pills */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
-            {CATEGORIES.map((c) => {
-              const isActive = activeCategory === c.slug;
-              return (
-                <button
-                  key={c.slug}
-                  onClick={() => setActiveCategory(c.slug)}
-                  className="shrink-0 transition-all duration-300"
-                  style={{
-                    padding: "8px 18px",
-                    borderRadius: 9999,
-                    fontSize: 11,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    fontWeight: 600,
-                    background: isActive ? "#1a1208" : "transparent",
-                    color: isActive ? "#fdf9f0" : "rgba(26,18,8,0.55)",
-                    border: `1px solid ${isActive ? "#1a1208" : "rgba(26,18,8,0.12)"}`,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {c.label}
-                </button>
-              );
-            })}
-          </div>
+        <div
+          className="relative"
+          style={{
+            background: "rgba(253,249,240,0.96)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            boxShadow: "0 1px 0 rgba(26,18,8,0.06), 0 6px 20px -6px rgba(26,18,8,0.06)",
+          }}
+        >
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-3">
+            {/* Category pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
+              {CATEGORIES.map((c) => {
+                const isActive = activeCategory === c.slug;
+                return (
+                  <button
+                    key={c.slug}
+                    onClick={() => handleCategoryChange(c.slug)}
+                    className="shrink-0 transition-all duration-300"
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 9999,
+                      fontSize: 10,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      fontWeight: 600,
+                      background: isActive ? "#1a1208" : "transparent",
+                      color: isActive ? "#fdf9f0" : "rgba(26,18,8,0.5)",
+                      border: `1px solid ${isActive ? "#1a1208" : "rgba(26,18,8,0.1)"}`,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Sort + count */}
-          <div className="flex items-center justify-between mt-3">
-            <span className="text-[11px] uppercase tracking-wider" style={{ color: "rgba(26,18,8,0.45)" }}>
-              {filtered.length} {filtered.length === 1 ? "product" : "products"}
-            </span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="text-[11px] uppercase tracking-wider font-medium outline-none cursor-pointer"
-              style={{ padding: "8px 14px", borderRadius: 9999, border: "1px solid rgba(26,18,8,0.1)", background: "#fff", color: "#1a1208" }}
-            >
-              <option value="featured">Featured</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="newest">Newest</option>
-              <option value="bestselling">Best Selling</option>
-            </select>
+            {/* Sort + count */}
+            <div className="flex items-center justify-between mt-2.5">
+              <span className="text-[10px] uppercase tracking-[0.14em]" style={{ color: "rgba(26,18,8,0.4)" }}>
+                {filtered.length} {filtered.length === 1 ? "product" : "products"}
+              </span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="text-[10px] uppercase tracking-[0.1em] font-medium outline-none cursor-pointer"
+                style={{ padding: "6px 12px", borderRadius: 9999, border: "1px solid rgba(26,18,8,0.08)", background: "rgba(255,255,255,0.8)", color: "#1a1208" }}
+              >
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low → High</option>
+                <option value="price-desc">Price: High → Low</option>
+                <option value="newest">Newest</option>
+                <option value="bestselling">Best Selling</option>
+              </select>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
 
       {/* ── PRODUCT GRID ── */}
@@ -229,7 +257,7 @@ const Shop = () => {
               <h3 className="font-display text-xl mb-2" style={{ color: "#1a1208" }}>No products found</h3>
               <p className="text-sm mb-5" style={{ color: "rgba(26,18,8,0.55)" }}>Try a different category</p>
               <button
-                onClick={() => setActiveCategory("all")}
+                onClick={() => handleCategoryChange("all")}
                 className="px-6 py-2.5 rounded-full text-[11px] uppercase tracking-wider font-semibold"
                 style={{ background: "#1a1208", color: "#fdf9f0" }}
               >

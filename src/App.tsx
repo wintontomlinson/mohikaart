@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense } from "react";
@@ -10,8 +10,6 @@ import SeoUpdater from "@/components/site/SeoUpdater";
 // ── Storefront ── always-needed pages stay eager
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
-import CategoriesPage from "./pages/CategoriesPage";
-import CategoryPage from "./pages/CategoryPage";
 import ProductPage from "./pages/ProductPage";
 import AboutPage from "./pages/AboutPage";
 import GalleryPage from "./pages/GalleryPage";
@@ -74,8 +72,8 @@ const App = () => (
             <Route element={<SiteLayout />}>
               <Route path="/" element={<Index />} />
               <Route path="/shop" element={<Shop />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/category/:slug" element={<CategoryPage />} />
+              <Route path="/categories" element={<Navigate to="/shop" replace />} />
+              <Route path="/category/:slug" element={<Navigate to="/shop" replace />} />
               <Route path="/product/:slug" element={<ProductPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/gallery" element={<GalleryPage />} />
