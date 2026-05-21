@@ -1,46 +1,72 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Star, Heart, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveImage, formatINR } from "@/lib/site";
 
-import catKeychain from "@/assets/cat-keychain.jpg";
-import catFrame from "@/assets/cat-frame.jpg";
-import catWedding from "@/assets/cat-wedding.jpg";
-import catBookmark from "@/assets/cat-bookmark.jpg";
-import catTray from "@/assets/cat-tray.jpg";
-import catHamper from "@/assets/cat-hamper.jpg";
-import catCouple from "@/assets/cat-couple.jpg";
-import heroTray from "@/assets/hero-resin-tray.jpg";
-
-const PRODUCTS = [
-  { id: 1, name: "Personalized Name Keychain", price: 499, mrp: 699, badge: "BESTSELLER", discount: 29, image: catKeychain, rating: 4.9, reviews: 67 },
-  { id: 2, name: "Couple Photo Frame", price: 1299, mrp: 1799, badge: "POPULAR", discount: 28, image: catFrame, rating: 4.8, reviews: 45 },
-  { id: 3, name: "Bridal Bouquet Preservation", price: 2499, mrp: 3499, badge: "PREMIUM", discount: 29, image: catWedding, rating: 5.0, reviews: 34 },
-  { id: 7, name: "Floral Heart Resin Tray", price: 1199, mrp: 1549, badge: "BESTSELLER", discount: 22, image: catTray, rating: 4.8, reviews: 73 },
-  { id: 4, name: "Floral Resin Bookmark", price: 349, mrp: 499, badge: "NEW", discount: 30, image: catBookmark, rating: 4.7, reviews: 28 },
-  { id: 6, name: "Luxury Gift Hamper", price: 2999, mrp: 3749, badge: "PREMIUM", discount: 20, image: catHamper, rating: 4.9, reviews: 19 },
-  { id: 5, name: "Ocean Resin Coaster Set", price: 899, mrp: 1199, badge: "POPULAR", discount: 25, image: catCouple, rating: 4.6, reviews: 52 },
-  { id: 8, name: "Custom Name Resin Tray", price: 1499, mrp: 1799, badge: "POPULAR", discount: 18, image: heroTray, rating: 4.7, reviews: 41 },
-];
-
-const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
-  BESTSELLER: { bg: "#1a1208", color: "#c9a84c" },
-  NEW: { bg: "#c9a84c", color: "#1a1208" },
-  POPULAR: { bg: "#f5e6f0", color: "#1a1208" },
-  PREMIUM: { bg: "#2d2015", color: "#c9a84c" },
+type Product = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  original_price: number | null;
+  image_url: string | null;
+  badge: string | null;
+  featured: boolean;
 };
 
-function formatINR(n: number) {
-  return "₹" + n.toLocaleString("en-IN");
+const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
+  Bestseller: { bg: "#1a1208", color: "#c9a84c" },
+  New: { bg: "#c9a84c", color: "#1a1208" },
+  Popular: { bg: "#f5e6f0", color: "#1a1208" },
+  Premium: { bg: "#2d2015", color: "#c9a84c" },
+};
+
+/* Generate a varied but deterministic rating from product id */
+function getProductRating(id: string): { rating: number; count: number } {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
+  const ratings = [4.5, 4.6, 4.7, 4.8, 4.9, 5.0, 4.7, 4.8];
+  const counts = [12, 28, 45, 67, 34, 19, 53, 41];
+  const idx = Math.abs(hash) % ratings.length;
+  return { rating: ratings[idx], count: counts[idx] };
 }
 
 const Showcase = () => {
   const { add } = useCart();
-  const [wishlist, setWishlist] = useState<Set<number>>(new Set());
+  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const toggleWishlist = (id: number) => {
+  useEffect(() => {
+    supabase
+      .from("products")
+      .select("id,slug,name,price,original_price,image_url,badge,featured")
+      .eq("in_stock", true)
+      .eq("featured", true)
+      .order("sort_order")
+      .limit(8)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setProducts(data as Product[]);
+        } else {
+          // Fallback: get any 8 products
+          supabase
+            .from("products")
+            .select("id,slug,name,price,original_price,image_url,badge,featured")
+            .eq("in_stock", true)
+            .order("sort_order")
+            .limit(8)
+            .then(({ data: fallback }) => {
+              setProducts((fallback ?? []) as Product[]);
+            });
+        }
+      });
+  }, []);
+
+  const toggleWishlist = (id: string) => {
     setWishlist((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
@@ -48,10 +74,12 @@ const Showcase = () => {
     });
   };
 
-  const handleAddToCart = (p: typeof PRODUCTS[0]) => {
-    add({ id: String(p.id), slug: p.name.toLowerCase().replace(/\s+/g, "-"), name: p.name, price: p.price, image_url: p.image });
-    toast.success("🛒 Added to cart!", { duration: 2500 });
+  const handleAddToCart = (p: Product) => {
+    add({ id: p.id, slug: p.slug, name: p.name, price: p.price, image_url: p.image_url });
+    toast.success("Added to cart!", { duration: 2500 });
   };
+
+  if (products.length === 0) return null;
 
   return (
     <section className="py-14 md:py-20" style={{ background: "#fdf9f0" }}>
@@ -89,76 +117,92 @@ const Showcase = () => {
           </motion.div>
         </div>
 
-        {/* Product grid - same style as Shop page */}
+        {/* Product grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
-          {PRODUCTS.map((p, i) => (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              className="group cursor-pointer"
-              style={{ transition: "transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease" }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 40px -12px rgba(26,18,8,0.15)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-            >
-              {/* Image */}
-              <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1" }}>
-                <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.07]" />
+          {products.map((p, i) => {
+            const { rating, count } = getProductRating(p.id);
+            const discount = p.original_price && p.original_price > p.price
+              ? Math.round((1 - p.price / p.original_price) * 100)
+              : null;
+            return (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                className="group cursor-pointer"
+                style={{ transition: "transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease" }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 40px -12px rgba(26,18,8,0.15)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <Link to={`/product/${p.slug}`}>
+                  {/* Image */}
+                  <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1" }}>
+                    <img src={resolveImage(p.image_url)} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.07]" />
 
-                {/* Badge */}
-                <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] uppercase tracking-wider font-bold" style={{ background: BADGE_STYLES[p.badge]?.bg, color: BADGE_STYLES[p.badge]?.color }}>
-                  {p.badge}
-                </div>
+                    {/* Badge */}
+                    {p.badge && (
+                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] uppercase tracking-wider font-bold" style={{ background: BADGE_STYLES[p.badge]?.bg ?? "#1a1208", color: BADGE_STYLES[p.badge]?.color ?? "#c9a84c" }}>
+                        {p.badge}
+                      </div>
+                    )}
 
-                {/* Discount */}
-                <div className="absolute top-2.5 right-10 sm:right-11 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold" style={{ background: "#e53e3e", color: "#fff" }}>
-                  -{p.discount}%
-                </div>
+                    {/* Discount */}
+                    {discount && (
+                      <div className="absolute top-2.5 right-10 sm:right-11 px-1.5 py-0.5 rounded-full text-[8px] sm:text-[9px] font-bold" style={{ background: "#e53e3e", color: "#fff" }}>
+                        -{discount}%
+                      </div>
+                    )}
 
-                {/* Wishlist */}
-                <button
-                  onClick={() => toggleWishlist(p.id)}
-                  className="absolute top-2.5 right-2.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
-                  style={{ background: "rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
-                >
-                  <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-all" style={{ color: wishlist.has(p.id) ? "#e53e3e" : "#999", fill: wishlist.has(p.id) ? "#e53e3e" : "none" }} />
-                </button>
+                    {/* Wishlist */}
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(p.id); }}
+                      className="absolute top-2.5 right-2.5 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                      style={{ background: "rgba(255,255,255,0.9)", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+                    >
+                      <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 transition-all" style={{ color: wishlist.has(p.id) ? "#e53e3e" : "#999", fill: wishlist.has(p.id) ? "#e53e3e" : "none" }} />
+                    </button>
 
-                {/* Add to Cart */}
-                <div className="absolute inset-x-2.5 bottom-2.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400">
-                  <button
-                    onClick={() => handleAddToCart(p)}
-                    className="w-full py-2 sm:py-2.5 rounded-full text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5"
-                    style={{ background: "#1a1208", color: "#fdf9f0" }}
-                  >
-                    <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Add to Cart
-                  </button>
-                </div>
-              </div>
+                    {/* Add to Cart */}
+                    <div className="absolute inset-x-2.5 bottom-2.5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400">
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(p); }}
+                        className="w-full py-2 sm:py-2.5 rounded-full text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1.5"
+                        style={{ background: "#1a1208", color: "#fdf9f0" }}
+                      >
+                        <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Add to Cart
+                      </button>
+                    </div>
+                  </div>
+                </Link>
 
-              {/* Card body */}
-              <div className="mt-2.5 px-0.5">
-                <div className="text-[8px] sm:text-[9px] uppercase tracking-[0.18em] font-semibold mb-0.5" style={{ color: "#c9a84c" }}>
-                  Handmade · Customizable
+                {/* Card body */}
+                <div className="mt-2.5 px-0.5">
+                  <div className="text-[8px] sm:text-[9px] uppercase tracking-[0.18em] font-semibold mb-0.5" style={{ color: "#c9a84c" }}>
+                    Handmade · Customizable
+                  </div>
+                  <Link to={`/product/${p.slug}`}>
+                    <h3 className="text-[12px] sm:text-[13px] font-medium leading-tight mb-1 hover:text-[#c9a84c] transition-colors" style={{ color: "#1a1208", wordBreak: "break-word" }}>
+                      {p.name}
+                    </h3>
+                  </Link>
+                  <div className="flex items-center gap-0.5 mb-1">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="w-2.5 h-2.5 sm:w-3 sm:h-3" style={{ fill: j < Math.floor(rating) ? "#c9a84c" : "#e5dfd3", color: j < Math.floor(rating) ? "#c9a84c" : "#e5dfd3" }} />
+                    ))}
+                    <span className="text-[9px] sm:text-[10px] ml-1" style={{ color: "rgba(26,18,8,0.45)" }}>({count})</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-semibold text-[13px] sm:text-sm" style={{ color: "#1a1208" }}>{formatINR(p.price)}</span>
+                    {p.original_price && p.original_price > p.price && (
+                      <span className="text-[10px] sm:text-xs line-through" style={{ color: "rgba(26,18,8,0.4)" }}>{formatINR(p.original_price)}</span>
+                    )}
+                  </div>
                 </div>
-                <h3 className="text-[12px] sm:text-[13px] font-medium leading-tight mb-1" style={{ color: "#1a1208", wordBreak: "break-word" }}>
-                  {p.name}
-                </h3>
-                <div className="flex items-center gap-0.5 mb-1">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-2.5 h-2.5 sm:w-3 sm:h-3" style={{ fill: j < Math.floor(p.rating) ? "#c9a84c" : "#e5dfd3", color: j < Math.floor(p.rating) ? "#c9a84c" : "#e5dfd3" }} />
-                  ))}
-                  <span className="text-[9px] sm:text-[10px] ml-1" style={{ color: "rgba(26,18,8,0.45)" }}>({p.reviews})</span>
-                </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-semibold text-[13px] sm:text-sm" style={{ color: "#1a1208" }}>{formatINR(p.price)}</span>
-                  <span className="text-[10px] sm:text-xs line-through" style={{ color: "rgba(26,18,8,0.4)" }}>{formatINR(p.mrp)}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
