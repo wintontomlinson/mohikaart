@@ -273,7 +273,7 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
                     to={it.to}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all ${
                       active
-                        ? "bg-background/15 text-background font-medium"
+                        ? "bg-[rgba(201,168,76,0.12)] text-[#c9a84c] font-medium border-l-2 border-[#c9a84c]"
                         : "text-background/65 hover:text-background hover:bg-background/8"
                     }`}
                   >

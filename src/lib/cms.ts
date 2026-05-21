@@ -52,7 +52,7 @@ export const DEFAULT_HERO: HeroContent = {
   stat2_value: "4.9★",
   stat2_label: "Avg. Rating",
   stat3_value: 3,
-  stat3_suffix: "yrs",
+  stat3_suffix: " Yrs",
   stat3_label: "Of Artistry",
 };
 

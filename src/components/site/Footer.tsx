@@ -1,174 +1,124 @@
 import { useState } from "react";
-import { Instagram, Mail, MessageCircle, ArrowRight, MapPin } from "lucide-react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Instagram, MessageCircle, Mail, ArrowRight, Heart } from "lucide-react";
 import { toast } from "sonner";
+import { useStoreSettings } from "@/lib/settings";
 import { Monogram, Wordmark } from "@/components/site/Logo";
-import { useStoreSettings, isPlaceholderPhone } from "@/lib/settings";
-import { EMAIL_RE } from "@/lib/validation";
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const Footer = () => {
   const { phone, phone_display, email, instagram } = useStoreSettings();
+  const phoneDigits = (phone || "").replace(/\D/g, "");
   const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
 
-  const handleNewsletterSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = newsletterEmail.trim();
-    if (!EMAIL_RE.test(trimmed)) {
-      toast.error("Please enter a valid email address.");
+    if (!newsletterEmail.trim() || !newsletterEmail.includes("@")) {
+      toast.error("Please enter a valid email");
       return;
     }
-    if (isPlaceholderPhone(phone)) {
-      toast.error("We will be in touch soon. Please contact us via Instagram for now.");
-      return;
-    }
-    const digits = (phone || "").replace(/\D/g, "");
-    const message = `Hi Mohika! I'd like to join your inner circle. My email is ${trimmed}.`;
-    const href = `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
-    window.open(href, "_blank", "noopener,noreferrer");
-    toast.success("Opening WhatsApp. Drop your email there too if it didn't carry over.");
+    setSubscribed(true);
     setNewsletterEmail("");
+    toast.success("Subscribed! 🎉");
   };
 
-  const phoneDigits = (phone || "").replace(/\D/g, "");
+  const exploreLinks = [
+    { to: "/", label: "Home" },
+    { to: "/shop", label: "Shop Collection" },
+    { to: "/custom-order", label: "Custom Order" },
+    { to: "/about", label: "About Us" },
+    { to: "/gallery", label: "Gallery" },
+    { to: "/contact", label: "Contact Us" },
+  ];
+
+  const categoryLinks = [
+    { to: "/category/name-keychains", label: "Name Keychains" },
+    { to: "/category/photo-frames", label: "Photo Frames" },
+    { to: "/category/wedding-keepsakes", label: "Wedding Keepsakes" },
+    { to: "/category/resin-trays", label: "Resin Trays" },
+    { to: "/category/coaster-sets", label: "Coaster Sets" },
+    { to: "/category/bookmarks", label: "Bookmarks" },
+    { to: "/category/gift-hampers", label: "Gift Hampers" },
+  ];
+
+  const helpLinks = [
+    { to: "/shipping", label: "Shipping Policy" },
+    { to: "/shipping", label: "Return Policy" },
+    { to: "/shipping", label: "Privacy Policy" },
+    { to: "/faq", label: "FAQ" },
+    { to: "/contact", label: "Track My Order" },
+  ];
+
+  const socials = [
+    { icon: Instagram, href: `https://instagram.com/${(instagram || "mohikaart").replace(/^@/, "")}`, label: "Instagram" },
+    { icon: MessageCircle, href: `https://wa.me/${phoneDigits}`, label: "WhatsApp" },
+    { icon: Mail, href: `mailto:${email || "hello@mohikaart.com"}`, label: "Email" },
+  ];
 
   return (
-    <footer
-      className="relative overflow-hidden"
-      style={{ background: "#3D2B1F", color: "#FAF7F4" }}
-    >
-      {/* Subtle gold gradient line at top */}
-      <div
-        aria-hidden
-        style={{
-          height: "1px",
-          background:
-            "linear-gradient(90deg, transparent 0%, rgba(201,150,74,0.5) 50%, transparent 100%)",
-        }}
-      />
+    <footer style={{ background: "#1a1208", color: "#fdf9f0" }}>
+      {/* Gold line top */}
+      <div aria-hidden style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
 
-      {/* Main footer content */}
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-20 pb-8">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-10">
-          {/* Brand column */}
+      {/* ━━ TOP SECTION — 4 COLUMNS ━━ */}
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-16 pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+
+          {/* Column 1: Brand */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-4"
+            transition={{ duration: 0.6, ease: EASE }}
           >
-            <Link to="/" className="inline-flex items-center gap-2.5 mb-6">
-              <Monogram size={40} tone="background" />
+            <Link to="/" className="inline-flex items-center gap-2 mb-4">
+              <Monogram size={32} tone="background" />
               <Wordmark variant="dark" />
             </Link>
-            <p
-              style={{
-                fontSize: "14px",
-                lineHeight: 1.75,
-                color: "rgba(250,247,244,0.65)",
-                maxWidth: "320px",
-              }}
-            >
-              Handcrafted resin keepsakes that preserve your most cherished moments
-              forever. Made one piece at a time, by hand, in India.
+            <p className="font-serif italic text-sm mb-3" style={{ color: "rgba(253,249,240,0.6)" }}>
+              Turning memories into timeless art.
             </p>
-
+            <p className="text-[12px] leading-relaxed mb-5" style={{ color: "rgba(253,249,240,0.4)", maxWidth: 260 }}>
+              Premium handcrafted resin keepsakes, personalized for every occasion. Pan India delivery.
+            </p>
             {/* Social icons */}
-            <div className="mt-7 flex items-center gap-3">
-              {[
-                {
-                  icon: MessageCircle,
-                  href: `https://wa.me/${phoneDigits}`,
-                  label: "WhatsApp",
-                  external: true,
-                },
-                {
-                  icon: Instagram,
-                  href: `https://instagram.com/${(instagram || "mohikaart").replace(/^@/, "")}`,
-                  label: "Instagram",
-                  external: true,
-                },
-                {
-                  icon: Mail,
-                  href: `mailto:${email}`,
-                  label: "Email",
-                  external: false,
-                },
-              ].map((s) => (
+            <div className="flex items-center gap-2.5">
+              {socials.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
-                  target={s.external ? "_blank" : undefined}
-                  rel={s.external ? "noopener noreferrer" : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="flex items-center justify-center transition-all duration-300"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "9999px",
-                    border: "1px solid rgba(250,247,244,0.15)",
-                    color: "rgba(250,247,244,0.7)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#C9964A";
-                    e.currentTarget.style.borderColor = "#C9964A";
-                    e.currentTarget.style.color = "#3D2B1F";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.borderColor = "rgba(250,247,244,0.15)";
-                    e.currentTarget.style.color = "rgba(250,247,244,0.7)";
-                  }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-300 hover:bg-[#c9a84c] hover:border-[#c9a84c] hover:text-[#1a1208] hover:scale-110"
+                  style={{ borderColor: "rgba(201,168,76,0.3)", color: "rgba(253,249,240,0.6)" }}
                 >
-                  <s.icon strokeWidth={1.6} style={{ width: 16, height: 16 }} />
+                  <s.icon className="w-4 h-4" strokeWidth={1.6} />
                 </a>
               ))}
             </div>
           </motion.div>
 
-
-
-          {/* Explore links */}
+          {/* Column 2: Explore */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-2"
+            transition={{ duration: 0.6, delay: 0.08, ease: EASE }}
           >
-            <h4
-              className="font-semibold uppercase mb-5"
-              style={{
-                fontSize: "11px",
-                letterSpacing: "0.25em",
-                color: "#C9964A",
-              }}
-            >
-              Shop
+            <h4 className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-5" style={{ color: "#c9a84c" }}>
+              Explore
             </h4>
-            <ul className="space-y-3">
-              {[
-                { to: "/shop", label: "All Products" },
-                { to: "/categories", label: "Categories" },
-                { to: "/wedding", label: "Wedding" },
-                { to: "/corporate", label: "Corporate" },
-                { to: "/gallery", label: "Gallery" },
-              ].map((l) => (
-                <li key={l.to}>
+            <ul className="space-y-2.5">
+              {exploreLinks.map((l) => (
+                <li key={l.label}>
                   <Link
                     to={l.to}
-                    className="transition-colors"
-                    style={{
-                      fontSize: "14px",
-                      color: "rgba(250,247,244,0.65)",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = "#C9964A")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = "rgba(250,247,244,0.65)")
-                    }
+                    className="text-[13px] transition-all duration-200 hover:text-[#c9a84c] hover:translate-x-1 inline-block"
+                    style={{ color: "rgba(253,249,240,0.55)" }}
                   >
                     {l.label}
                   </Link>
@@ -177,253 +127,137 @@ const Footer = () => {
             </ul>
           </motion.div>
 
-          {/* Help links */}
+          {/* Column 3: Categories */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-2"
+            transition={{ duration: 0.6, delay: 0.14, ease: EASE }}
           >
-            <h4
-              className="font-semibold uppercase mb-5"
-              style={{
-                fontSize: "11px",
-                letterSpacing: "0.25em",
-                color: "#C9964A",
-              }}
-            >
+            <h4 className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-5" style={{ color: "#c9a84c" }}>
+              Categories
+            </h4>
+            <ul className="space-y-2.5">
+              {categoryLinks.map((l) => (
+                <li key={l.label}>
+                  <Link
+                    to={l.to}
+                    className="text-[13px] transition-all duration-200 hover:text-[#c9a84c] hover:translate-x-1 inline-block"
+                    style={{ color: "rgba(253,249,240,0.55)" }}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Column 4: Help & Connect */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
+          >
+            <h4 className="text-[10px] uppercase tracking-[0.22em] font-semibold mb-5" style={{ color: "#c9a84c" }}>
               Help
             </h4>
-            <ul className="space-y-3">
-              {[
-                { to: "/about", label: "About" },
-                { to: "/contact", label: "Contact" },
-                { to: "/shipping", label: "Shipping" },
-                { to: "/care-guide", label: "Care Guide" },
-                { to: "/faq", label: "FAQ" },
-              ].map((l) => (
-                <li key={l.to}>
+            <ul className="space-y-2.5 mb-6">
+              {helpLinks.map((l, i) => (
+                <li key={`${l.label}-${i}`}>
                   <Link
                     to={l.to}
-                    className="transition-colors"
-                    style={{
-                      fontSize: "14px",
-                      color: "rgba(250,247,244,0.65)",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = "#C9964A")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = "rgba(250,247,244,0.65)")
-                    }
+                    className="text-[13px] transition-all duration-200 hover:text-[#c9a84c] hover:translate-x-1 inline-block"
+                    style={{ color: "rgba(253,249,240,0.55)" }}
                   >
                     {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
-          </motion.div>
-
-
-
-          {/* Newsletter */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.26, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-4"
-          >
-            <h4
-              className="font-semibold uppercase mb-5"
-              style={{
-                fontSize: "11px",
-                letterSpacing: "0.25em",
-                color: "#C9964A",
-              }}
-            >
-              Inner Circle
-            </h4>
-            <p
-              className="font-display mb-3"
-              style={{
-                fontSize: "20px",
-                fontWeight: 400,
-                lineHeight: 1.25,
-                letterSpacing: "-0.01em",
-                color: "#FAF7F4",
-              }}
-            >
-              Drop alerts, behind the scenes,{" "}
-              <em
-                style={{
-                  fontFamily: "var(--font-serif)",
-                  fontStyle: "italic",
-                  color: "#C9964A",
-                }}
-              >
-                a quiet welcome.
-              </em>
-            </p>
-            <p
-              className="mb-5"
-              style={{
-                fontSize: "13px",
-                lineHeight: 1.7,
-                color: "rgba(250,247,244,0.55)",
-              }}
-            >
-              Join our list to be the first to know about limited drops and seasonal
-              collections.
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="flex items-center gap-2">
-              <input
-                type="email"
-                required
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                placeholder="you@email.com"
-                aria-label="Email address"
-                className="flex-1 min-w-0 transition-colors"
-                style={{
-                  height: "44px",
-                  paddingLeft: "18px",
-                  paddingRight: "18px",
-                  borderRadius: "9999px",
-                  background: "rgba(250,247,244,0.06)",
-                  border: "1px solid rgba(250,247,244,0.12)",
-                  fontSize: "14px",
-                  color: "#FAF7F4",
-                  outline: "none",
-                }}
-                onFocus={(e) =>
-                  (e.currentTarget.style.borderColor = "rgba(201,150,74,0.6)")
-                }
-                onBlur={(e) =>
-                  (e.currentTarget.style.borderColor = "rgba(250,247,244,0.12)")
-                }
-              />
-              <button
-                type="submit"
-                aria-label="Subscribe"
-                className="shrink-0 flex items-center justify-center transition-all duration-300"
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "9999px",
-                  background: "#C9964A",
-                  color: "#3D2B1F",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#FAF7F4";
-                  e.currentTarget.style.transform = "translateX(2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "#C9964A";
-                  e.currentTarget.style.transform = "translateX(0)";
-                }}
-              >
-                <ArrowRight strokeWidth={2} style={{ width: 16, height: 16 }} />
-              </button>
-            </form>
-
-            {/* Contact info */}
-            <div className="mt-7 space-y-2.5">
+            {/* Action buttons */}
+            <div className="space-y-2.5">
               <a
                 href={`https://wa.me/${phoneDigits}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2.5 transition-colors"
-                style={{
-                  fontSize: "13px",
-                  color: "rgba(250,247,244,0.6)",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.color = "rgba(250,247,244,0.6)")
-                }
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all duration-300 hover:scale-105"
+                style={{ background: "#25D366", color: "#fff" }}
               >
-                <MessageCircle strokeWidth={1.6} style={{ width: 14, height: 14, color: "#C9964A" }} />
-                {phone_display || "+91 98765 43210"}
+                <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Us
               </a>
-              <div
-                className="flex items-center gap-2.5"
-                style={{
-                  fontSize: "13px",
-                  color: "rgba(250,247,244,0.6)",
-                }}
+              <br />
+              <a
+                href={`mailto:${email || "hello@mohikaart.com"}`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase tracking-wider font-semibold border transition-all duration-300 hover:bg-[#c9a84c] hover:border-[#c9a84c] hover:text-[#1a1208]"
+                style={{ borderColor: "rgba(253,249,240,0.2)", color: "rgba(253,249,240,0.6)" }}
               >
-                <MapPin strokeWidth={1.6} style={{ width: 14, height: 14, color: "#C9964A" }} />
-                Made in India · Ships nationwide
-              </div>
+                <Mail className="w-3.5 h-3.5" /> Email Us
+              </a>
             </div>
           </motion.div>
         </div>
+      </div>
 
-        {/* Divider */}
-        <div
-          className="mt-16 mb-6"
-          style={{
-            height: "1px",
-            background: "rgba(250,247,244,0.08)",
-          }}
-        />
-
-        {/* Bottom row */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div
-            style={{
-              fontSize: "12px",
-              color: "rgba(250,247,244,0.4)",
-              letterSpacing: "0.02em",
-            }}
-          >
-            © {new Date().getFullYear()} Mohika Art. All rights reserved.
+      {/* ━━ MIDDLE — NEWSLETTER STRIP ━━ */}
+      <div style={{ background: "#2d2416" }}>
+        <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium" style={{ color: "rgba(253,249,240,0.8)" }}>
+                Get exclusive offers & new launches
+              </p>
+              <p className="text-[11px] mt-0.5" style={{ color: "rgba(253,249,240,0.4)" }}>
+                We won't spam, promise ✦
+              </p>
+            </div>
+            {subscribed ? (
+              <p className="text-sm font-medium" style={{ color: "#c9a84c" }}>Subscribed! 🎉</p>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex items-center gap-2">
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder="you@email.com"
+                  className="px-4 py-2.5 rounded-full text-sm outline-none transition-colors"
+                  style={{ background: "rgba(253,249,240,0.06)", border: "1px solid rgba(253,249,240,0.12)", color: "#fdf9f0", minWidth: 200 }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(253,249,240,0.12)"; }}
+                />
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-full text-[10px] uppercase tracking-wider font-semibold transition-all duration-300 hover:scale-105"
+                  style={{ background: "#c9a84c", color: "#1a1208" }}
+                >
+                  Subscribe <ArrowRight className="w-3 h-3 inline ml-1" />
+                </button>
+              </form>
+            )}
           </div>
-          <div className="flex items-center gap-6">
-            <Link
-              to="/shipping"
-              className="transition-colors"
-              style={{
-                fontSize: "12px",
-                color: "rgba(250,247,244,0.4)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "rgba(250,247,244,0.4)")
-              }
-            >
-              Shipping
-            </Link>
-            <Link
-              to="/faq"
-              className="transition-colors"
-              style={{
-                fontSize: "12px",
-                color: "rgba(250,247,244,0.4)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "rgba(250,247,244,0.4)")
-              }
-            >
-              FAQ
-            </Link>
-            <Link
-              to="/care-guide"
-              className="transition-colors"
-              style={{
-                fontSize: "12px",
-                color: "rgba(250,247,244,0.4)",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = "rgba(250,247,244,0.4)")
-              }
-            >
-              Care Guide
-            </Link>
+        </div>
+      </div>
+
+      {/* ━━ BOTTOM BAR ━━ */}
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-5">
+        <div style={{ height: "1px", background: "rgba(201,168,76,0.1)", marginBottom: "1.25rem" }} />
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+          <p style={{ fontSize: "0.72rem", color: "rgba(253,249,240,0.4)" }}>
+            © 2024 Mohika Art. Made with{" "}
+            <Heart className="inline w-3 h-3" style={{ color: "#e53e3e", fill: "#e53e3e" }} />{" "}
+            in India
+          </p>
+          <div className="flex items-center gap-4">
+            {["Privacy Policy", "Return Policy", "Terms"].map((t) => (
+              <Link
+                key={t}
+                to="/shipping"
+                style={{ fontSize: "0.72rem", color: "rgba(253,249,240,0.4)" }}
+                className="transition-colors hover:text-[#c9a84c]"
+              >
+                {t}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
