@@ -361,7 +361,9 @@ body {
   overscroll-behavior-y: none;
 }
 main {
-  will-change: transform;
+  /* Removed will-change: transform — it creates a new containing block
+     that breaks position: sticky on child elements (filter bars).
+     Sticky elements need to be relative to the viewport scroll. */
 }
 
 
