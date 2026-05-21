@@ -617,19 +617,11 @@ const Hero = () => {
       </div>
 
       {/* ── MARQUEE STRIP ── premium ecommerce brand pillars */}
-      <div className="relative mt-auto">
+      <div className="relative mt-auto w-full">
         <div className="gold-divider" />
         <div
-          className="relative overflow-hidden py-4"
+          className="relative overflow-hidden py-4 w-full"
           style={{ background: "transparent" }}
-          onMouseEnter={(e) => {
-            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
-            if (track) track.style.animationPlayState = "paused";
-          }}
-          onMouseLeave={(e) => {
-            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
-            if (track) track.style.animationPlayState = "running";
-          }}
         >
           {/* Soft fade gradients on left/right edges */}
           <div
@@ -651,7 +643,7 @@ const Hero = () => {
             }}
           />
 
-          <div className="marquee-strip flex whitespace-nowrap">
+          <div className="marquee-strip">
             {[...Array(2)].map((_, i) => (
               <span key={i} className="flex shrink-0 items-center">
                 {[
@@ -676,26 +668,19 @@ const Hero = () => {
                       color: "hsl(25 10% 32%)",
                       transition: "color 0.4s cubic-bezier(0.22,1,0.36,1)",
                       cursor: "default",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {t}
-                    <motion.span
+                    <span
                       className="mx-5 inline-block"
                       style={{
                         color: "hsl(34 58% 52%)",
                         fontSize: "0.85em",
                       }}
-                      animate={{
-                        rotate: [0, 360],
-                        scale: [1, 1.15, 1],
-                      }}
-                      transition={{
-                        rotate: { duration: 6, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
-                      }}
                     >
                       ✦
-                    </motion.span>
+                    </span>
                   </span>
                 ))}
               </span>
