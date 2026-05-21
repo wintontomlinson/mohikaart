@@ -99,7 +99,7 @@ const Hero = () => {
           "linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%)",
       }}
     >
-      {/* ── Animated mesh blobs ── */}
+      {/* ── Animated mesh blobs + cinematic ambient ── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         <div
           className="absolute -top-56 -left-52 h-[56rem] w-[56rem] rounded-full bg-blush/20 blur-[110px] will-change-transform"
@@ -107,15 +107,22 @@ const Hero = () => {
         <div
           className="absolute -right-56 -top-4 h-[62rem] w-[62rem] rounded-full bg-champagne/18 blur-[130px] will-change-transform"
         />
+        {/* Morphing ambient glow */}
         <motion.div
           className="absolute bottom-0 left-1/3 h-[28rem] w-[28rem] rounded-full blur-[90px]"
           style={{ background: "hsl(34 58% 82%/0.12)" }}
-          animate={{ scale: [1, 1.12, 1], x: [0, 30, 0] }}
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ scale: [1, 1.15, 1], x: [0, 40, 0], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-1/4 right-1/4 h-[20rem] w-[20rem] rounded-full blur-[100px] hidden md:block"
+          style={{ background: "hsl(348 55% 88%/0.08)" }}
+          animate={{ scale: [1, 1.2, 1], y: [0, -20, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 3 }}
         />
 
-        {/* Gold dust particles — enhanced cinematic */}
-        {!reduceMotion && [...Array(8)].map((_, i) => (
+        {/* Gold dust particles — cinematic shimmer */}
+        {!reduceMotion && [...Array(10)].map((_, i) => (
           <motion.span
             key={i}
             className="absolute rounded-full"
@@ -160,9 +167,22 @@ const Hero = () => {
               marginTop: `-${size / 2}rem`,
             }}
             animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-            transition={{ duration: 30 + i * 8, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 35 + i * 10, repeat: Infinity, ease: "linear" }}
           />
         ))}
+
+        {/* Light reflection sweep — cinematic ambient shimmer */}
+        {!reduceMotion && (
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(135deg, transparent 40%, hsl(38 65% 90%/0.05) 50%, transparent 60%)",
+              backgroundSize: "300% 300%",
+            }}
+            animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
       </div>
 
       {/* ── MAIN LAYOUT ── */}
