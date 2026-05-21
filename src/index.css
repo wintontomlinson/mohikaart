@@ -416,3 +416,59 @@ body::before {
 section {
   scroll-margin-top: 80px;
 }
+
+
+
+/* ── Premium Homepage Redesign Effects ── */
+
+/* Magnetic button hover effect */
+.btn-magnetic-premium {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease;
+}
+.btn-magnetic-premium:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 16px 40px -8px hsl(34 58% 52% / 0.35);
+}
+.btn-magnetic-premium:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Section reveal — used with Framer Motion */
+.section-premium {
+  position: relative;
+  overflow: hidden;
+}
+.section-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Luxury card depth */
+.card-luxury {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.card-luxury:hover {
+  transform: translateY(-10px) scale(1.01);
+  box-shadow: 0 28px 56px -16px rgba(26, 18, 8, 0.16), 0 0 0 1px rgba(201, 168, 76, 0.06);
+}
+
+/* Premium glassmorphism */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px -8px rgba(26, 18, 8, 0.08);
+}
+
+/* Smooth image reveal on load */
+.img-cinema {
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease, filter 0.8s ease;
+}
+.img-cinema:hover {
+  transform: scale(1.06);
+}
