@@ -5,13 +5,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 
-import catKeychain from "@/assets/cat-keychain.jpg";
-import catFrame from "@/assets/cat-frame.jpg";
-import catWedding from "@/assets/cat-wedding.jpg";
+const catKeychain = "/placeholder.svg";
+const catFrame = "/placeholder.svg";
+const catWedding = "/placeholder.svg";
 import catBookmark from "@/assets/cat-bookmark.jpg";
-import catTray from "@/assets/cat-tray.jpg";
-import catHamper from "@/assets/cat-hamper.jpg";
-import catCouple from "@/assets/cat-couple.jpg";
+const catTray = "/placeholder.svg";
+const catHamper = "/placeholder.svg";
+const catCouple = "/placeholder.svg";
 import heroTray from "@/assets/hero-resin-tray.jpg";
 
 const PRODUCTS = [
@@ -94,18 +94,21 @@ const Showcase = () => {
           {PRODUCTS.map((p, i) => (
             <motion.div
               key={p.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 40, scale: 0.9, rotateX: 10 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-              className="group cursor-pointer"
-              style={{ transition: "transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease" }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 40px -12px rgba(26,18,8,0.15)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+              transition={{ duration: 0.7, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -10, scale: 1.02, rotateY: 3, z: 20 }}
+              className="group cursor-pointer card-shine hover-glow-gold"
+              style={{
+                transformStyle: "preserve-3d",
+                perspective: "800px",
+                transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s ease",
+              }}
             >
               {/* Image */}
               <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1" }}>
-                <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.07]" />
+                <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.1]" />
 
                 {/* Badge */}
                 <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[8px] sm:text-[9px] uppercase tracking-wider font-bold" style={{ background: BADGE_STYLES[p.badge]?.bg, color: BADGE_STYLES[p.badge]?.color }}>

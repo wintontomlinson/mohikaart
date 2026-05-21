@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Heart, Plus, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +38,27 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
   const fullStars = Math.floor(rating);
   const hasHalf = rating % 1 >= 0.5;
 
+  /* ── 3D Tilt logic ── */
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), { stiffness: 250, damping: 25 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), { stiffness: 250, damping: 25 });
+  const glareX = useTransform(mouseX, [-0.5, 0.5], [0, 100]);
+  const glareY = useTransform(mouseY, [-0.5, 0.5], [0, 100]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  }, [mouseX, mouseY]);
+
+  const handleMouseLeave = useCallback(() => {
+    mouseX.set(0);
+    mouseY.set(0);
+  }, [mouseX, mouseY]);
+
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     setAdding(true);
@@ -51,24 +72,39 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 40, scale: 0.96 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      ref={cardRef}
+      initial={{ opacity: 0, y: 50, scale: 0.92, rotateX: 10 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.7, delay: (index % 6) * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -8, boxShadow: "0 20px 40px -12px rgba(61,43,31,0.15)" }}
-      className="group"
-      style={{ transition: "box-shadow 0.4s ease" }}
+      transition={{ duration: 0.8, delay: (index % 6) * 0.12, ease: [0.22, 1, 0.36, 1] }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+        perspective: "1000px",
+      }}
+      className="group card-shine"
     >
       <Link to={`/product/${p.slug}`} className="block">
-        <div className="relative overflow-hidden rounded-3xl bg-card-grad shadow-card aspect-square">
+        <div className="relative overflow-hidden rounded-3xl bg-card-grad shadow-3d aspect-square" style={{ transformStyle: "preserve-3d" }}>
           <img
             src={resolveImage(p.image_url)}
             alt={p.name}
             loading="lazy"
-            className="w-full h-full object-cover transition-transform group-hover:scale-110"
-            style={{ transitionDuration: "1500ms" }}
+            className="w-full h-full object-cover transition-transform group-hover:scale-[1.12]"
+            style={{ transitionDuration: "1200ms", transform: "translateZ(0)" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* 3D Depth overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* Glare effect */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{
+              background: `radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15), transparent 60%)`,
+            }}
+          />
 
           {/* Badges row */}
           <div className="absolute top-4 left-4 flex items-center gap-2">
@@ -123,7 +159,8 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
               {adding ? "Added!" : "Add to Cart"}
             </button>
           </div>
-          <div className="absolute inset-0 rounded-3xl border-2 border-gold/0 group-hover:border-gold/30 transition-all duration-500 pointer-events-none" />
+          {/* Animated glow border */}
+          <div className="absolute inset-0 rounded-3xl border-2 border-gold/0 group-hover:border-gold/40 transition-all duration-700 pointer-events-none group-hover:shadow-[inset_0_0_30px_rgba(201,150,74,0.1)]" />
         </div>
 
         <div className="mt-4 flex items-end justify-between gap-2">

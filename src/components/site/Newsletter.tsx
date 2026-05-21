@@ -29,14 +29,16 @@ const Newsletter = () => {
     <section className="py-16 md:py-20">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30, scale: 0.95, rotateX: 6 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative overflow-hidden rounded-3xl px-6 py-12 md:px-12 md:py-14"
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className="relative overflow-hidden rounded-3xl px-6 py-12 md:px-12 md:py-14 hover-glow-gold"
           style={{
             background: "linear-gradient(135deg, #fdf8f3 0%, #fef5ee 50%, #fdf8f3 100%)",
             border: "1px solid rgba(201,150,74,0.15)",
+            perspective: "1000px",
+            transformStyle: "preserve-3d",
           }}
         >
           {/* Subtle pattern */}

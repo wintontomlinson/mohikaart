@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, Quote, Mail, Calendar, Sparkles, Truck } from "lucide-react";
-import weddingImg from "@/assets/cat-wedding.jpg";
-import trayImg from "@/assets/cat-tray.jpg";
-import frameImg from "@/assets/cat-frame.jpg";
+const weddingImg = "/placeholder.svg";
+const trayImg = "/placeholder.svg";
+const frameImg = "/placeholder.svg";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },

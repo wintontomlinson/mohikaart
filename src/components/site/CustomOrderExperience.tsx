@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Upload, MessageCircle, X, Flower2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { useStoreSettings } from "@/lib/settings";
-import frameFallback from "@/assets/cat-frame.jpg";
+const frameFallback = "/placeholder.svg";
 
 /* ──────────────────────────────────────────────────────────────
    Static option sets - kept in-file because they're tightly

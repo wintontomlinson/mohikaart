@@ -4,8 +4,8 @@ import { ArrowRight, Instagram } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 
 import galleryPouring from "@/assets/gallery-pouring.jpg";
-import catKeychain from "@/assets/cat-keychain.jpg";
-import catTray from "@/assets/cat-tray.jpg";
+const catKeychain = "/placeholder.svg";
+const catTray = "/placeholder.svg";
 import galleryWorkspace from "@/assets/gallery-workspace.jpg";
 
 /* ── Count-up hook ── */

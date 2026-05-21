@@ -4,22 +4,16 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
-import catWedding from "@/assets/cat-wedding.jpg";
-import catTray from "@/assets/cat-tray.jpg";
-import catCouple from "@/assets/cat-couple.jpg";
-import catFrame from "@/assets/cat-frame.jpg";
-import catKeychain from "@/assets/cat-keychain.jpg";
-import catHamper from "@/assets/cat-hamper.jpg";
 
 type Cat = { id: string; name: string; slug: string; image_url: string | null };
 
 const FALLBACK_CATEGORIES: Cat[] = [
-  { id: "fb-wedding", name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: catWedding },
-  { id: "fb-frames", name: "Photo Frames", slug: "photo-frames", image_url: catFrame },
-  { id: "fb-keychains", name: "Name Keychains", slug: "name-keychains", image_url: catKeychain },
-  { id: "fb-coasters", name: "Coaster Sets", slug: "coaster-sets", image_url: catTray },
-  { id: "fb-bookmarks", name: "Bookmarks", slug: "bookmarks", image_url: catCouple },
-  { id: "fb-hampers", name: "Gift Hampers", slug: "gift-hampers", image_url: catHamper },
+  { id: "fb-wedding", name: "Wedding Keepsakes", slug: "wedding-keepsakes", image_url: "/placeholder.svg" },
+  { id: "fb-frames", name: "Photo Frames", slug: "photo-frames", image_url: "/placeholder.svg" },
+  { id: "fb-keychains", name: "Name Keychains", slug: "name-keychains", image_url: "/placeholder.svg" },
+  { id: "fb-coasters", name: "Coaster Sets", slug: "coaster-sets", image_url: "/placeholder.svg" },
+  { id: "fb-bookmarks", name: "Bookmarks", slug: "bookmarks", image_url: "/placeholder.svg" },
+  { id: "fb-hampers", name: "Gift Hampers", slug: "gift-hampers", image_url: "/placeholder.svg" },
 ];
 
 /* ── Simple 3D tilt on hover (no external dependency) ── */
@@ -137,13 +131,15 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
           {display.slice(0, 6).map((c, i) => (
             <motion.div
               key={c.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 40, scale: 0.88, rotateX: 12 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: (i % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.75, delay: (i % 3) * 0.12, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -8, scale: 1.03 }}
               className="group relative"
+              style={{ perspective: "800px" }}
             >
-              <TiltCard className="relative overflow-hidden rounded-2xl bg-white border border-[#e5e0d8]">
+              <TiltCard className="relative overflow-hidden rounded-2xl bg-white border border-[#e5e0d8] card-shine hover-glow-gold">
                 <Link to={`/category/${c.slug}`} className="block">
                   <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
                     <img

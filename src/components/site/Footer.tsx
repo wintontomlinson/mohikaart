@@ -59,9 +59,30 @@ const Footer = () => {
   ];
 
   return (
-    <footer style={{ background: "#1a1208", color: "#fdf9f0" }}>
+    <footer style={{ background: "#1a1208", color: "#fdf9f0" }} className="relative overflow-hidden">
+      {/* Animated background elements */}
+      <motion.div
+        className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-[0.04]"
+        style={{ background: "radial-gradient(circle, hsl(34 58% 52%), transparent 70%)" }}
+        animate={{ scale: [1, 1.2, 1], x: [0, -30, 0] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-[0.03]"
+        style={{ background: "radial-gradient(circle, hsl(348 56% 70%), transparent 70%)" }}
+        animate={{ scale: [1, 1.15, 1], y: [0, -20, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+      />
+
       {/* Gold line top */}
-      <div aria-hidden style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
+      <motion.div
+        aria-hidden
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)", transformOrigin: "center" }}
+      />
 
       {/* ━━ TOP SECTION — 4 COLUMNS ━━ */}
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-16 pb-10">
@@ -86,8 +107,8 @@ const Footer = () => {
             </p>
             {/* Social icons */}
             <div className="flex items-center gap-2.5">
-              {socials.map((s) => (
-                <a
+              {socials.map((s, i) => (
+                <motion.a
                   key={s.label}
                   href={s.href}
                   target="_blank"
@@ -95,9 +116,15 @@ const Footer = () => {
                   aria-label={s.label}
                   className="w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-300 hover:bg-[#c9a84c] hover:border-[#c9a84c] hover:text-[#1a1208] hover:scale-110"
                   style={{ borderColor: "rgba(201,168,76,0.3)", color: "rgba(253,249,240,0.6)" }}
+                  whileHover={{ scale: 1.15, rotate: 5, y: -3 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 * i, duration: 0.5 }}
                 >
                   <s.icon className="w-4 h-4" strokeWidth={1.6} />
-                </a>
+                </motion.a>
               ))}
             </div>
           </motion.div>

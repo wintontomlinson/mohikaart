@@ -7,6 +7,7 @@ import CartDrawer from "@/components/site/CartDrawer";
 import LoadingScreen from "@/components/site/LoadingScreen";
 import CursorSpotlight from "@/components/site/CursorSpotlight";
 import ScrollProgress from "@/components/site/ScrollProgress";
+import AnimatedBackground from "@/components/site/AnimatedBackground";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
 import { useEffect } from "react";
@@ -21,11 +22,12 @@ const SiteLayout = () => (
   <CartProvider>
     <WishlistProvider>
       <LoadingScreen />
+      <AnimatedBackground />
       <CursorSpotlight />
       <ScrollProgress />
       <ScrollTop />
       <Navbar />
-      <main className="relative">
+      <main className="relative z-10">
         <Outlet />
       </main>
       <Footer />

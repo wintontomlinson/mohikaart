@@ -8,7 +8,7 @@ import g2 from "@/assets/gallery-packing.jpg";
 import g3 from "@/assets/gallery-flatlay.jpg";
 import g4 from "@/assets/gallery-workspace.jpg";
 import g5 from "@/assets/gallery-customer.jpg";
-import g6 from "@/assets/cat-couple.jpg";
+const g6 = "/placeholder.svg";
 
 const GALLERY_KEYS = ["gallery_1", "gallery_2", "gallery_3", "gallery_4", "gallery_5", "gallery_6"];
 const FALLBACKS = [g1, g2, g3, g4, g5, g6];
@@ -93,18 +93,25 @@ const Gallery = () => {
               href="https://instagram.com/mohikaart"
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, scale: 0.9, y: 30 }}
-              animate={isInView ? { opacity: 1, scale: 1, y: 0 } : {}}
-              transition={{ duration: 0.65, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ scale: 1.025, y: -5 }}
-              className={`group relative overflow-hidden rounded-2xl shadow-soft ${heights[i]}`}
+              initial={{ opacity: 0, scale: 0.85, y: 40, rotateX: 12 }}
+              animate={isInView ? { opacity: 1, scale: 1, y: 0, rotateX: 0 } : {}}
+              transition={{ duration: 0.75, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{
+                scale: 1.04,
+                y: -10,
+                rotateX: -3,
+                rotateY: 4,
+                z: 30,
+              }}
+              className={`group relative overflow-hidden rounded-2xl shadow-3d card-shine ${heights[i]}`}
+              style={{ transformStyle: "preserve-3d", perspective: "800px" }}
             >
               <img
                 src={src}
                 alt={`Mohika Art - ${labels[i]}`}
                 loading="lazy"
-                className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                style={{ transitionDuration: "1200ms" }}
+                className="w-full h-full object-cover transition-transform group-hover:scale-[1.12]"
+                style={{ transitionDuration: "1000ms", transform: "translateZ(0)" }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/75 via-foreground/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
               <div className="absolute inset-0 rounded-2xl border-2 border-gold/0 group-hover:border-gold/35 transition-all duration-500 pointer-events-none" />

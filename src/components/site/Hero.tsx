@@ -7,7 +7,7 @@ import { resolveImage } from "@/lib/site";
 import { safePath } from "@/lib/validation";
 import { useHeroContent } from "@/lib/cms";
 import heroFallback from "@/assets/hero-resin-tray.jpg";
-import keychain from "@/assets/cat-keychain.jpg";
+const keychain = "/placeholder.svg";
 import bookmark from "@/assets/cat-bookmark.jpg";
 
 /* ── animated counter ── */
