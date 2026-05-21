@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import ImageUpload from "./ImageUpload";
 import { toast } from "sonner";
-import { RefreshCw, Trash2, ExternalLink, ImageIcon } from "lucide-react";
+import { RefreshCw, Trash2, ImageIcon, CheckCircle2 } from "lucide-react";
 
 type Slot = { key: string; image_url: string; alt: string | null };
 
@@ -52,6 +52,8 @@ const SECTIONS: { title: string; slots: { key: string; label: string; desc?: str
 const AdminImages = () => {
   const [data, setData] = useState<Record<string, Slot>>({});
   const [loading, setLoading] = useState(true);
+  const [productImages, setProductImages] = useState<{ id: string; name: string; image_url: string }[]>([]);
+  const [pickingFor, setPickingFor] = useState<string | null>(null);
 
   const load = async () => {
     const { data: rows } = await supabase.from("site_images").select("*");
@@ -61,7 +63,18 @@ const AdminImages = () => {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    // Load product images for picker
+    supabase
+      .from("products")
+      .select("id,name,image_url")
+      .not("image_url", "is", null)
+      .order("sort_order")
+      .then(({ data: prods }) => {
+        setProductImages((prods ?? []).filter((p: any) => p.image_url) as any);
+      });
+  }, []);
 
   const update = async (key: string, image_url: string) => {
     const existing = data[key];
@@ -83,6 +96,11 @@ const AdminImages = () => {
     if (error) return toast.error(error.message);
     toast.success("Image removed — will use default");
     load();
+  };
+
+  const useProductImage = async (key: string, imageUrl: string) => {
+    await update(key, imageUrl);
+    setPickingFor(null);
   };
 
   if (loading) {
@@ -204,6 +222,13 @@ const AdminImages = () => {
                             label=""
                             className="inline-block"
                           />
+                          <button
+                            onClick={() => setPickingFor(s.key)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs transition-colors"
+                            title="Use one of your product images"
+                          >
+                            <ImageIcon className="w-3 h-3" /> From Products
+                          </button>
                           {DEFAULT_IMAGES[s.key] && (
                             <button
                               onClick={() => resetToDefault(s.key)}
@@ -232,6 +257,59 @@ const AdminImages = () => {
           </div>
         ))}
       </div>
+
+      {/* Product Image Picker Modal */}
+      {pickingFor && (
+        <div className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-background w-full max-w-2xl max-h-[80vh] rounded-2xl shadow-2xl overflow-hidden">
+            <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="font-display text-xl">Pick from Product Images</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Select a product image to use for <span className="font-mono bg-muted px-1.5 py-0.5 rounded">{pickingFor}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setPickingFor(null)}
+                className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {productImages.length === 0 ? (
+                <p className="text-center text-sm text-muted-foreground py-10">
+                  No product images found. Add products with images first.
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  {productImages.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => useProductImage(pickingFor, p.image_url)}
+                      className="group relative rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-400 transition-all"
+                    >
+                      <div className="aspect-square">
+                        <img
+                          src={resolveImage(p.image_url)}
+                          alt={p.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      </div>
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center">
+                        <CheckCircle2 className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-foreground/70 to-transparent p-2">
+                        <span className="text-[9px] text-white font-medium line-clamp-1">{p.name}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
