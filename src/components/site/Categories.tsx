@@ -137,13 +137,15 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
           {display.slice(0, 6).map((c, i) => (
             <motion.div
               key={c.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 40, scale: 0.88, rotateX: 12 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: (i % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.75, delay: (i % 3) * 0.12, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -8, scale: 1.03 }}
               className="group relative"
+              style={{ perspective: "800px" }}
             >
-              <TiltCard className="relative overflow-hidden rounded-2xl bg-white border border-[#e5e0d8]">
+              <TiltCard className="relative overflow-hidden rounded-2xl bg-white border border-[#e5e0d8] card-shine hover-glow-gold">
                 <Link to={`/category/${c.slug}`} className="block">
                   <div className="relative overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
                     <img

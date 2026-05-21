@@ -1,1 +1,541 @@
-/* App.css - minimal reset, all styling via Tailwind + index.css */
+/* App.css - Global Animations, 3D Effects & Design Enhancements */
+
+/* ══════════════════════════════════════════════════════════════
+   1. SCROLL-TRIGGERED REVEAL ANIMATIONS
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(60px) scale(0.96); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes reveal-left {
+  from { opacity: 0; transform: translateX(-60px) rotateY(8deg); }
+  to   { opacity: 1; transform: translateX(0) rotateY(0); }
+}
+@keyframes reveal-right {
+  from { opacity: 0; transform: translateX(60px) rotateY(-8deg); }
+  to   { opacity: 1; transform: translateX(0) rotateY(0); }
+}
+@keyframes reveal-scale {
+  from { opacity: 0; transform: scale(0.8) rotateX(10deg); }
+  to   { opacity: 1; transform: scale(1) rotateX(0); }
+}
+@keyframes reveal-rotate {
+  from { opacity: 0; transform: perspective(1000px) rotateX(20deg) translateY(40px); }
+  to   { opacity: 1; transform: perspective(1000px) rotateX(0) translateY(0); }
+}
+
+.anim-reveal-up {
+  animation: reveal-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-reveal-left {
+  animation: reveal-left 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-reveal-right {
+  animation: reveal-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-reveal-scale {
+  animation: reveal-scale 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-reveal-rotate {
+  animation: reveal-rotate 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   2. 3D CARD EFFECTS
+   ══════════════════════════════════════════════════════════════ */
+
+.card-3d-enhanced {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-3d-enhanced:hover {
+  transform: perspective(1000px) rotateX(4deg) rotateY(-6deg) translateZ(30px) translateY(-12px);
+  box-shadow:
+    0 40px 80px -20px rgba(61, 43, 31, 0.2),
+    0 20px 40px -10px rgba(201, 150, 74, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.card-flip {
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-flip:hover {
+  transform: rotateY(180deg);
+}
+.card-flip-front, .card-flip-back {
+  backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+}
+.card-flip-back {
+  transform: rotateY(180deg);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. MAGNETIC / INTERACTIVE BUTTON EFFECTS
+   ══════════════════════════════════════════════════════════════ */
+
+.btn-3d {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-3d::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  transform: translateZ(-8px);
+  filter: blur(12px);
+  opacity: 0.4;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-3d:hover {
+  transform: translateY(-4px) translateZ(8px);
+}
+.btn-3d:hover::before {
+  transform: translateZ(-14px);
+  opacity: 0.6;
+  filter: blur(18px);
+}
+
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: rotate(25deg);
+  transition: left 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.btn-shine:hover::after {
+  left: 120%;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. GRADIENT BORDER ANIMATIONS
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes border-rotate {
+  0%   { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-border {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    hsl(34 58% 52%),
+    hsl(348 56% 80%),
+    hsl(278 32% 72%),
+    hsl(38 62% 70%),
+    hsl(34 58% 52%)
+  );
+  animation: border-rotate 4s linear infinite;
+  z-index: -1;
+}
+.gradient-border::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: calc(1.5rem - 2px);
+  background: hsl(36 45% 99%);
+  z-index: -1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. FLOATING / LEVITATION EFFECTS
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes levitate {
+  0%, 100% { transform: translateY(0) rotateX(0) rotateZ(0); }
+  25%      { transform: translateY(-12px) rotateX(2deg) rotateZ(0.5deg); }
+  50%      { transform: translateY(-20px) rotateX(0) rotateZ(-0.5deg); }
+  75%      { transform: translateY(-12px) rotateX(-2deg) rotateZ(0.5deg); }
+}
+.animate-levitate {
+  animation: levitate 8s ease-in-out infinite;
+}
+
+@keyframes orbit {
+  0%   { transform: rotate(0deg) translateX(20px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(20px) rotate(-360deg); }
+}
+.animate-orbit {
+  animation: orbit 12s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(34 58% 52% / 0.2), 0 0 40px hsl(34 58% 52% / 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(34 58% 52% / 0.4), 0 0 80px hsl(34 58% 52% / 0.2), 0 0 120px hsl(348 56% 80% / 0.1);
+  }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. TEXT EFFECTS & REVEALS
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes text-slide-up {
+  from { transform: translateY(110%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.text-slide-up {
+  overflow: hidden;
+  display: inline-block;
+}
+.text-slide-up > * {
+  animation: text-slide-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid hsl(34 58% 52%);
+  animation: typewriter 2.5s steps(30) 0.5s both, blink-caret 0.75s step-end infinite;
+}
+@keyframes blink-caret {
+  50% { border-color: transparent; }
+}
+
+@keyframes gradient-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.text-gradient-animated {
+  background: linear-gradient(270deg, hsl(34 58% 52%), hsl(348 56% 70%), hsl(278 32% 65%), hsl(38 62% 60%), hsl(34 58% 52%));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-flow 6s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7. PARTICLE & SPARKLE EFFECTS
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50%      { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+.sparkle-container {
+  position: relative;
+}
+.sparkle-container::before,
+.sparkle-container::after {
+  content: '✦';
+  position: absolute;
+  font-size: 10px;
+  color: hsl(34 58% 52%);
+  animation: sparkle 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.sparkle-container::before {
+  top: -8px;
+  right: -8px;
+  animation-delay: 0s;
+}
+.sparkle-container::after {
+  bottom: -8px;
+  left: -8px;
+  animation-delay: 1.5s;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8. SCROLLBAR-TRIGGERED PROGRESS EFFECTS
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes draw-line {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9. RIPPLE & WAVE EFFECTS
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes ripple {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid hsl(34 58% 52% / 0.3);
+  animation: ripple 2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes wave {
+  0%, 100% { transform: translateX(0) translateZ(0) scaleY(1); }
+  50%      { transform: translateX(-25%) translateZ(0) scaleY(0.55); }
+}
+.animate-wave {
+  animation: wave 8s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. GLASSMORPHISM ENHANCED
+   ══════════════════════════════════════════════════════════════ */
+
+.glass-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+}
+
+.glass-dark-premium {
+  background: linear-gradient(
+    135deg,
+    rgba(26, 18, 8, 0.7) 0%,
+    rgba(26, 18, 8, 0.4) 100%
+  );
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   11. STAGGER DELAYS (for child animations)
+   ══════════════════════════════════════════════════════════════ */
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+
+/* ══════════════════════════════════════════════════════════════
+   12. BACKGROUND MESH ANIMATED GRADIENT
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes mesh-move {
+  0%, 100% {
+    background-position: 0% 50%, 100% 50%, 50% 100%;
+  }
+  25% {
+    background-position: 100% 0%, 0% 100%, 50% 0%;
+  }
+  50% {
+    background-position: 100% 100%, 0% 0%, 0% 50%;
+  }
+  75% {
+    background-position: 0% 100%, 100% 0%, 100% 50%;
+  }
+}
+
+.bg-mesh-animated {
+  background:
+    radial-gradient(ellipse at 20% 50%, hsl(348 56% 90% / 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, hsl(34 58% 80% / 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, hsl(278 32% 85% / 0.2) 0%, transparent 50%);
+  background-size: 60% 60%, 50% 50%, 70% 70%;
+  animation: mesh-move 20s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. HOVER GLOW / NEON BORDER
+   ══════════════════════════════════════════════════════════════ */
+
+.hover-glow-gold {
+  transition: box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hover-glow-gold:hover {
+  box-shadow:
+    0 0 20px hsl(34 58% 52% / 0.25),
+    0 0 40px hsl(34 58% 52% / 0.15),
+    0 0 80px hsl(34 58% 52% / 0.08);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. IMAGE PARALLAX ZOOM ON SCROLL
+   ══════════════════════════════════════════════════════════════ */
+
+.img-parallax-zoom {
+  overflow: hidden;
+  border-radius: 1.5rem;
+}
+.img-parallax-zoom img {
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.img-parallax-zoom:hover img {
+  transform: scale(1.08);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   15. SPLIT TEXT LINE REVEAL
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes line-reveal {
+  from { transform: translateY(100%) rotateX(-80deg); opacity: 0; }
+  to   { transform: translateY(0) rotateX(0); opacity: 1; }
+}
+.line-reveal-container {
+  perspective: 1000px;
+  overflow: hidden;
+}
+.line-reveal-container > * {
+  animation: line-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   16. MORPHING BLOB BACKGROUND
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes blob-float {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: translate(10px, -15px) scale(1.05);
+  }
+  66% {
+    border-radius: 50% 50% 30% 70% / 40% 70% 30% 60%;
+    transform: translate(-8px, 10px) scale(0.98);
+  }
+}
+.blob-animated {
+  animation: blob-float 12s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   17. CARD SHINE ON HOVER
+   ══════════════════════════════════════════════════════════════ */
+
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+.card-shine::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transform: rotate(25deg);
+  transition: left 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+.card-shine:hover::before {
+  left: 130%;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   18. ENHANCED SHADOW LAYERS (depth effect)
+   ══════════════════════════════════════════════════════════════ */
+
+.shadow-3d {
+  box-shadow:
+    0 2px 4px rgba(61, 43, 31, 0.04),
+    0 4px 8px rgba(61, 43, 31, 0.06),
+    0 8px 16px rgba(61, 43, 31, 0.08),
+    0 16px 32px rgba(61, 43, 31, 0.1),
+    0 32px 64px rgba(61, 43, 31, 0.12);
+  transition: box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.shadow-3d:hover {
+  box-shadow:
+    0 4px 8px rgba(61, 43, 31, 0.02),
+    0 8px 16px rgba(61, 43, 31, 0.04),
+    0 16px 32px rgba(61, 43, 31, 0.06),
+    0 32px 64px rgba(61, 43, 31, 0.08),
+    0 64px 128px rgba(61, 43, 31, 0.1);
+  transform: translateY(-8px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   19. SCROLL-INDICATOR BOUNCE
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50%      { transform: translateY(10px); opacity: 1; }
+}
+.scroll-indicator {
+  animation: scroll-bounce 2s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   20. RESPONSIVE: reduce effects on mobile for perf
+   ══════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+  .card-3d-enhanced:hover,
+  .card-shine::before,
+  .btn-3d::before {
+    transform: none;
+    box-shadow: var(--shadow-card);
+  }
+  .bg-mesh-animated {
+    animation: none;
+  }
+}

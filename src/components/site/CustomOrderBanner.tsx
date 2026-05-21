@@ -7,13 +7,15 @@ const CustomOrderBanner = () => {
     <section className="py-4 md:py-6">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 30, scale: 0.95, rotateX: 8 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative overflow-hidden rounded-3xl px-8 py-14 md:py-16 text-center"
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className="relative overflow-hidden rounded-3xl px-8 py-14 md:py-16 text-center hover-glow-gold"
           style={{
             background: "linear-gradient(135deg, #3D2B1F 0%, #5a3d2e 50%, #3D2B1F 100%)",
+            perspective: "1000px",
+            transformStyle: "preserve-3d",
           }}
         >
           {/* Shimmer animated bg */}

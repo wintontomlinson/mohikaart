@@ -88,21 +88,23 @@ const HowItWorksSimple = () => {
           {steps.map((step, i) => (
             <motion.div
               key={step.title}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="relative z-10 flex flex-col items-center text-center flex-1 max-w-[260px]"
+              initial={{ opacity: 0, y: 40, rotateX: 20, scale: 0.85 }}
+              animate={isInView ? { opacity: 1, y: 0, rotateX: 0, scale: 1 } : {}}
+              transition={{ duration: 0.8, delay: i * 0.2, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -12, scale: 1.05, rotateY: 5 }}
+              className="relative z-10 flex flex-col items-center text-center flex-1 max-w-[260px] card-shine"
+              style={{ perspective: "800px", transformStyle: "preserve-3d" }}
             >
               {/* Icon circle */}
               <motion.div
-                className="w-[80px] h-[80px] rounded-full flex items-center justify-center mb-5"
+                className="w-[80px] h-[80px] rounded-full flex items-center justify-center mb-5 animate-pulse-glow"
                 style={{
                   background: "white",
                   border: "2px solid #C9964A",
                   boxShadow: "0 8px 24px -4px rgba(201,150,74,0.2)",
                 }}
-                animate={isInView ? { scale: [0.8, 1.05, 1] } : {}}
-                transition={{ duration: 0.6, delay: i * 0.2 + 0.3 }}
+                animate={isInView ? { scale: [0.5, 1.1, 1], rotate: [0, 10, 0] } : {}}
+                transition={{ duration: 0.8, delay: i * 0.2 + 0.3, type: "spring", stiffness: 200 }}
               >
                 <motion.span
                   className="text-3xl"
