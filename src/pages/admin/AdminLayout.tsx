@@ -192,27 +192,25 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   if (!isAdmin) return <NotAuthorized />;
 
   const groups: { title: string; items: { to: string; icon: any; label: string }[] }[] = [
-    { title: "Overview", items: [
+    { title: "Main", items: [
       { to: "/admin",           icon: LayoutDashboard, label: "Dashboard" },
       { to: "/admin/analytics", icon: BarChart3,       label: "Analytics" },
+      { to: "/admin/orders",    icon: ShoppingCart,    label: "Orders" },
     ]},
-    { title: "Catalogue", items: [
+    { title: "Store", items: [
       { to: "/admin/products",    icon: Package, label: "Products" },
       { to: "/admin/categories",  icon: Tag,     label: "Categories" },
-      { to: "/admin/coupons",     icon: Ticket,  label: "Coupons" },
-    ]},
-    { title: "Customers", items: [
-      { to: "/admin/orders",     icon: ShoppingCart,        label: "Orders" },
-      { to: "/admin/inquiries",  icon: Mail,                label: "Inquiries" },
-      { to: "/admin/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
+      { to: "/admin/inquiries",   icon: Mail,    label: "Inquiries" },
+      { to: "/admin/testimonials", icon: MessageSquareQuote, label: "Reviews" },
     ]},
     { title: "Content", items: [
-      { to: "/admin/hero",          icon: Sparkles,  label: "Hero Section" },
+      { to: "/admin/hero",          icon: Sparkles,  label: "Hero" },
       { to: "/admin/announcements", icon: Megaphone, label: "Announcements" },
-      { to: "/admin/images",        icon: ImageIcon, label: "Site Images" },
+      { to: "/admin/images",        icon: ImageIcon, label: "Images" },
+      { to: "/admin/coupons",       icon: Ticket,    label: "Coupons" },
     ]},
-    { title: "System", items: [
-      { to: "/admin/users",    icon: Users,    label: "Admin Users" },
+    { title: "Settings", items: [
+      { to: "/admin/users",    icon: Users,    label: "Team" },
       { to: "/admin/settings", icon: Settings, label: "Settings" },
     ]},
   ];
@@ -258,13 +256,13 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 pt-2 overflow-y-auto space-y-4">
+      <nav className="flex-1 p-4 pt-2 overflow-y-auto space-y-5">
         {filtered.map((group) => (
           <div key={group.title}>
-            <div className="text-[9px] uppercase tracking-[0.25em] text-background/40 font-semibold px-3 mb-2">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-background/45 font-semibold px-3 mb-2.5">
               {group.title}
             </div>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {group.items.map((it) => {
                 const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
                 return (

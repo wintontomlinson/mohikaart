@@ -10,6 +10,11 @@ import heroFallback from "@/assets/hero-resin-tray.jpg";
 import keychain from "@/assets/cat-keychain.jpg";
 import bookmark from "@/assets/cat-bookmark.jpg";
 
+// Better quality Unsplash hero images (used when Supabase has no image)
+const HERO_UNSPLASH = "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=1200&q=90";
+const KEYCHAIN_UNSPLASH = "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=400&q=80";
+const BOOKMARK_UNSPLASH = "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&q=80";
+
 /* ── animated counter ── */
 function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
   const [val, setVal] = useState(0);
@@ -58,7 +63,7 @@ function TiltCard({ children, className = "", style = {} }: { children: React.Re
 
 const Hero = () => {
   const { data: content } = useHeroContent();
-  const [hero, setHero] = useState<string>(heroFallback);
+  const [hero, setHero] = useState<string>(HERO_UNSPLASH);
   const ref = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
 
@@ -531,7 +536,7 @@ const Hero = () => {
                   }}
                 >
                   <img
-                    src={bookmark}
+                    src={BOOKMARK_UNSPLASH}
                     alt="Floral resin bookmark"
                     loading="lazy"
                     className="w-full rounded-xl object-cover"
@@ -571,7 +576,7 @@ const Hero = () => {
                   }}
                 >
                   <img
-                    src={keychain}
+                    src={KEYCHAIN_UNSPLASH}
                     alt="Personalised name keychain"
                     loading="lazy"
                     className="w-full rounded-xl object-cover"
