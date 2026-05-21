@@ -1,410 +1,127 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-import PageHeader from "@/components/site/PageHeader";
 import { useCart } from "@/lib/cart";
-import { resolveImage, formatINR } from "@/lib/site";
-import { Minus, Plus, Trash2, CreditCard, MessageCircle, CheckCircle2, Package } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useStoreSettings } from "@/lib/settings";
-import { EMAIL_RE, PHONE_RE, PINCODE_RE, LIMITS, clamp } from "@/lib/validation";
+import { Check } from "lucide-react";
 
-declare global {
-  interface Window { Razorpay: any; }
-}
+const Checkout = () => {
+  const { items, total, clear } = useCart();
+  const [placed, setPlaced] = useState(false);
+  const [form, setForm] = useState({
+    name: "", email: "", phone: "", address: "", city: "", state: "", pincode: "", notes: "",
+  });
 
-type Form = {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  notes: string;
-};
-
-const emptyForm: Form = {
-  name: "", email: "", phone: "",
-  address: "", city: "", state: "", pincode: "",
-  notes: "",
-};
-
-const CheckoutPage = () => {
-  const { items, total, setQty, remove, clear } = useCart();
-  const [form, setForm] = useState<Form>(emptyForm);
-  const [step, setStep] = useState<"cart" | "success">("cart");
-  const [processing, setProcessing] = useState(false);
-  const [razorpayKeyId, setRazorpayKeyId] = useState<string>("");
-  const [orderNumber, setOrderNumber] = useState<string>("");
-  const { phone } = useStoreSettings();
-
-  useEffect(() => {
-    supabase.from("app_settings").select("value").eq("key", "razorpay").maybeSingle()
-      .then(({ data }) => {
-        if (data?.value && typeof data.value === "object" && !Array.isArray(data.value)) {
-          setRazorpayKeyId((data.value as any).key_id ?? "");
-        }
-      });
-  }, []);
-
-  const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  const EMAIL_RE_LOCAL   = EMAIL_RE;
-  const PHONE_RE_LOCAL   = PHONE_RE;
-  const PINCODE_RE_LOCAL = PINCODE_RE;
-
-  const validate = () => {
-    if (!form.name.trim() || form.name.trim().length > LIMITS.name)
-      { toast.error("Please enter your name"); return false; }
-    if (!EMAIL_RE_LOCAL.test(form.email.trim()) || form.email.length > LIMITS.email)
-      { toast.error("Enter a valid email"); return false; }
-    if (!PHONE_RE_LOCAL.test(form.phone.trim()) || form.phone.length > LIMITS.phone)
-      { toast.error("Enter a valid phone number"); return false; }
-    if (!form.address.trim() || form.address.length > LIMITS.address)
-      { toast.error("Please enter your address"); return false; }
-    if (!form.city.trim() || form.city.length > LIMITS.city)
-      { toast.error("Please enter your city"); return false; }
-    if (!PINCODE_RE_LOCAL.test(form.pincode.trim()))
-      { toast.error("Pincode must be 6 digits"); return false; }
-    if (form.notes.length > LIMITS.notes)
-      { toast.error("Please shorten your special instructions"); return false; }
-    if (items.length === 0)
-      { toast.error("Your cart is empty"); return false; }
-    if (items.length > 50)
-      { toast.error("Too many items in cart - please contact us via WhatsApp"); return false; }
-    return true;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /**
-   * Server-side order creation (no client-trusted totals).
-   * Calls public.create_order(customer, items, payment_method) RPC.
-   */
-  const saveOrder = async (paymentMethod: "razorpay" | "whatsapp" | "cod") => {
-    const customer = {
-      name:    clamp(form.name,    LIMITS.name),
-      email:   clamp(form.email,   LIMITS.email).toLowerCase(),
-      phone:   clamp(form.phone,   LIMITS.phone),
-      address: clamp(form.address, LIMITS.address),
-      city:    clamp(form.city,    LIMITS.city),
-      state:   clamp(form.state,   LIMITS.state) || null,
-      pincode: clamp(form.pincode, 6),
-      notes:   clamp(form.notes,   LIMITS.notes) || null,
-    };
-    const cartItems = items.map((i) => ({ id: i.id, qty: Math.max(1, Math.min(99, i.qty | 0)) }));
-
-    const { data, error } = await supabase.rpc("create_order", {
-      p_customer:       customer,
-      p_items:          cartItems,
-      p_payment_method: paymentMethod,
-    });
-
-    if (error) throw new Error(error.message);
-    const row = Array.isArray(data) ? data[0] : data;
-    if (!row?.id) throw new Error("Order creation failed");
-    return row as { id: string; order_number: string; total: number; currency: string };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    clear();
+    setPlaced(true);
+    toast.success("Order placed successfully!");
   };
 
-  const onWhatsApp = async () => {
-    if (!validate()) return;
-    setProcessing(true);
-    try {
-      const order = await saveOrder("whatsapp");
-      const text = encodeURIComponent(
-        `Hi Mohika Art! Order #${order.order_number}\n\n` +
-        items.map((i) => `${i.name} x ${i.qty}: ${formatINR(i.price * i.qty)}`).join("\n") +
-        `\n\nTotal: ${formatINR(order.total)}` +
-        `\n\nShip to: ${form.name}, ${form.address}, ${form.city}${form.state ? `, ${form.state}` : ""} - ${form.pincode}` +
-        `\nPhone: ${form.phone}` +
-        (form.notes ? `\nNote: ${form.notes}` : "")
-      );
-      setOrderNumber(order.order_number);
-      clear();
-      setStep("success");
-      const safePhone = (phone || "").replace(/\D/g, "");
-      window.open(`https://wa.me/${encodeURIComponent(safePhone)}?text=${text}`, "_blank", "noopener,noreferrer");
-    } catch (e: any) {
-      toast.error(e.message || "Something went wrong");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const onCOD = async () => {
-    if (!validate()) return;
-    setProcessing(true);
-    try {
-      const order = await saveOrder("cod");
-      setOrderNumber(order.order_number);
-      clear();
-      setStep("success");
-      toast.success("Order placed - pay on delivery");
-    } catch (e: any) {
-      toast.error(e.message || "Something went wrong");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const onRazorpay = async () => {
-    if (!validate()) return;
-    if (!razorpayKeyId) {
-      toast.error("Online payments are not configured yet. Please order via WhatsApp.");
-      return;
-    }
-    setProcessing(true);
-    try {
-      const order = await saveOrder("razorpay");
-
-      if (!window.Razorpay) {
-        await new Promise<void>((res, rej) => {
-          const s = document.createElement("script");
-          s.src = "https://checkout.razorpay.com/v1/checkout.js";
-          s.onload = () => res();
-          s.onerror = () => rej(new Error("Failed to load payment gateway"));
-          document.head.appendChild(s);
-        });
-      }
-
-      const rzp = new window.Razorpay({
-        key: razorpayKeyId,
-        amount: Math.round(order.total * 100),
-        currency: order.currency || "INR",
-        name: "Mohika Art",
-        description: `Order #${order.order_number}`,
-        prefill: { name: form.name, email: form.email, contact: form.phone },
-        theme: { color: "#b8860b" },
-        handler: async (response: any) => {
-          // Best-effort: tell the server the payment was submitted.
-          // The server marks the order as 'payment_submitted'; the admin
-          // verifies it (or a webhook later promotes to 'confirmed').
-          await supabase.rpc("record_payment", {
-            p_order_id:     order.id,
-            p_payment_id:   response.razorpay_payment_id,
-            p_rzp_order_id: response.razorpay_order_id ?? null,
-            p_signature:    response.razorpay_signature ?? null,
-          });
-          setOrderNumber(order.order_number);
-          clear();
-          setStep("success");
-          setProcessing(false);
-        },
-        modal: {
-          ondismiss: async () => {
-            await supabase.rpc("cancel_pending_order", { p_order_id: order.id });
-            toast.info("Payment cancelled.");
-            setProcessing(false);
-          },
-        },
-      });
-      rzp.open();
-    } catch (e: any) {
-      toast.error(e.message || "Something went wrong");
-      setProcessing(false);
-    }
-  };
-
-  if (step === "success") {
+  if (placed) {
     return (
-      <>
-        <PageHeader
-          eyebrow="Order Placed"
-          title={<>Thank you <em className="not-italic text-gold-grad">so much!</em></>}
-          subtitle="Your order has been received. We'll be in touch within 24 hours."
-        />
-        <section className="py-16 md:py-24">
-          <div className="container max-w-lg text-center">
-            <div className="glass rounded-3xl p-10 md:p-14 shadow-luxe">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-              </div>
-              <h2 className="font-display text-3xl mb-2">Order #{orderNumber}</h2>
-              <p className="text-muted-foreground mt-3 leading-relaxed">
-                Mohika will reach out to confirm your custom piece and share an ETA. All items are made-to-order and delivered within 7–10 days.
-              </p>
-              <div className="mt-8 flex flex-col gap-3">
-                <Link to="/shop" className="px-8 py-3.5 rounded-full bg-foreground text-background btn-glow text-sm tracking-wide">
-                  Continue Shopping
-                </Link>
-                <Link to="/" className="px-8 py-3.5 rounded-full border border-border text-sm hover:bg-muted transition-colors">
-                  Back to Home
-                </Link>
-              </div>
-            </div>
+      <div className="pt-24 pb-20 min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+            <Check className="w-10 h-10 text-green-600" />
           </div>
-        </section>
-      </>
+          <h2 className="text-2xl font-serif text-[#1a1208]">Order Placed!</h2>
+          <p className="text-[#1a1208]/60">Order #MKA{Math.floor(Math.random() * 9000) + 1000}</p>
+          <p className="text-sm text-[#1a1208]/50">We'll send confirmation on WhatsApp & email</p>
+          <Link to="/" className="inline-block px-6 py-3 bg-[#1a1208] text-[#fdf9f0] text-sm font-medium rounded-full mt-4">
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="pt-24 pb-20 min-h-screen flex items-center justify-center text-center">
+        <div>
+          <h2 className="text-2xl font-serif text-[#1a1208] mb-3">Your cart is empty</h2>
+          <Link to="/shop" className="text-[#c9a84c] text-sm font-medium hover:underline">Continue Shopping &rarr;</Link>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-      <PageHeader
-        eyebrow="Checkout"
-        title={<>Your <em className="not-italic text-gold-grad">order.</em></>}
-        subtitle="Review your cart, fill in your details, and place your order."
-      />
+    <div className="pt-24 pb-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-serif text-[#1a1208] mb-8">Checkout</h1>
 
-      <section className="py-12 md:py-20">
-        <div className="container">
-          {items.length === 0 ? (
-            <div className="text-center py-20">
-              <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-40" />
-              <p className="font-serif text-2xl mb-6">Your cart is empty.</p>
-              <Link to="/shop" className="px-8 py-3 rounded-full bg-foreground text-background">Browse Collection</Link>
-            </div>
-          ) : (
-            <div className="grid lg:grid-cols-3 gap-12">
-
-              {/* Left: cart items + delivery form */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Cart items */}
-                <div className="space-y-4">
-                  {items.map((it) => (
-                    <div key={it.id} className="flex gap-4 md:gap-5 p-4 md:p-5 rounded-2xl glass shadow-soft">
-                      <img src={resolveImage(it.image_url)} alt={it.name} className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <Link to={`/product/${it.slug}`} className="font-serif text-base md:text-lg hover:underline line-clamp-1">{it.name}</Link>
-                        <div className="text-sm text-muted-foreground mt-0.5">{formatINR(it.price)} each</div>
-                        <div className="mt-3 flex items-center gap-3">
-                          <div className="inline-flex items-center rounded-full border border-border">
-                            <button onClick={() => setQty(it.id, it.qty - 1)} className="w-8 h-8 flex items-center justify-center"><Minus className="w-3 h-3" /></button>
-                            <span className="w-8 text-center text-sm">{it.qty}</span>
-                            <button onClick={() => setQty(it.id, it.qty + 1)} className="w-8 h-8 flex items-center justify-center"><Plus className="w-3 h-3" /></button>
-                          </div>
-                          <button onClick={() => remove(it.id)} className="text-muted-foreground hover:text-destructive ml-auto transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="font-display text-xl md:text-2xl text-gold-grad">{formatINR(it.price * it.qty)}</div>
-                      </div>
-                    </div>
-                  ))}
-                  <button onClick={clear} className="text-xs text-muted-foreground hover:text-destructive transition-colors">
-                    Clear cart
-                  </button>
-                </div>
-
-                {/* Delivery details form */}
-                <div className="glass rounded-3xl p-6 md:p-8 shadow-soft space-y-5">
-                  <h2 className="font-display text-2xl">Delivery Details</h2>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <F label="Full Name *">
-                      <input value={form.name} onChange={set("name")} maxLength={LIMITS.name} autoComplete="name" className={inp} placeholder="Priya Sharma" />
-                    </F>
-                    <F label="Phone *">
-                      <input value={form.phone} onChange={set("phone")} maxLength={LIMITS.phone} autoComplete="tel" className={inp} placeholder="+91 98765 43210" type="tel" />
-                    </F>
-                  </div>
-
-                  <F label="Email *">
-                    <input value={form.email} onChange={set("email")} maxLength={LIMITS.email} autoComplete="email" className={inp} placeholder="you@email.com" type="email" />
-                  </F>
-
-                  <F label="Shipping Address *">
-                    <input value={form.address} onChange={set("address")} maxLength={LIMITS.address} autoComplete="street-address" className={inp} placeholder="Flat 4B, Sunrise Apartments, MG Road" />
-                  </F>
-
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    <F label="City *">
-                      <input value={form.city} onChange={set("city")} maxLength={LIMITS.city} autoComplete="address-level2" className={inp} placeholder="Mumbai" />
-                    </F>
-                    <F label="State">
-                      <input value={form.state} onChange={set("state")} maxLength={LIMITS.state} autoComplete="address-level1" className={inp} placeholder="Maharashtra" />
-                    </F>
-                    <F label="Pincode *">
-                      <input value={form.pincode} onChange={set("pincode")} maxLength={6} inputMode="numeric" autoComplete="postal-code" className={inp} placeholder="400001" />
-                    </F>
-                  </div>
-
-                  <F label="Special Instructions">
-                    <textarea
-                      value={form.notes}
-                      onChange={set("notes")}
-                      rows={3}
-                      maxLength={LIMITS.notes}
-                      className={inp + " resize-none"}
-                      placeholder="Colour preferences, names to engrave, gift message…"
-                    />
-                  </F>
-                </div>
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
+            <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 className="font-medium text-[#1a1208]">Customer Details</h3>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <input name="name" placeholder="Full Name" value={form.name} onChange={handleChange} required className="px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c]" />
+                <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required className="px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c]" />
               </div>
-
-              {/* Right: summary + actions */}
-              <aside className="lg:col-span-1">
-                <div className="sticky top-32 glass rounded-3xl p-8 shadow-luxe">
-                  <h2 className="font-display text-3xl mb-6">Order Summary</h2>
-
-                  <div className="space-y-2.5 text-sm mb-6">
-                    {items.map((it) => (
-                      <div key={it.id} className="flex justify-between text-muted-foreground">
-                        <span className="line-clamp-1 mr-2">{it.name} × {it.qty}</span>
-                        <span className="shrink-0">{formatINR(it.price * it.qty)}</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Shipping</span>
-                      <span className="text-gold">Free Pan India</span>
-                    </div>
-                    <div className="gold-divider my-3" />
-                    <div className="flex justify-between font-display text-2xl">
-                      <span>Total</span>
-                      <span className="text-gold-grad">{formatINR(total)}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <button
-                      onClick={onRazorpay}
-                      disabled={processing}
-                      className="w-full px-8 py-4 rounded-full bg-foreground text-background btn-glow inline-flex items-center justify-center gap-2 disabled:opacity-60 text-sm tracking-wide"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      {processing ? "Processing…" : "Pay Online"}
-                    </button>
-
-                    <button
-                      onClick={onWhatsApp}
-                      disabled={processing}
-                      className="w-full px-8 py-4 rounded-full border border-foreground/30 hover:bg-foreground hover:text-background transition-all duration-500 inline-flex items-center justify-center gap-2 disabled:opacity-60 text-sm"
-                    >
-                      <MessageCircle className="w-4 h-4" /> Order on WhatsApp
-                    </button>
-
-                    <button
-                      onClick={onCOD}
-                      disabled={processing}
-                      className="w-full px-8 py-4 rounded-full border border-border hover:border-foreground/40 hover:bg-muted/40 transition-all duration-300 inline-flex items-center justify-center gap-2 disabled:opacity-60 text-sm text-foreground/75"
-                    >
-                      <Package className="w-4 h-4" /> Cash on Delivery
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground mt-5 text-center">
-                    All items are made-to-order and delivered within 7–10 days.
-                  </p>
-                </div>
-              </aside>
-
+              <input name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required className="w-full px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c]" />
             </div>
-          )}
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm space-y-4">
+              <h3 className="font-medium text-[#1a1208]">Shipping Address</h3>
+              <textarea name="address" placeholder="Full Address" value={form.address} onChange={handleChange} required rows={3} className="w-full px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c] resize-none" />
+              <div className="grid grid-cols-3 gap-4">
+                <input name="city" placeholder="City" value={form.city} onChange={handleChange} required className="px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c]" />
+                <input name="state" placeholder="State" value={form.state} onChange={handleChange} required className="px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c]" />
+                <input name="pincode" placeholder="Pincode" value={form.pincode} onChange={handleChange} required className="px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c]" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm">
+              <h3 className="font-medium text-[#1a1208] mb-3">Order Notes (optional)</h3>
+              <textarea name="notes" placeholder="Any customization details, special messages..." value={form.notes} onChange={handleChange} rows={3} className="w-full px-4 py-3 border border-[#1a1208]/10 rounded-xl text-sm focus:outline-none focus:border-[#c9a84c] resize-none" />
+            </div>
+
+            <button type="submit" className="w-full py-4 bg-[#c9a84c] text-white text-sm font-semibold tracking-wider rounded-full hover:bg-[#b8933f] transition-colors">
+              Place Order &rarr;
+            </button>
+          </form>
+
+          {/* Summary */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm h-fit sticky top-24">
+            <h3 className="font-medium text-[#1a1208] mb-4">Order Summary</h3>
+            <div className="space-y-3 mb-6">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3">
+                  <img src={item.image_url || "/placeholder.svg"} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[#1a1208] truncate">{item.name}</p>
+                    <p className="text-xs text-[#1a1208]/40">Qty: {item.qty}</p>
+                  </div>
+                  <p className="text-sm font-medium">₹{(item.price * item.qty).toLocaleString("en-IN")}</p>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-[#1a1208]/5 pt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-[#1a1208]/60">Subtotal</span>
+                <span>₹{total.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-[#1a1208]/60">Shipping</span>
+                <span className="text-green-600">{total >= 999 ? "FREE" : "₹99"}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-lg border-t border-[#1a1208]/5 pt-3 mt-3">
+                <span>Total</span>
+                <span>₹{(total + (total >= 999 ? 0 : 99)).toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-    </>
+      </div>
+    </div>
   );
 };
 
-const inp = "w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-gold outline-none text-sm transition-colors";
-
-const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div>
-    <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">{label}</label>
-    {children}
-  </div>
-);
-
-export default CheckoutPage;
+export default Checkout;

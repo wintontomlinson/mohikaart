@@ -1,139 +1,116 @@
-import { useCart } from "@/lib/cart";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { resolveImage, formatINR } from "@/lib/site";
-import { Minus, Plus, Trash2, ShoppingBag, Sparkles, Truck } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCart } from "@/lib/cart";
 
 const CartDrawer = () => {
-  const { items, open, setOpen, setQty, remove, total, count } = useCart();
+  const { items, count, total, remove, setQty, open, setOpen } = useCart();
+
+  if (!open) return null;
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="w-full sm:max-w-md flex flex-col bg-background p-0">
+    <div className="fixed inset-0 z-[70]">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-[#1a1208]/40 backdrop-blur-sm"
+        onClick={() => setOpen(false)}
+      />
+
+      {/* Drawer */}
+      <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[#fdf9f0] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-border/60">
-          <SheetTitle className="font-display text-3xl mb-0.5">Your Cart</SheetTitle>
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">
-            {count === 0 ? "Empty" : `${count} item${count !== 1 ? "s" : ""}`}
-          </p>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-[#c9a84c]/10">
+          <h2 className="font-serif text-xl flex items-center gap-2">
+            Your Cart <ShoppingBag className="w-5 h-5" />
+            <span className="text-sm text-[#1a1208]/50">({count} items)</span>
+          </h2>
+          <button
+            onClick={() => setOpen(false)}
+            className="p-2 rounded-full hover:bg-[#1a1208]/5 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {items.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center gap-5 p-8">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="w-24 h-24 rounded-full bg-blush/40 flex items-center justify-center"
-            >
-              <ShoppingBag className="w-9 h-9 text-foreground/40" strokeWidth={1.3} />
-            </motion.div>
-            <div>
-              <p className="font-serif text-xl mb-2">Your cart is empty</p>
-              <p className="text-sm text-muted-foreground">Discover our handcrafted collection</p>
+        {/* Items */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          {items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+              <ShoppingBag className="w-12 h-12 text-[#1a1208]/20 mb-4" />
+              <p className="text-[#1a1208]/60 mb-4">Your cart is empty</p>
+              <Link
+                to="/shop"
+                onClick={() => setOpen(false)}
+                className="text-[#c9a84c] text-sm font-medium hover:underline"
+              >
+                Continue Shopping &rarr;
+              </Link>
+            </div>
+          ) : (
+            items.map((item) => (
+              <div key={item.id} className="flex gap-4 p-3 bg-white rounded-xl">
+                <img
+                  src={item.image_url || "/placeholder.svg"}
+                  alt={item.name}
+                  className="w-20 h-20 rounded-lg object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm text-[#1a1208] truncate">{item.name}</p>
+                  <p className="text-[#c9a84c] font-semibold text-sm mt-1">
+                    ₹{item.price.toLocaleString("en-IN")}
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <button
+                      onClick={() => setQty(item.id, item.qty - 1)}
+                      className="w-7 h-7 rounded-full border border-[#1a1208]/10 flex items-center justify-center hover:bg-[#1a1208]/5"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="text-sm font-medium w-6 text-center">{item.qty}</span>
+                    <button
+                      onClick={() => setQty(item.id, item.qty + 1)}
+                      className="w-7 h-7 rounded-full border border-[#1a1208]/10 flex items-center justify-center hover:bg-[#1a1208]/5"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+                <button
+                  onClick={() => remove(item.id)}
+                  className="p-1 self-start text-[#1a1208]/30 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        {items.length > 0 && (
+          <div className="border-t border-[#c9a84c]/10 px-6 py-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[#1a1208]/60">Subtotal</span>
+              <span className="text-xl font-serif font-semibold">
+                ₹{total.toLocaleString("en-IN")}
+              </span>
             </div>
             <Link
-              to="/shop"
+              to="/checkout"
               onClick={() => setOpen(false)}
-              className="mt-1 px-7 py-3 rounded-full bg-foreground text-background text-xs tracking-[0.12em] uppercase btn-glow"
+              className="block w-full py-3.5 bg-[#c9a84c] text-white text-center text-sm font-semibold tracking-wider rounded-full hover:bg-[#b8933f] transition-colors"
             >
-              Browse Collection
+              Proceed to Checkout &rarr;
             </Link>
+            <button
+              onClick={() => setOpen(false)}
+              className="block w-full text-center text-sm text-[#1a1208]/60 hover:text-[#c9a84c] transition-colors"
+            >
+              Continue Shopping
+            </button>
           </div>
-        ) : (
-          <>
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
-              <AnimatePresence initial={false}>
-                {items.map((it) => (
-                  <motion.div
-                    key={it.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
-                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex gap-4 p-3 rounded-2xl bg-card-grad shadow-soft"
-                  >
-                    <Link to={`/product/${it.slug}`} onClick={() => setOpen(false)} className="shrink-0">
-                      <img
-                        src={resolveImage(it.image_url)}
-                        alt={it.name}
-                        className="w-20 h-20 rounded-xl object-cover"
-                      />
-                    </Link>
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to={`/product/${it.slug}`}
-                        onClick={() => setOpen(false)}
-                        className="font-serif text-base leading-tight line-clamp-2 hover:text-gold transition-colors"
-                      >
-                        {it.name}
-                      </Link>
-                      <div className="font-display text-sm text-gold-grad mt-1">{formatINR(it.price)}</div>
-                      <div className="mt-2.5 flex items-center gap-2">
-                        <div className="inline-flex items-center rounded-full border border-border">
-                          <button
-                            onClick={() => setQty(it.id, it.qty - 1)}
-                            className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors rounded-l-full"
-                          >
-                            <Minus className="w-3 h-3" />
-                          </button>
-                          <span className="w-7 text-center text-sm font-medium">{it.qty}</span>
-                          <button
-                            onClick={() => setQty(it.id, it.qty + 1)}
-                            className="w-7 h-7 flex items-center justify-center hover:bg-muted transition-colors rounded-r-full"
-                          >
-                            <Plus className="w-3 h-3" />
-                          </button>
-                        </div>
-                        <button
-                          onClick={() => remove(it.id)}
-                          className="ml-auto text-muted-foreground hover:text-destructive transition-colors p-1"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-
-            {/* Summary */}
-            <div className="px-6 pb-6 pt-3 border-t border-border/60 space-y-3">
-              {/* Free shipping notice */}
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold/8 border border-gold/15">
-                <Truck className="w-3.5 h-3.5 text-gold shrink-0" />
-                <span className="text-[11px] text-gold/80">Free pan-India shipping on all orders</span>
-              </div>
-
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Subtotal ({count} items)</span>
-                <span>{formatINR(total)}</span>
-              </div>
-              <div className="flex justify-between font-display text-2xl">
-                <span>Total</span>
-                <span className="text-gold-grad">{formatINR(total)}</span>
-              </div>
-              <Link
-                to="/checkout"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-2 w-full px-6 py-4 rounded-full bg-foreground text-background btn-glow text-sm tracking-wide"
-              >
-                <Sparkles className="w-4 h-4" />
-                Proceed to Checkout
-              </Link>
-              <button
-                onClick={() => setOpen(false)}
-                className="w-full text-xs text-muted-foreground hover:text-foreground py-2 transition-colors"
-              >
-                Continue shopping
-              </button>
-            </div>
-          </>
         )}
-      </SheetContent>
-    </Sheet>
+      </div>
+    </div>
   );
 };
 

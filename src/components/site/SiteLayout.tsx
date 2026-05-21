@@ -1,39 +1,28 @@
 import { Outlet, useLocation } from "react-router-dom";
-import Navbar from "@/components/site/Navbar";
-import Footer from "@/components/site/Footer";
-import WhatsAppFab from "@/components/site/WhatsAppFab";
-import BackToTop from "@/components/site/BackToTop";
-import CartDrawer from "@/components/site/CartDrawer";
-import LoadingScreen from "@/components/site/LoadingScreen";
-import CursorSpotlight from "@/components/site/CursorSpotlight";
-import ScrollProgress from "@/components/site/ScrollProgress";
-import { CartProvider } from "@/lib/cart";
-import { WishlistProvider } from "@/lib/wishlist";
 import { useEffect } from "react";
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+import CartDrawer from "./CartDrawer";
+import WhatsAppFab from "./WhatsAppFab";
 
-const ScrollTop = () => {
+const SiteLayout = () => {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [pathname]);
-  return null;
-};
 
-const SiteLayout = () => (
-  <CartProvider>
-    <WishlistProvider>
-      <LoadingScreen />
-      <CursorSpotlight />
-      <ScrollProgress />
-      <ScrollTop />
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return (
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="relative">
+      <CartDrawer />
+      <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
       <WhatsAppFab />
-      <BackToTop />
-      <CartDrawer />
-    </WishlistProvider>
-  </CartProvider>
-);
+    </div>
+  );
+};
 
 export default SiteLayout;

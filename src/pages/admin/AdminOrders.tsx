@@ -1,301 +1,81 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { formatINR } from "@/lib/site";
-import { Eye, X, ChevronDown, Search, Download } from "lucide-react";
-import { toast } from "sonner";
+import { useState } from "react";
 
-type Order = {
-  id: string;
-  order_number: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  shipping_address: string;
-  shipping_city: string;
-  shipping_state: string | null;
-  shipping_pincode: string;
-  items: any;
-  subtotal: number;
-  total: number;
-  status: string;
-  payment_method: string | null;
-  notes: string | null;
-  created_at: string;
-};
+const orders = [
+  { id: "MKA4521", date: "2024-01-15", customer: "Priya Sharma", items: "Name Keychain x1", amount: 499, status: "Delivered" },
+  { id: "MKA4520", date: "2024-01-14", customer: "Rahul Gupta", items: "Photo Frame x1", amount: 1299, status: "Shipped" },
+  { id: "MKA4519", date: "2024-01-14", customer: "Sneha Patel", items: "Wedding Keepsake x1", amount: 2499, status: "Processing" },
+  { id: "MKA4518", date: "2024-01-13", customer: "Vikram Singh", items: "Resin Tray x2", amount: 2398, status: "Pending" },
+  { id: "MKA4517", date: "2024-01-13", customer: "Meera Kapoor", items: "Bookmark Set x1", amount: 699, status: "Delivered" },
+  { id: "MKA4516", date: "2024-01-12", customer: "Ananya Desai", items: "Gift Hamper x1", amount: 2999, status: "Shipped" },
+  { id: "MKA4515", date: "2024-01-12", customer: "Karan Mehta", items: "Coaster Set x1", amount: 899, status: "Cancelled" },
+];
 
-const STATUSES = ["pending", "payment_submitted", "confirmed", "shipped", "delivered", "cancelled"];
-
+const tabs = ["All", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
 const statusColors: Record<string, string> = {
-  pending:           "bg-amber-100 text-amber-700 border-amber-200",
-  payment_submitted: "bg-cyan-100 text-cyan-700 border-cyan-200",
-  confirmed:         "bg-blue-100 text-blue-700 border-blue-200",
-  shipped:           "bg-indigo-100 text-indigo-700 border-indigo-200",
-  delivered:         "bg-emerald-100 text-emerald-700 border-emerald-200",
-  cancelled:         "bg-rose-100 text-rose-700 border-rose-200",
+  Pending: "bg-yellow-100 text-yellow-700",
+  Processing: "bg-blue-100 text-blue-700",
+  Shipped: "bg-purple-100 text-purple-700",
+  Delivered: "bg-green-100 text-green-700",
+  Cancelled: "bg-red-100 text-red-700",
 };
-
-const fmt = (d: string) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 const AdminOrders = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
-  const [viewing, setViewing] = useState<Order | null>(null);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("All");
 
-  const load = async () => {
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    setOrders((data ?? []) as Order[]);
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const updateStatus = async (id: string, status: string) => {
-    setUpdatingId(id);
-    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-    setUpdatingId(null);
-    if (error) return toast.error(error.message);
-    toast.success("Status updated");
-    setOrders((prev) => prev.map((o) => o.id === id ? { ...o, status } : o));
-    if (viewing?.id === id) setViewing((v) => v ? { ...v, status } : v);
-  };
-
-  const matchesSearch = (o: Order) => {
-    const q = search.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      o.order_number.toLowerCase().includes(q) ||
-      o.customer_name.toLowerCase().includes(q) ||
-      o.customer_email.toLowerCase().includes(q) ||
-      (o.customer_phone || "").toLowerCase().includes(q) ||
-      (o.shipping_city || "").toLowerCase().includes(q)
-    );
-  };
-
-  const filtered = orders
-    .filter((o) => filter === "all" ? true : o.status === filter)
-    .filter(matchesSearch);
-
-  const counts = STATUSES.reduce((acc, s) => ({ ...acc, [s]: orders.filter((o) => o.status === s).length }), {} as Record<string, number>);
-
-  const exportCSV = () => {
-    const headers = ["Order #", "Date", "Status", "Customer", "Email", "Phone", "Address", "City", "State", "Pincode", "Subtotal", "Total", "Payment Method"];
-    const rows = filtered.map((o) => [
-      o.order_number, new Date(o.created_at).toISOString(), o.status,
-      o.customer_name, o.customer_email, o.customer_phone,
-      o.shipping_address, o.shipping_city, o.shipping_state ?? "", o.shipping_pincode,
-      o.subtotal, o.total, o.payment_method ?? "",
-    ]);
-    const csv = [headers, ...rows]
-      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `mohika-orders-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const filtered = activeTab === "All" ? orders : orders.filter((o) => o.status === activeTab);
 
   return (
-    <div>
-      <div className="mb-8 flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="font-display text-4xl">Orders</h1>
-          <p className="text-sm text-muted-foreground mt-1">{orders.length} total orders · {filtered.length} shown</p>
-        </div>
-        <button
-          onClick={exportCSV}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors"
-        >
-          <Download className="w-3.5 h-3.5" /> Export CSV
-        </button>
-      </div>
-
-      {/* Search */}
-      <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-background border border-border max-w-md mb-4">
-        <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by order #, name, email, phone, city…"
-          className="flex-1 outline-none bg-transparent text-sm placeholder:text-muted-foreground/60"
-        />
-        {search && (
-          <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      {/* Filter tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={() => setFilter("all")}
-          className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-all ${filter === "all" ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"}`}
-        >
-          All ({orders.length})
-        </button>
-        {STATUSES.map((s) => (
+    <div className="space-y-6">
+      {/* Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto">
+        {tabs.map((tab) => (
           <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium border capitalize transition-all ${filter === s ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"}`}
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-xs font-medium rounded-full transition-colors ${
+              activeTab === tab
+                ? "bg-[#1a1208] text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:border-[#c9a84c]"
+            }`}
           >
-            {s.replace("_", " ")} ({counts[s] ?? 0})
+            {tab}
           </button>
         ))}
       </div>
 
-      {/* Orders table */}
-      <div className="bg-background rounded-2xl border border-border overflow-hidden">
+      {/* Table */}
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-widest text-muted-foreground">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="text-left p-4">Order</th>
-                <th className="text-left p-4 hidden md:table-cell">Customer</th>
-                <th className="text-left p-4 hidden lg:table-cell">Date</th>
-                <th className="text-left p-4">Total</th>
-                <th className="text-left p-4">Status</th>
-                <th className="p-4"></th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Customer</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Items</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Amount</th>
+                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Status</th>
               </tr>
             </thead>
-            <tbody>
-              {filtered.map((o) => (
-                <tr key={o.id} className="border-t border-border hover:bg-muted/20 transition-colors">
-                  <td className="p-4">
-                    <div className="font-medium">#{o.order_number}</div>
-                    <div className="text-xs text-muted-foreground md:hidden">{o.customer_name}</div>
-                  </td>
-                  <td className="p-4 hidden md:table-cell">
-                    <div>{o.customer_name}</div>
-                    <div className="text-xs text-muted-foreground">{o.customer_email}</div>
-                  </td>
-                  <td className="p-4 hidden lg:table-cell text-muted-foreground">{fmt(o.created_at)}</td>
-                  <td className="p-4 font-medium">{formatINR(o.total)}</td>
-                  <td className="p-4">
-                    <div className="relative inline-flex items-center">
-                      <select
-                        value={o.status}
-                        onChange={(e) => updateStatus(o.id, e.target.value)}
-                        disabled={updatingId === o.id}
-                        className={`appearance-none pl-2.5 pr-7 py-1 rounded-full text-[10px] uppercase tracking-widest font-medium border cursor-pointer outline-none transition-all ${statusColors[o.status] ?? "bg-muted text-muted-foreground border-border"}`}
-                      >
-                        {STATUSES.map((s) => (
-                          <option key={s} value={s} className="text-foreground bg-background capitalize">{s}</option>
-                        ))}
-                      </select>
-                      <ChevronDown className="absolute right-2 w-3 h-3 pointer-events-none opacity-60" />
-                    </div>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => setViewing(o)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+            <tbody className="divide-y divide-gray-50">
+              {filtered.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-50 cursor-pointer">
+                  <td className="px-6 py-3 font-medium text-[#1a1208]">{order.id}</td>
+                  <td className="px-6 py-3 text-gray-500">{order.date}</td>
+                  <td className="px-6 py-3 text-gray-600">{order.customer}</td>
+                  <td className="px-6 py-3 text-gray-600">{order.items}</td>
+                  <td className="px-6 py-3 font-medium">₹{order.amount.toLocaleString("en-IN")}</td>
+                  <td className="px-6 py-3">
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${statusColors[order.status]}`}>
+                      {order.status}
+                    </span>
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={6} className="p-10 text-center text-muted-foreground">No orders found.</td></tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* Order Detail Modal */}
-      {viewing && (
-        <div className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6">
-          <div className="bg-background w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-t-3xl md:rounded-3xl shadow-2xl">
-            <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
-              <div>
-                <h2 className="font-display text-2xl">Order #{viewing.order_number}</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">{fmt(viewing.created_at)}</p>
-              </div>
-              <button onClick={() => setViewing(null)} className="w-9 h-9 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-6 space-y-6">
-              {/* Status */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Status</span>
-                <div className="relative inline-flex items-center">
-                  <select
-                    value={viewing.status}
-                    onChange={(e) => updateStatus(viewing.id, e.target.value)}
-                    className={`appearance-none pl-3 pr-8 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-medium border cursor-pointer outline-none ${statusColors[viewing.status] ?? "bg-muted text-muted-foreground border-border"}`}
-                  >
-                    {STATUSES.map((s) => (
-                      <option key={s} value={s} className="text-foreground bg-background capitalize">{s}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2.5 w-3 h-3 pointer-events-none opacity-60" />
-                </div>
-              </div>
-
-              {/* Customer */}
-              <div>
-                <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Customer</h3>
-                <div className="bg-muted/40 rounded-xl p-4 space-y-1.5 text-sm">
-                  <div className="font-medium">{viewing.customer_name}</div>
-                  <div className="text-muted-foreground">{viewing.customer_email}</div>
-                  <div className="text-muted-foreground">{viewing.customer_phone}</div>
-                </div>
-              </div>
-
-              {/* Shipping */}
-              <div>
-                <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Shipping Address</h3>
-                <div className="bg-muted/40 rounded-xl p-4 text-sm text-muted-foreground leading-relaxed">
-                  {viewing.shipping_address}, {viewing.shipping_city}{viewing.shipping_state ? `, ${viewing.shipping_state}` : ""}, {viewing.shipping_pincode}
-                </div>
-              </div>
-
-              {/* Items */}
-              <div>
-                <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Items</h3>
-                <div className="bg-muted/40 rounded-xl overflow-hidden">
-                  {(Array.isArray(viewing.items) ? viewing.items : []).map((item: any, i: number) => (
-                    <div key={i} className="flex items-center justify-between px-4 py-3 border-b border-border/40 last:border-0">
-                      <div>
-                        <div className="text-sm font-medium">{item.name}</div>
-                        <div className="text-xs text-muted-foreground">Qty: {item.qty}</div>
-                      </div>
-                      <div className="text-sm font-medium">{formatINR(item.price * item.qty)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Totals */}
-              <div className="border-t border-border pt-4 space-y-2 text-sm">
-                <div className="flex justify-between text-muted-foreground">
-                  <span>Subtotal</span>
-                  <span>{formatINR(viewing.subtotal)}</span>
-                </div>
-                <div className="flex justify-between font-semibold text-base">
-                  <span>Total</span>
-                  <span>{formatINR(viewing.total)}</span>
-                </div>
-              </div>
-
-              {/* Notes */}
-              {viewing.notes && (
-                <div>
-                  <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Notes</h3>
-                  <div className="bg-muted/40 rounded-xl p-4 text-sm text-muted-foreground">{viewing.notes}</div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

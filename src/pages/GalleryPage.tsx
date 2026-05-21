@@ -1,411 +1,166 @@
-import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { X, ChevronLeft, ChevronRight, Instagram, ShoppingBag } from "lucide-react";
+import { GALLERY_IMAGES, IMAGES, CATEGORIES } from "@/lib/products";
 
-import g5 from "@/assets/gallery-customer.jpg";
-import g6 from "@/assets/cat-couple.jpg";
-import catKeychain from "@/assets/cat-keychain.jpg";
-import catFrame from "@/assets/cat-frame.jpg";
-import catWedding from "@/assets/cat-wedding.jpg";
-
-const LUXE_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-type Category = "All" | "Keychains" | "Frames" | "Wedding" | "Packaging";
-const TABS: Category[] = ["All", "Keychains", "Frames", "Wedding", "Packaging"];
-
-type GalleryItem = { src: string; alt: string; category: Exclude<Category, "All"> };
-
-// Resin craft art HD images. Mix of local product shots + HD resin art from web.
-const IMAGES: GalleryItem[] = [
-  { src: "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=800&q=85", alt: "Dried flowers preserved in crystal clear epoxy resin", category: "Wedding" },
-  { src: catKeychain, alt: "Custom name resin keychain with gold flakes", category: "Keychains" },
-  { src: "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=800&q=85", alt: "Handmade resin photo frame with pressed petals", category: "Frames" },
-  { src: catFrame, alt: "Floral resin frame with real dried roses", category: "Frames" },
-  { src: "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=85", alt: "Luxury resin art gift box with velvet ribbon", category: "Packaging" },
-  { src: catWedding, alt: "Wedding bouquet preserved in resin tray", category: "Wedding" },
-  { src: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800&q=85", alt: "Resin art making process with dried botanicals", category: "Keychains" },
-  { src: g6, alt: "Couple name resin frame with flower petals", category: "Frames" },
-  { src: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=85", alt: "Artisan resin craft workspace with molds and pigments", category: "Packaging" },
-  { src: g5, alt: "Customer unboxing her custom resin keepsake", category: "Wedding" },
-  { src: "https://images.unsplash.com/photo-1582845512747-e42001c95638?w=800&q=85", alt: "Epoxy resin bookmark with real lavender stems", category: "Keychains" },
-  { src: "https://images.unsplash.com/photo-1490750967868-88aa4f1e0f09?w=800&q=85", alt: "Handpoured resin coasters with gold leaf finish", category: "Packaging" },
+const filters = [
+  { name: "All", slug: "all" },
+  ...CATEGORIES.slice(0, 7).map((c) => ({ name: c.name.replace(/s$/, ""), slug: c.slug })),
 ];
 
-// Floating gold particle decoration for the header
-const GoldParticles = () => {
-  const particles = [
-    { left: "10%", top: "30%", size: 6, delay: 0, duration: 6 },
-    { left: "30%", top: "82%", size: 4, delay: 1.2, duration: 7.5 },
-    { left: "55%", top: "20%", size: 5, delay: 0.6, duration: 8 },
-    { left: "82%", top: "70%", size: 7, delay: 1.8, duration: 6.5 },
-    { left: "92%", top: "28%", size: 4, delay: 0.9, duration: 7 },
-  ];
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {particles.map((p, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            left: p.left,
-            top: p.top,
-            width: p.size,
-            height: p.size,
-            background: "#C9964A",
-            opacity: 0.35,
-            boxShadow: "0 0 12px rgba(201,150,74,0.55)",
-          }}
-          animate={{ y: [0, -15, 0], opacity: [0.3, 0.55, 0.3] }}
-          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ))}
-    </div>
-  );
-};
-
 const GalleryPage = () => {
-  const [active, setActive] = useState<Category>("All");
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [lightbox, setLightbox] = useState<number | null>(null);
 
-  const visible = useMemo(
-    () => (active === "All" ? IMAGES : IMAGES.filter((i) => i.category === active)),
-    [active],
-  );
+  const filtered = activeFilter === "all"
+    ? GALLERY_IMAGES
+    : GALLERY_IMAGES.filter((img) => img.category === activeFilter);
 
-  // ESC key closes lightbox + body scroll lock while open
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxIndex(null);
-    };
-    window.addEventListener("keydown", onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [lightboxIndex]);
-
-  const activeImage = lightboxIndex !== null ? visible[lightboxIndex] : null;
+  const openLightbox = (i: number) => setLightbox(i);
+  const closeLightbox = () => setLightbox(null);
+  const prev = () => setLightbox((i) => (i !== null ? (i - 1 + filtered.length) % filtered.length : null));
+  const next = () => setLightbox((i) => (i !== null ? (i + 1) % filtered.length : null));
 
   return (
-    <>
-      {/* ─────────────────────────────  HEADER  ───────────────────────────── */}
-      <section
-        className="relative overflow-hidden pt-[110px] pb-20 md:pb-24"
-        style={{
-          background:
-            "linear-gradient(180deg, #FAF7F4 0%, #FAF7F4 65%, rgba(250,247,244,0) 100%)",
-        }}
-      >
-        <GoldParticles />
-
-        <div className="relative max-w-[1280px] mx-auto px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: LUXE_EASE }}
-            style={{
-              fontSize: "11px",
-              color: "#C9964A",
-              letterSpacing: "0.25em",
-              fontWeight: 600,
-              textTransform: "uppercase",
-            }}
-            className="mb-6"
+    <div className="pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-serif text-[#1a1208] mb-3">Our Gallery</h1>
+          <p className="text-[#1a1208]/60 max-w-md mx-auto">A glimpse into every piece poured with love</p>
+          <a
+            href="https://instagram.com/mohikaart"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-[#c9a84c]/10 text-[#c9a84c] text-sm font-medium rounded-full hover:bg-[#c9a84c]/20"
           >
-            Our Studio
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: LUXE_EASE, delay: 0.1 }}
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 400,
-              fontSize: "clamp(2.5rem, 5.5vw, 4rem)",
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              color: "#3D2B1F",
-              maxWidth: 820,
-            }}
-          >
-            Our work speaks
-            <br />
-            <span
-              style={{
-                fontFamily: "var(--font-serif)",
-                fontStyle: "italic",
-                color: "#C9964A",
-                fontWeight: 400,
-              }}
-            >
-              for itself.
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: LUXE_EASE, delay: 0.28 }}
-            className="mt-7 text-base md:text-lg leading-relaxed"
-            style={{ color: "rgba(61,43,31,0.72)", maxWidth: 600 }}
-          >
-            From delicate name keychains to preserved wedding bouquets, every
-            piece tells a story. Step inside our studio.
-          </motion.p>
-
-          {/* ─────────  FILTER TABS  ───────── */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: LUXE_EASE, delay: 0.4 }}
-            className="mt-12 -mx-6 px-6 lg:mx-0 lg:px-0 overflow-x-auto no-scrollbar"
-          >
-            <div className="flex lg:justify-center gap-2 min-w-max lg:min-w-0">
-              {TABS.map((tab) => {
-                const isActive = active === tab;
-                return (
-                  <button
-                    key={tab}
-                    onClick={() => setActive(tab)}
-                    className="relative transition-all duration-300"
-                    style={{
-                      padding: "10px 22px",
-                      borderRadius: 9999,
-                      fontSize: 11,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.12em",
-                      fontWeight: 600,
-                      background: isActive ? "#3D2B1F" : "transparent",
-                      color: isActive ? "#FAF7F4" : "#3D2B1F",
-                      border: `1px solid ${isActive ? "#3D2B1F" : "#e5e0d8"}`,
-                      whiteSpace: "nowrap",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = "#FAF7F4";
-                        e.currentTarget.style.borderColor = "rgba(201,150,74,0.3)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = "transparent";
-                        e.currentTarget.style.borderColor = "#e5e0d8";
-                      }
-                    }}
-                  >
-                    <span className="relative z-10">{tab}</span>
-                    {isActive && (
-                      <motion.span
-                        layoutId="gallery-tab-underline"
-                        aria-hidden
-                        className="absolute left-1/2 -translate-x-1/2"
-                        style={{
-                          bottom: -6,
-                          width: 22,
-                          height: 2,
-                          borderRadius: 2,
-                          background: "#C9964A",
-                        }}
-                        transition={{ duration: 0.4, ease: LUXE_EASE }}
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </motion.div>
+            <Instagram className="w-4 h-4" /> @mohikaart
+          </a>
         </div>
-      </section>
 
-      {/* ─────────────────────────────  MASONRY GRID  ───────────────────────────── */}
-      <section className="max-w-[1280px] mx-auto px-6 lg:px-8 py-20">
-        <motion.div
-          key={active}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="[column-count:1] sm:[column-count:2] lg:[column-count:3]"
-          style={{ columnGap: 20 }}
-        >
-          {visible.map((img, i) => (
+        {/* Filter Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-4 mb-8 sticky top-16 md:top-20 z-20 bg-[#fdf9f0]/95 backdrop-blur-md pt-2 -mt-2">
+          {filters.map((f) => (
             <button
-              key={`${active}-${i}-${img.src}`}
-              onClick={() => setLightboxIndex(i)}
-              className="gallery-tile group relative block w-full break-inside-avoid mb-4 lg:mb-5 overflow-hidden cursor-pointer"
-              style={{
-                borderRadius: 14,
-                opacity: 0,
-                transform: "translateY(20px)",
-                animation: `gallery-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) forwards`,
-                animationDelay: `${i * 80}ms`,
-                boxShadow: "0 12px 36px -18px rgba(61,43,31,0.18)",
-              }}
-              aria-label={`Open ${img.alt}`}
+              key={f.slug}
+              onClick={() => setActiveFilter(f.slug)}
+              className={`px-4 py-2 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
+                activeFilter === f.slug
+                  ? "bg-[#1a1208] text-[#fdf9f0]"
+                  : "bg-white border border-[#1a1208]/10 text-[#1a1208]/70 hover:border-[#c9a84c]"
+              }`}
+            >
+              {f.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Masonry Grid */}
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+          {filtered.map((img, i) => (
+            <div
+              key={i}
+              onClick={() => openLightbox(i)}
+              className="group relative rounded-2xl overflow-hidden cursor-pointer break-inside-avoid"
             >
               <img
                 src={img.src}
                 alt={img.alt}
+                className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                 loading="lazy"
-                className="gallery-tile__img w-full h-auto block"
-                style={{
-                  transition: "transform 600ms cubic-bezier(0.22,1,0.36,1)",
-                }}
               />
-              {/* Hover dark gradient overlay */}
-              <div
-                aria-hidden
-                className="absolute inset-0 opacity-0 group-hover:opacity-100"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)",
-                  transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1)",
-                }}
-              />
-              {/* "View →" label */}
-              <div
-                className="absolute left-5 bottom-5 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
-                style={{
-                  transition:
-                    "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
-                  color: "#ffffff",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  letterSpacing: "0.04em",
-                }}
-              >
-                View &rarr;
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1208]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-start justify-end p-4">
+                <p className="text-white text-sm font-medium">{img.alt}</p>
+                <p className="text-white/60 text-xs capitalize">{img.category}</p>
               </div>
-            </button>
-          ))}
-        </motion.div>
-
-        {/* Empty state per filter */}
-        {visible.length === 0 && (
-          <div
-            className="mx-auto text-center py-16 px-6"
-            style={{
-              maxWidth: 480,
-              background: "#ffffff",
-              border: "1px solid #e5e0d8",
-              borderRadius: 24,
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 400,
-                fontSize: "1.75rem",
-                color: "#3D2B1F",
-                marginBottom: 10,
-              }}
-            >
-              Nothing here yet.
-            </h2>
-            <p className="text-sm" style={{ color: "rgba(61,43,31,0.6)" }}>
-              Check back soon, we add fresh studio shots every week.
-            </p>
-          </div>
-        )}
-      </section>
-
-      {/* ─────────────────────────────  LIGHTBOX  ───────────────────────────── */}
-      <AnimatePresence>
-        {activeImage && (
-          <motion.div
-            key="lightbox-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            onClick={() => setLightboxIndex(null)}
-            className="fixed inset-0 z-[120] flex items-center justify-center p-6"
-            style={{
-              background: "rgba(0,0,0,0.85)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Image viewer"
-          >
-            {/* Close button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setLightboxIndex(null);
-              }}
-              className="absolute z-10 flex items-center justify-center transition-colors"
-              style={{
-                top: 24,
-                right: 24,
-                width: 48,
-                height: 48,
-                borderRadius: 9999,
-                background: "rgba(255,255,255,0.1)",
-                color: "#ffffff",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.2)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Image, clicking it should NOT close */}
-            <motion.img
-              key={activeImage.src}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: LUXE_EASE }}
-              onClick={(e) => e.stopPropagation()}
-              src={activeImage.src}
-              alt={activeImage.alt}
-              className="object-contain"
-              style={{
-                maxWidth: "90vw",
-                maxHeight: "85vh",
-                borderRadius: 16,
-                boxShadow: "0 40px 120px -20px rgba(0,0,0,0.6)",
-              }}
-            />
-
-            {/* Caption */}
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-5 py-2.5 text-center"
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                borderRadius: 9999,
-                color: "rgba(255,255,255,0.8)",
-                fontSize: 12,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
-              }}
-            >
-              {activeImage.category}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ))}
+        </div>
 
-      {/* Scoped keyframe + hover scale for the masonry tiles */}
-      <style>{`
-        @keyframes gallery-fade-up {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .gallery-tile:hover .gallery-tile__img { transform: scale(1.03); }
-      `}</style>
-    </>
+        {/* Instagram Strip */}
+        <div className="mt-20 text-center">
+          <h2 className="text-2xl font-serif text-[#1a1208] mb-6">As Seen On @mohikaart</h2>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+            {[IMAGES.g1, IMAGES.g2, IMAGES.g3, IMAGES.g4, IMAGES.g5, IMAGES.g6].map((src, i) => (
+              <a
+                key={i}
+                href="https://instagram.com/mohikaart"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative aspect-square rounded-lg overflow-hidden"
+              >
+                <img src={src} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+                <div className="absolute inset-0 bg-[#1a1208]/0 group-hover:bg-[#1a1208]/40 transition-all flex items-center justify-center">
+                  <Instagram className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              </a>
+            ))}
+          </div>
+          <a
+            href="https://instagram.com/mohikaart"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1208] text-[#fdf9f0] text-sm font-medium rounded-full mt-6 hover:bg-[#1a1208]/85"
+          >
+            Follow @mohikaart &rarr;
+          </a>
+        </div>
+
+        {/* Bottom CTA */}
+        <div className="mt-20 py-16 bg-[#1a1208] rounded-3xl text-center px-8">
+          <h2 className="text-2xl md:text-3xl font-serif text-[#fdf9f0] mb-4">See something you love?</h2>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              to="/shop"
+              className="px-7 py-3.5 bg-[#c9a84c] text-[#1a1208] text-sm font-semibold tracking-wider rounded-full"
+            >
+              Shop Now &rarr;
+            </Link>
+            <Link
+              to="/custom-order"
+              className="px-7 py-3.5 border-2 border-[#fdf9f0]/20 text-[#fdf9f0] text-sm font-semibold tracking-wider rounded-full hover:border-[#c9a84c] hover:text-[#c9a84c]"
+            >
+              Custom Order &rarr;
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      {lightbox !== null && (
+        <div className="fixed inset-0 z-[90] bg-[#1a1208]/95 flex items-center justify-center p-4">
+          <button onClick={closeLightbox} className="absolute top-6 right-6 text-white/70 hover:text-white">
+            <X className="w-8 h-8" />
+          </button>
+          <button onClick={prev} className="absolute left-4 md:left-8 text-white/70 hover:text-white">
+            <ChevronLeft className="w-10 h-10" />
+          </button>
+          <button onClick={next} className="absolute right-4 md:right-8 text-white/70 hover:text-white">
+            <ChevronRight className="w-10 h-10" />
+          </button>
+          <div className="max-w-4xl max-h-[85vh]">
+            <img
+              src={filtered[lightbox].src}
+              alt={filtered[lightbox].alt}
+              className="max-w-full max-h-[80vh] object-contain rounded-xl"
+            />
+            <div className="flex items-center justify-between mt-4 px-2">
+              <div>
+                <p className="text-white font-medium">{filtered[lightbox].alt}</p>
+                <p className="text-white/50 text-sm capitalize">{filtered[lightbox].category}</p>
+              </div>
+              <Link
+                to="/shop"
+                onClick={closeLightbox}
+                className="px-5 py-2.5 bg-[#c9a84c] text-[#1a1208] text-xs font-semibold rounded-full flex items-center gap-1.5"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" /> Shop this &rarr;
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

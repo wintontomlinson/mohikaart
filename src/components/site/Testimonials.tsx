@@ -1,245 +1,93 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import { useTestimonials } from "@/lib/cms";
+import { Star } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-const initials = (name: string) =>
-  name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+const reviews = [
+  {
+    text: "Absolutely beautiful! The name keychain for my best friend's birthday was even more stunning in person.",
+    name: "Priya S.",
+    product: "Name Keychain",
+  },
+  {
+    text: "The resin tray is a showstopper. Every guest asks where I got it from. Packaging was super premium!",
+    name: "Ananya M.",
+    product: "Resin Tray",
+  },
+  {
+    text: "Got our wedding bouquet preserved as a keepsake. We will treasure it forever. Worth every rupee!",
+    name: "Sneha & Rahul",
+    product: "Wedding Keepsake",
+  },
+  {
+    text: "Ordered a custom photo frame as an anniversary gift. My wife cried happy tears. Highly recommended!",
+    name: "Vikram T.",
+    product: "Photo Frame",
+  },
+  {
+    text: "Fast delivery, perfect packaging and the bookmark set is gorgeous. Already placing my second order!",
+    name: "Meera K.",
+    product: "Bookmark Set",
+  },
+];
 
 const Testimonials = () => {
-  const reviews = useTestimonials();
-  const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(1);
-
-  const next = useCallback(() => {
-    setDirection(1);
-    setCurrent((prev) => (prev + 1) % Math.max(reviews.length, 1));
-  }, [reviews.length]);
-
-  const prev = useCallback(() => {
-    setDirection(-1);
-    setCurrent((prev) => (prev - 1 + reviews.length) % Math.max(reviews.length, 1));
-  }, [reviews.length]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (reviews.length <= 1) return;
-    const interval = setInterval(next, 5500);
-    return () => clearInterval(interval);
-  }, [next, reviews.length]);
+    const el = scrollRef.current;
+    if (!el) return;
+    let animId: number;
+    let pos = 0;
 
-  // Reset index if data shrinks
-  useEffect(() => {
-    if (current >= reviews.length && reviews.length > 0) setCurrent(0);
-  }, [current, reviews.length]);
-
-  if (reviews.length === 0) return null;
-
-  const variants = {
-    enter: (dir: number) => ({ x: dir > 0 ? 280 : -280, opacity: 0, scale: 0.92 }),
-    center: { x: 0, opacity: 1, scale: 1 },
-    exit: (dir: number) => ({ x: dir > 0 ? -280 : 280, opacity: 0, scale: 0.92 }),
-  };
+    const animate = () => {
+      if (!paused) {
+        pos += 0.5;
+        if (pos >= el.scrollWidth / 2) pos = 0;
+        el.scrollLeft = pos;
+      }
+      animId = requestAnimationFrame(animate);
+    };
+    animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, [paused]);
 
   return (
-    <section
-      className="relative py-28 md:py-40 overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse 80% 60% at 50% 0%, hsl(348 58% 94%/0.5), transparent), hsl(36 42% 98%)",
-      }}
-    >
-      {/* Floating decorative elements */}
-      <motion.div
-        className="absolute top-20 left-10 w-32 h-32 rounded-full bg-gold/8 blur-3xl"
-        animate={{ scale: [1, 1.4, 1], y: [0, -10, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-20 right-10 w-48 h-48 rounded-full bg-champagne/20 blur-3xl"
-        animate={{ scale: [1, 1.2, 1], x: [0, 15, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-lavender/8 blur-3xl pointer-events-none"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-      />
-
-      {/* Big quote marks */}
-      <div className="absolute top-16 left-8 opacity-[0.035] pointer-events-none hidden lg:block">
-        <Quote className="w-40 h-40 text-gold rotate-180" />
-      </div>
-      <div className="absolute bottom-16 right-8 opacity-[0.035] pointer-events-none hidden lg:block">
-        <Quote className="w-40 h-40 text-gold" />
+    <section className="py-20 md:py-28 bg-[#fdf9f0]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+        <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-[#c9a84c] mb-2">TESTIMONIALS</p>
+        <h2 className="text-3xl md:text-4xl font-serif text-[#1a1208]">What our customers say</h2>
       </div>
 
-      <div className="container relative z-10">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="eyebrow mb-5 flex items-center justify-center gap-2"
-          >
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3 h-3" style={{ fill: "hsl(34 58% 52%)", color: "hsl(34 58% 52%)" }} />
-              ))}
+      <div
+        ref={scrollRef}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        className="overflow-hidden"
+      >
+        <div className="flex gap-6 px-4 sm:px-6 lg:px-8 w-max">
+          {[...reviews, ...reviews].map((review, i) => (
+            <div
+              key={i}
+              className="w-[350px] flex-shrink-0 bg-white rounded-2xl p-6 shadow-sm"
+            >
+              {/* Stars */}
+              <div className="flex gap-0.5 mb-4">
+                {Array.from({ length: 5 }).map((_, s) => (
+                  <Star key={s} className="w-4 h-4 fill-[#c9a84c] text-[#c9a84c]" />
+                ))}
+              </div>
+
+              <p className="text-sm italic text-[#1a1208]/70 leading-relaxed mb-4">
+                "{review.text}"
+              </p>
+
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-[#1a1208]">— {review.name}</p>
+                <p className="text-xs text-[#c9a84c]">{review.product}</p>
+              </div>
             </div>
-            Words of Love
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="font-display leading-[1.04] tracking-[-0.03em]"
-            style={{ fontWeight: 300, fontSize: "clamp(2rem, 4vw, 3.6rem)" }}
-          >
-            Loved by hearts
-            <br />
-            <em
-              className="not-italic shimmer-text"
-              style={{ fontStyle: "italic", fontFamily: "var(--font-serif)" }}
-            >
-              across India.
-            </em>
-          </motion.h2>
-        </div>
-
-        {/* Carousel */}
-        <div className="relative max-w-4xl mx-auto" style={{ perspective: "1200px" }}>
-          <div className="relative h-[300px] md:h-[260px] overflow-hidden">
-            <AnimatePresence custom={direction} mode="wait">
-              <motion.blockquote
-                key={current}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute inset-0 frost-card rounded-3xl p-8 md:p-12 shadow-luxe text-center flex flex-col items-center justify-center"
-              >
-                {/* Avatar circle */}
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-background mb-5 shrink-0"
-                  style={{ background: "linear-gradient(135deg, hsl(34 58% 52%), hsl(348 58% 68%))" }}
-                >
-                  {initials(reviews[current].name)}
-                </div>
-
-                <div className="flex gap-1 mb-4 text-gold">
-                  {Array.from({ length: reviews[current].rating }).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-
-                <p
-                  className="font-serif leading-[1.72] text-foreground/88 max-w-2xl"
-                  style={{ fontSize: "clamp(0.98rem, 1.8vw, 1.18rem)", fontWeight: 400 }}
-                >
-                  "{reviews[current].text}"
-                </p>
-
-                <footer className="mt-6 flex flex-col items-center gap-1">
-                  <div
-                    className="font-display"
-                    style={{ fontSize: "clamp(0.95rem, 1.4vw, 1.1rem)", fontWeight: 400, letterSpacing: "-0.01em" }}
-                  >
-                    {reviews[current].name}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div
-                      style={{
-                        fontSize: "9px",
-                        letterSpacing: "0.28em",
-                        textTransform: "uppercase",
-                        color: "hsl(25 10% 52%)",
-                      }}
-                    >
-                      {reviews[current].city}
-                    </div>
-                    <span className="text-gold/40">·</span>
-                    <div
-                      style={{
-                        fontSize: "9px",
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase",
-                        color: "hsl(34 58% 52%/0.75)",
-                        fontStyle: "italic",
-                      }}
-                    >
-                      {reviews[current].product}
-                    </div>
-                  </div>
-                </footer>
-              </motion.blockquote>
-            </AnimatePresence>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-center gap-6 mt-8">
-            <button
-              onClick={prev}
-              className="w-12 h-12 rounded-full glass flex items-center justify-center hover:shadow-soft hover:scale-110 transition-all duration-300"
-              aria-label="Previous review"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-
-            <div className="flex gap-2">
-              {reviews.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    setDirection(i > current ? 1 : -1);
-                    setCurrent(i);
-                  }}
-                  className={`h-2 rounded-full transition-all duration-500 ${
-                    i === current ? "w-8 bg-gold" : "w-2 bg-border hover:bg-gold/50"
-                  }`}
-                  aria-label={`Go to review ${i + 1}`}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={next}
-              className="w-12 h-12 rounded-full glass flex items-center justify-center hover:shadow-soft hover:scale-110 transition-all duration-300"
-              aria-label="Next review"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="mt-16 grid grid-cols-3 gap-4 max-w-xl mx-auto"
-        >
-          {[
-            { value: "2000+", label: "Happy Customers" },
-            { value: "4.9★",  label: "Average Rating" },
-            { value: "100%",  label: "Handmade" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.35 + i * 0.1 }}
-              className="text-center p-5 rounded-2xl glass hover:shadow-soft transition-all duration-300"
-            >
-              <div className="font-display text-2xl md:text-3xl text-gold-grad">{stat.value}</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1.5">{stat.label}</div>
-            </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

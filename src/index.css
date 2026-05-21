@@ -380,3 +380,67 @@ main {
 .marquee-pill:hover {
   color: #C9964A !important;
 }
+
+/* ── Ken Burns zoom effect for Hero ── */
+@keyframes ken-burns {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.animate-ken-burns {
+  animation: ken-burns 8s ease-in-out infinite;
+}
+
+/* ── Floating card animations ── */
+@keyframes float-card1 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes float-card2 {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float-card1 {
+  animation: float-card1 3s ease-in-out infinite;
+}
+.animate-float-card2 {
+  animation: float-card2 4s ease-in-out infinite;
+}
+
+/* ── Shake animation for errors ── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 90% { transform: translateX(-4px); }
+  30%, 70% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* ── Animate-in utilities (for elements entering view) ── */
+.animate-in {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.slide-in-from-right {
+  animation-name: slide-in-from-right;
+}
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.slide-in-from-top {
+  animation-name: slide-in-from-top;
+}
+@keyframes slide-in-from-top {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.zoom-in-95 {
+  animation-name: zoom-in-95;
+}
+@keyframes zoom-in-95 {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

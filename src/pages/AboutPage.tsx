@@ -1,399 +1,203 @@
-import { motion } from "framer-motion";
-import { Leaf, Heart, Sparkles, Clock } from "lucide-react";
-import workspaceImg from "@/assets/gallery-workspace.jpg";
-import flatlayImg from "@/assets/gallery-flatlay.jpg";
+import { Link } from "react-router-dom";
+import { IMAGES } from "@/lib/products";
+import { useCountUp } from "@/hooks/use-count-up";
+import { useInView } from "@/hooks/use-in-view";
 
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
-};
+const AboutPage = () => {
+  const { count: orders, ref: ordersRef } = useCountUp(2000);
+  const { count: years, ref: yearsRef } = useCountUp(3);
+  const { ref: storyRef, inView: storyVisible } = useInView();
 
-const values = [
-  {
-    icon: Leaf,
-    title: "Sustainably Crafted",
-    body: "Responsibly sourced materials, recyclable packaging, and zero-waste processes wherever possible.",
-  },
-  {
-    icon: Heart,
-    title: "Made by Hand",
-    body: "No machines. Every piece is poured, set, and finished personally, each one signed by us.",
-  },
-  {
-    icon: Sparkles,
-    title: "Forever Unique",
-    body: "Your story is one of a kind. So is your piece. We never repeat a design.",
-  },
-];
-
-const stats = [
-  { value: "2000+", label: "Happy customers" },
-  { value: "4.9", label: "Average rating" },
-  { value: "100%", label: "Handmade" },
-];
-
-const AboutPage = () => (
-  <>
-    {/* HERO */}
-    <section
-      className="relative overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(180deg, #FAF7F4 0%, rgba(250,247,244,0.6) 60%, transparent 100%)",
-        minHeight: "60vh",
-      }}
-    >
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-28 pb-20 md:pt-32 md:pb-24">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div
-              className="font-semibold uppercase mb-6"
-              style={{
-                fontSize: "11px",
-                color: "#C9964A",
-                letterSpacing: "0.25em",
-              }}
-            >
-              Our Story
-            </div>
-            <h1
-              className="font-display"
-              style={{
-                fontWeight: 400,
-                fontSize: "clamp(2.5rem, 5vw, 3.8rem)",
-                lineHeight: 1.05,
-                letterSpacing: "-0.02em",
-                color: "#3D2B1F",
-              }}
-            >
-              Where every keepsake{" "}
-              <em
-                className="font-serif italic"
-                style={{ color: "#C9964A", fontWeight: 400 }}
-              >
-                begins with a story.
-              </em>
+  return (
+    <div className="pt-24 pb-20">
+      {/* Hero Split */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h1 className="text-4xl md:text-6xl font-serif text-[#1a1208] leading-tight">
+              Crafted with <span className="italic text-[#c9a84c]">love</span>,<br />
+              since 2021.
             </h1>
-            <div
-              className="mt-7 space-y-5"
-              style={{
-                fontSize: "16px",
-                lineHeight: 1.75,
-                color: "hsl(25 10% 42%)",
-              }}
-            >
-              <p>
-                Mohika Art was born in a small kitchen in 2021, with a single bottle of resin
-                and the dream of preserving life&apos;s quiet, beautiful moments. What started
-                as a personal experiment has grown into a studio dedicated to handcrafted
-                heirlooms.
-              </p>
-              <p>
-                Today, every piece carries that same intention, meticulous detail, reverence
-                for your story, and a refusal to compromise on quality. We don&apos;t make mass
-                products. We make memories.
-              </p>
+            <p className="text-lg text-[#1a1208]/60">Every piece tells a story — yours.</p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                to="/shop"
+                className="px-7 py-3.5 bg-[#1a1208] text-[#fdf9f0] text-sm font-semibold tracking-wider rounded-full hover:bg-[#1a1208]/85 transition-colors"
+              >
+                Shop Collection &rarr;
+              </Link>
+              <Link
+                to="/custom-order"
+                className="px-7 py-3.5 border-2 border-[#1a1208]/20 text-[#1a1208] text-sm font-semibold tracking-wider rounded-full hover:border-[#c9a84c] hover:text-[#c9a84c] transition-colors"
+              >
+                Custom Order &rarr;
+              </Link>
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="relative"
-          >
-            <div
-              className="overflow-hidden shadow-luxe"
-              style={{
-                aspectRatio: "4 / 5",
-                borderRadius: "24px",
-              }}
-            >
-              <img
-                src={workspaceImg}
-                alt="Mohika Art workspace"
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-            </div>
-            {/* Floating gold ring accent */}
-            <motion.div
-              aria-hidden
-              className="hidden lg:block absolute -bottom-8 -left-8 w-32 h-32 rounded-full pointer-events-none"
-              style={{ border: "1px solid rgba(201,150,74,0.35)" }}
-              animate={{ rotate: 360 }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          </div>
+          <div className="relative">
+            <img
+              src={IMAGES.about_hero}
+              alt="Crafting resin art"
+              className="w-full rounded-3xl shadow-xl object-cover aspect-[4/5]"
             />
-          </motion.div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    {/* BRAND VALUES */}
-    <section className="max-w-[1280px] mx-auto px-6 lg:px-8 py-20">
-      <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto mb-14">
-        <div
-          className="font-semibold uppercase mb-5"
-          style={{
-            fontSize: "11px",
-            color: "#C9964A",
-            letterSpacing: "0.25em",
-          }}
-        >
-          What We Believe
-        </div>
-        <h2
-          className="font-display"
-          style={{
-            fontWeight: 400,
-            fontSize: "clamp(1.85rem, 3.8vw, 2.8rem)",
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            color: "#3D2B1F",
-          }}
-        >
-          What we hold sacred
-        </h2>
-      </motion.div>
-
-      <div className="grid md:grid-cols-3 gap-6">
-        {values.map((v, i) => (
-          <motion.div
-            key={v.title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{
-              duration: 0.7,
-              delay: i * 0.1,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            whileHover={{ y: -6 }}
-            className="text-center p-8 transition-all duration-500"
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e5e0d8",
-              borderRadius: "20px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow =
-                "0 20px 50px -15px rgba(61,43,31,0.15)";
-              e.currentTarget.style.borderColor = "rgba(201,150,74,0.3)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.borderColor = "#e5e0d8";
-            }}
-          >
-            <div
-              className="mx-auto flex items-center justify-center"
-              style={{
-                width: "56px",
-                height: "56px",
-                borderRadius: "14px",
-                background: "#FAF7F4",
-              }}
-            >
-              <v.icon strokeWidth={1.6} style={{ width: 22, height: 22, color: "#C9964A" }} />
-            </div>
-            <h3
-              className="mt-5"
-              style={{
-                fontSize: "16px",
-                fontWeight: 500,
-                color: "#3D2B1F",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              {v.title}
-            </h3>
-            <p
-              className="mt-2 mx-auto"
-              style={{
-                fontSize: "13px",
-                lineHeight: 1.7,
-                color: "#6B7280",
-                maxWidth: "26ch",
-              }}
-            >
-              {v.body}
-            </p>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-
-    {/* FOUNDER */}
-    <section style={{ background: "#FAF7F4" }}>
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-20">
-        <div className="grid md:grid-cols-[1fr_1.2fr] gap-12 items-center">
-          <motion.div {...fadeUp}>
-            <div
-              className="overflow-hidden shadow-luxe"
-              style={{
-                aspectRatio: "1 / 1",
-                borderRadius: "20px",
-              }}
-            >
+      {/* Our Story */}
+      <section ref={storyRef} className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className={`grid lg:grid-cols-2 gap-12 items-center ${storyVisible ? "animate-fade-in" : "opacity-0"}`}>
+            <div className="relative space-y-4">
               <img
-                src={flatlayImg}
-                alt="Maker behind Mohika Art"
-                className="w-full h-full object-cover"
-                loading="lazy"
+                src={IMAGES.about_story1}
+                alt="Crafting"
+                className="w-3/4 rounded-2xl shadow-lg"
               />
+              <img
+                src={IMAGES.about_story2}
+                alt="Workshop"
+                className="w-2/3 rounded-2xl shadow-lg ml-auto -mt-20 relative z-10"
+              />
+              <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-[#c9a84c] text-white text-xs font-medium rounded-full">
+                @mohikaart
+              </div>
             </div>
-          </motion.div>
 
-          <motion.div
-            {...fadeUp}
-            transition={{
-              duration: 0.7,
-              delay: 0.1,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          >
-            <div
-              className="font-semibold uppercase mb-5"
-              style={{
-                fontSize: "11px",
-                color: "#C9964A",
-                letterSpacing: "0.25em",
-              }}
-            >
-              Meet the Maker
+            <div className="space-y-6">
+              <p className="text-[11px] font-semibold tracking-[0.3em] uppercase text-[#c9a84c]">OUR STORY</p>
+              <h2 className="text-3xl md:text-4xl font-serif text-[#1a1208]">
+                From a passion for art to 2000+ happy memories
+              </h2>
+              <div className="space-y-4 text-[#1a1208]/60 leading-relaxed">
+                <p>
+                  It started in 2021 with a simple idea — what if we could turn fleeting moments into
+                  something you can hold forever? That spark became Mohika Art.
+                </p>
+                <p>
+                  Every piece we create is handpoured with love, embedded with real flowers, touched
+                  with gold leaf, and crafted specifically for the person receiving it.
+                </p>
+                <p>
+                  We believe gifts should feel personal. Not mass-produced, not generic — but truly
+                  unique. A name, a date, a flower from your bouquet — these details make our pieces special.
+                </p>
+                <p>
+                  Today, we've delivered 2000+ keepsakes across India, each one carrying a story,
+                  a memory, a moment preserved in resin forever.
+                </p>
+              </div>
+              <Link to="/shop" className="inline-flex text-[#c9a84c] text-sm font-medium hover:underline">
+                Shop Our Collection &rarr;
+              </Link>
             </div>
-            <h2
-              className="font-display"
-              style={{
-                fontWeight: 400,
-                fontSize: "clamp(1.85rem, 3.8vw, 2.8rem)",
-                lineHeight: 1.1,
-                letterSpacing: "-0.02em",
-                color: "#3D2B1F",
-              }}
-            >
-              Hands behind the art.
-            </h2>
-            <p
-              className="mt-6"
-              style={{
-                fontSize: "16px",
-                lineHeight: 1.75,
-                color: "hsl(25 10% 42%)",
-              }}
-            >
-              Every Mohika piece passes through the same pair of hands, those of our founder.
-              From the first sketch to the final wax-sealed package, you&apos;re holding a
-              story that&apos;s been told one careful step at a time. No assembly lines, no
-              shortcuts, only patience, intention, and the quiet thrill of watching memory
-              set in resin.
-            </p>
-            <p
-              className="mt-8 font-serif italic"
-              style={{
-                fontSize: "22px",
-                color: "#C9964A",
-                fontWeight: 500,
-              }}
-            >
-              Mohika
-            </p>
-          </motion.div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    {/* STATS STRIP */}
-    <section style={{ background: "#2C1F14" }}>
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-3 gap-6 md:gap-10">
-          {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="text-center"
-            >
-              <div
-                className="font-display"
-                style={{
-                  fontSize: "32px",
-                  fontWeight: 400,
-                  color: "#C9964A",
-                  letterSpacing: "-0.01em",
-                  lineHeight: 1.1,
-                }}
-              >
-                {s.value}
-              </div>
-              <div
-                className="mt-2 uppercase"
-                style={{
-                  fontSize: "11px",
-                  color: "rgba(255,255,255,0.6)",
-                  letterSpacing: "0.18em",
-                  fontWeight: 500,
-                }}
-              >
-                {s.label}
-              </div>
-            </motion.div>
+      {/* Why Choose Us */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { emoji: "🌸", title: "100% Handmade", desc: "Every piece crafted by hand" },
+            { emoji: "✨", title: "Premium Materials", desc: "UV-resistant resin & real flowers" },
+            { emoji: "💌", title: "Fully Personalized", desc: "Custom designs for every order" },
+            { emoji: "🚚", title: "Pan India Delivery", desc: "Shipped across all states" },
+          ].map((item) => (
+            <div key={item.title} className="text-center p-6 bg-white rounded-2xl shadow-sm">
+              <div className="text-3xl mb-3">{item.emoji}</div>
+              <h3 className="font-medium text-sm text-[#1a1208] mb-1">{item.title}</h3>
+              <p className="text-xs text-[#1a1208]/50">{item.desc}</p>
+            </div>
           ))}
         </div>
-      </div>
-    </section>
+      </section>
 
-    {/* RESPONSE TIME BANNER */}
-    <section className="max-w-2xl mx-auto px-6 lg:px-8 py-16">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="text-center p-8"
-        style={{
-          background: "linear-gradient(180deg, #FAF7F4 0%, #ffffff 100%)",
-          border: "1px solid #e5e0d8",
-          borderRadius: "24px",
-        }}
-      >
-        <div
-          className="mx-auto flex items-center justify-center mb-4"
-          style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "14px",
-            background: "#ffffff",
-            border: "1px solid #e5e0d8",
-          }}
-        >
-          <Clock strokeWidth={1.6} style={{ width: 20, height: 20, color: "#C9964A" }} />
+      {/* Stats */}
+      <section className="py-16 bg-[#1a1208]">
+        <div ref={ordersRef} className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <p className="text-3xl font-serif font-bold text-[#c9a84c]">{orders}+</p>
+            <p className="text-sm text-[#fdf9f0]/50 mt-1">Orders</p>
+          </div>
+          <div>
+            <p className="text-3xl font-serif font-bold text-[#c9a84c]">4.9★</p>
+            <p className="text-sm text-[#fdf9f0]/50 mt-1">Rating</p>
+          </div>
+          <div ref={yearsRef}>
+            <p className="text-3xl font-serif font-bold text-[#c9a84c]">{years} Yrs</p>
+            <p className="text-sm text-[#fdf9f0]/50 mt-1">Artistry</p>
+          </div>
+          <div>
+            <p className="text-3xl font-serif font-bold text-[#c9a84c]">Pan India</p>
+            <p className="text-sm text-[#fdf9f0]/50 mt-1">Delivery</p>
+          </div>
         </div>
-        <p
-          className="font-serif"
-          style={{
-            fontSize: "20px",
-            color: "#3D2B1F",
-            lineHeight: 1.5,
-            letterSpacing: "-0.01em",
-          }}
-        >
-          Crafted with patience,{" "}
-          <em style={{ color: "#C9964A" }}>
-            each piece takes 7&ndash;14 days of careful work.
-          </em>
+      </section>
+
+      {/* Meet the Maker */}
+      <section className="py-20 text-center px-4">
+        <div className="w-40 h-40 mx-auto rounded-full border-4 border-[#c9a84c] p-1 mb-6">
+          <img
+            src={IMAGES.about_story1}
+            alt="Founder"
+            className="w-full h-full rounded-full object-cover"
+          />
+        </div>
+        <h3 className="text-xl font-serif text-[#1a1208] mb-2">Meet the Maker</h3>
+        <p className="text-[#1a1208]/60 max-w-md mx-auto text-sm mb-4">
+          Behind every piece is a passionate artist who believes in the magic of preserving memories.
+          Every pour, every petal placement, every gold detail — done with intention and love.
         </p>
-      </motion.div>
-    </section>
-  </>
-);
+        <a
+          href="https://instagram.com/mohikaart"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#c9a84c] text-sm font-medium hover:underline"
+        >
+          Follow @mohikaart
+        </a>
+      </section>
+
+      {/* Process Timeline */}
+      <section className="py-16 bg-[#fdf9f0]">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-2xl font-serif text-[#1a1208] text-center mb-10">Our Process</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {[
+              { emoji: "🎨", label: "Design" },
+              { emoji: "🌸", label: "Embed" },
+              { emoji: "⏳", label: "Cure" },
+              { emoji: "📦", label: "Deliver" },
+            ].map((s) => (
+              <div key={s.label}>
+                <div className="text-3xl mb-2">{s.emoji}</div>
+                <p className="text-sm font-medium text-[#1a1208]">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="py-16 text-center px-4">
+        <div className="flex flex-wrap justify-center gap-4">
+          <Link
+            to="/shop"
+            className="px-7 py-3.5 bg-[#1a1208] text-[#fdf9f0] text-sm font-semibold tracking-wider rounded-full"
+          >
+            Shop Collection &rarr;
+          </Link>
+          <Link
+            to="/custom-order"
+            className="px-7 py-3.5 border-2 border-[#1a1208]/20 text-[#1a1208] text-sm font-semibold tracking-wider rounded-full hover:border-[#c9a84c] hover:text-[#c9a84c] transition-colors"
+          >
+            Custom Order &rarr;
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+};
 
 export default AboutPage;

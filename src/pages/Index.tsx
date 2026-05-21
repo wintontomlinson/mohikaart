@@ -1,20 +1,26 @@
 import Hero from "@/components/site/Hero";
+import Marquee from "@/components/site/Marquee";
 import Categories from "@/components/site/Categories";
-import Showcase from "@/components/site/Showcase";
+import HowItWorks from "@/components/site/HowItWorks";
+import BestSellers from "@/components/site/BestSellers";
 import Testimonials from "@/components/site/Testimonials";
-import HomepageFAQ from "@/components/site/HomepageFAQ";
+import InstagramSection from "@/components/site/InstagramSection";
+import CustomOrderCTA from "@/components/site/CustomOrderCTA";
+import AboutSnippet from "@/components/site/AboutSnippet";
+import Newsletter from "@/components/site/Newsletter";
 
 const Index = () => (
   <>
-    <h1 className="sr-only">
-      Mohika Art. Luxury Handmade Resin Gifts, Personalised Keepsakes and
-      Wedding Memory Preservation
-    </h1>
     <Hero />
+    <Marquee />
     <Categories />
-    <Showcase />
+    <HowItWorks />
+    <BestSellers />
     <Testimonials />
-    <HomepageFAQ />
+    <InstagramSection />
+    <CustomOrderCTA />
+    <AboutSnippet />
+    <Newsletter />
   </>
 );
 
