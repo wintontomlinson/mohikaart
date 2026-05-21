@@ -188,55 +188,52 @@ const GalleryPage = () => {
       </section>
 
       {/* ━━ CATEGORY PILLS — Sticky, Minimal, Premium ━━ */}
-      <section
-        className="sticky top-[60px] md:top-[68px] z-30"
-        style={{
-          background: "rgba(253,249,240,0.88)",
-          backdropFilter: "blur(20px) saturate(180%)",
-          WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderBottom: "1px solid rgba(26,18,8,0.05)",
-        }}
+      <div
+        className="sticky top-0 z-40 will-change-transform"
+        style={{ isolation: "isolate" }}
       >
-        <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
-            {CATEGORIES.map((c) => {
-              const isActive = activeCategory === c.slug;
-              return (
-                <motion.button
-                  key={c.slug}
-                  onClick={() => setActiveCategory(c.slug)}
-                  className="shrink-0 relative"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  style={{
-                    padding: "5px 14px",
-                    borderRadius: 9999,
-                    fontSize: 10,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.12em",
-                    fontWeight: 600,
-                    background: isActive ? "#1a1208" : "transparent",
-                    color: isActive ? "#fdf9f0" : "rgba(26,18,8,0.5)",
-                    border: `1px solid ${isActive ? "#1a1208" : "rgba(26,18,8,0.1)"}`,
-                    whiteSpace: "nowrap",
-                    transition: "all 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
-                  }}
-                >
-                  {c.label}
-                  {isActive && (
-                    <motion.span
-                      layoutId="activePill"
-                      className="absolute inset-0 rounded-full"
-                      style={{ background: "#1a1208", zIndex: -1 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                </motion.button>
-              );
-            })}
+        <div
+          className="relative"
+          style={{
+            background: "rgba(253,249,240,0.96)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            boxShadow: "0 1px 0 rgba(26,18,8,0.06), 0 6px 20px -6px rgba(26,18,8,0.06)",
+          }}
+        >
+          <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
+              {CATEGORIES.map((c) => {
+                const isActive = activeCategory === c.slug;
+                return (
+                  <motion.button
+                    key={c.slug}
+                    onClick={() => setActiveCategory(c.slug)}
+                    className="shrink-0 relative"
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    style={{
+                      padding: "5px 14px",
+                      borderRadius: 9999,
+                      fontSize: 10,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      fontWeight: 600,
+                      background: isActive ? "#1a1208" : "transparent",
+                      color: isActive ? "#fdf9f0" : "rgba(26,18,8,0.5)",
+                      border: `1px solid ${isActive ? "#1a1208" : "rgba(26,18,8,0.1)"}`,
+                      whiteSpace: "nowrap",
+                      transition: "all 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+                    }}
+                  >
+                    {c.label}
+                  </motion.button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* ━━ CSS COLUMNS MASONRY GRID ━━ */}
       <section className="max-w-[1280px] mx-auto px-6 lg:px-8 py-8 md:py-12">
