@@ -386,3 +386,69 @@ main {
 .marquee-pill:hover {
   color: #C9964A !important;
 }
+
+/* ── Smooth section reveal on scroll ── */
+@keyframes section-reveal {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Enhanced image hover zoom (product cards, gallery) ── */
+.img-zoom-hover {
+  overflow: hidden;
+  border-radius: inherit;
+}
+.img-zoom-hover img {
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.8s ease;
+}
+.img-zoom-hover:hover img {
+  transform: scale(1.08);
+}
+
+/* ── Gold shimmer button effect ── */
+@keyframes gold-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(201,150,74,0.15), transparent);
+  transform: translateX(-100%);
+  transition: none;
+}
+.btn-shimmer:hover::after {
+  animation: gold-shimmer 0.8s ease forwards;
+}
+
+/* ── Smooth link underline effect ── */
+.link-underline {
+  position: relative;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: #C9964A;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.link-underline:hover::after {
+  width: 100%;
+}
+
+/* ── Card lift on hover (lighter version) ── */
+.card-lift {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px -16px rgba(61,43,31,0.15);
+}

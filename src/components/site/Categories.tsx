@@ -13,15 +13,15 @@ import catHamper from "@/assets/cat-hamper.jpg";
 
 type Cat = { id: string; name: string; slug: string; image_url: string | null };
 
-// High quality Unsplash fallback images for each category
+// High quality Unsplash fallback images — actual resin/craft/gift photos
 const UNSPLASH_FALLBACKS: Record<string, string> = {
-  "wedding-keepsakes": "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80",
-  "photo-frames":      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&q=80",
-  "name-keychains":    "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=600&q=80",
-  "coaster-sets":      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
-  "bookmarks":         "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=80",
-  "gift-hampers":      "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80",
-  "resin-trays":       "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=600&q=80",
+  "wedding-keepsakes": "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=700&q=85",
+  "photo-frames":      "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=700&q=85",
+  "name-keychains":    "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=700&q=85",
+  "coaster-sets":      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=85",
+  "bookmarks":         "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=700&q=85",
+  "gift-hampers":      "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=700&q=85",
+  "resin-trays":       "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=700&q=85",
 };
 
 const FALLBACK_CATEGORIES: Cat[] = [

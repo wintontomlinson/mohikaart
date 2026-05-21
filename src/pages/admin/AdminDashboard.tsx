@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/site";
 import {
-  Package, ShoppingCart, IndianRupee, TrendingUp, Star, AlertCircle,
-  Mail, Sparkles, Megaphone, Ticket, ArrowUpRight, MessageSquareQuote,
+  Package, ShoppingCart, IndianRupee, Star, AlertCircle,
+  Mail, Sparkles, ArrowUpRight,
   BarChart3, Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -365,28 +365,23 @@ const AdminDashboard = () => {
       {/* Quick links to all admin areas */}
       <div>
         <h2 className="font-display text-xl mb-4">Quick Actions</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { to: "/admin/analytics",     icon: BarChart3,         label: "Analytics",           desc: "Revenue, orders & insights" },
-            { to: "/admin/products",      icon: Package,           label: "Manage Products",     desc: "Add, edit or remove products" },
-            { to: "/admin/categories",    icon: TrendingUp,        label: "Categories",          desc: "Organize your catalogue" },
-            { to: "/admin/coupons",       icon: Ticket,            label: "Coupons",             desc: "Create discount codes" },
-            { to: "/admin/orders",        icon: ShoppingCart,      label: "Orders",              desc: "Track & fulfill orders" },
-            { to: "/admin/inquiries",     icon: Mail,              label: "Inquiries",           desc: "Reply to contact forms" },
-            { to: "/admin/testimonials",  icon: MessageSquareQuote,label: "Testimonials",        desc: "Manage customer reviews" },
-            { to: "/admin/hero",          icon: Sparkles,          label: "Hero Section",        desc: "Edit headline & stats" },
-            { to: "/admin/announcements", icon: Megaphone,         label: "Announcements",       desc: "Top bar messages" },
-            { to: "/admin/images",        icon: Star,              label: "Site Images",         desc: "Update photos" },
-            { to: "/admin/users",         icon: Users,             label: "Admin Users",         desc: "Manage your team" },
+            { to: "/admin/products",      icon: Package,           label: "Products",        desc: "Add, edit or remove products" },
+            { to: "/admin/orders",        icon: ShoppingCart,      label: "Orders",          desc: "Track & fulfill orders" },
+            { to: "/admin/inquiries",     icon: Mail,              label: "Inquiries",       desc: "Reply to custom order requests" },
+            { to: "/admin/hero",          icon: Sparkles,          label: "Hero Section",    desc: "Edit homepage headline & CTA" },
+            { to: "/admin/images",        icon: Star,              label: "Site Images",     desc: "Update hero & gallery photos" },
+            { to: "/admin/settings",      icon: Users,             label: "Settings",        desc: "Store info, payment & social" },
           ].map((q) => (
             <Link
               key={q.to}
               to={q.to}
-              className="bg-background rounded-2xl border border-border p-5 hover:border-foreground/25 hover:shadow-sm transition-all group"
+              className="bg-background rounded-2xl border border-border p-6 hover:border-foreground/25 hover:shadow-md transition-all group"
             >
-              <q.icon className="w-5 h-5 mb-3 text-muted-foreground group-hover:text-amber-600 transition-colors" />
+              <q.icon className="w-6 h-6 mb-3 text-muted-foreground group-hover:text-amber-600 transition-colors" />
               <div className="font-medium text-sm">{q.label}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{q.desc}</div>
+              <div className="text-xs text-muted-foreground mt-1">{q.desc}</div>
             </Link>
           ))}
         </div>

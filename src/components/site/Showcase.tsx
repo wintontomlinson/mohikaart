@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useProducts, ProductCard, Product } from "./ProductCard";
 
-// Fallback products with Unsplash images shown when Supabase returns empty
+// Fallback products with actual resin art related Unsplash images
 const FALLBACK_PRODUCTS: Product[] = [
-  { id: "fp-1", slug: "personalized-name-keychain", name: "Personalized Name Keychain", price: 499, original_price: 699, image_url: "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=600&q=80", badge: "Bestseller", short_description: null, category_slug: "name-keychains" },
-  { id: "fp-2", slug: "couple-photo-frame", name: "Couple Photo Frame", price: 1299, original_price: 1799, image_url: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600&q=80", badge: "Popular", short_description: null, category_slug: "photo-frames" },
-  { id: "fp-3", slug: "bridal-bouquet-preservation", name: "Bridal Bouquet Preservation", price: 2499, original_price: 3499, image_url: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=80", badge: "Premium", short_description: null, category_slug: "wedding-keepsakes" },
-  { id: "fp-4", slug: "floral-resin-bookmark", name: "Floral Resin Bookmark", price: 349, original_price: 499, image_url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&q=80", badge: "New", short_description: null, category_slug: "bookmarks" },
-  { id: "fp-5", slug: "ocean-resin-coaster-set", name: "Ocean Resin Coaster Set", price: 899, original_price: 1199, image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80", badge: "Popular", short_description: null, category_slug: "coaster-sets" },
-  { id: "fp-6", slug: "luxury-gift-hamper", name: "Luxury Gift Hamper", price: 2999, original_price: 3749, image_url: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80", badge: "Premium", short_description: null, category_slug: "gift-hampers" },
+  { id: "fp-1", slug: "personalized-name-keychain", name: "Personalized Name Keychain", price: 499, original_price: 699, image_url: "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=85", badge: "Bestseller", short_description: "Custom resin keychain with real flowers", category_slug: "name-keychains" },
+  { id: "fp-2", slug: "couple-photo-frame", name: "Couple Resin Photo Frame", price: 1299, original_price: 1799, image_url: "https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?w=600&q=85", badge: "Popular", short_description: "Handcrafted frame with preserved petals", category_slug: "photo-frames" },
+  { id: "fp-3", slug: "bridal-bouquet-preservation", name: "Bridal Bouquet Preservation", price: 2499, original_price: 3499, image_url: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=600&q=85", badge: "Premium", short_description: "Your wedding flowers preserved forever", category_slug: "wedding-keepsakes" },
+  { id: "fp-4", slug: "floral-resin-bookmark", name: "Floral Resin Bookmark", price: 349, original_price: 499, image_url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=85", badge: "New", short_description: "Real pressed flowers in clear resin", category_slug: "bookmarks" },
+  { id: "fp-5", slug: "ocean-resin-coaster-set", name: "Ocean Wave Coaster Set", price: 899, original_price: 1199, image_url: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=85", badge: "Popular", short_description: "4pc ocean-inspired resin coasters", category_slug: "coaster-sets" },
+  { id: "fp-6", slug: "luxury-gift-hamper", name: "Luxury Resin Gift Box", price: 2999, original_price: 3749, image_url: "https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=600&q=85", badge: "Premium", short_description: "Curated hamper of handcrafted pieces", category_slug: "gift-hampers" },
 ];
 
 /**
