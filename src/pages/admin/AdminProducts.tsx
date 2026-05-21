@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
 import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
+import ConfirmModal from "@/components/admin/ConfirmModal";
+import { ProductCardSkeleton } from "@/components/admin/Skeleton";
+import EmptyState from "@/components/admin/EmptyState";
 
 type Product = {
   id?: string;
@@ -43,11 +46,24 @@ const AdminProducts = () => {
   const [editing, setEditing] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "featured" | "in" | "out">("all");
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const load = async () => {
     const { data } = await supabase.from("products").select("*").order("sort_order");
     setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [] })) as Product[]);
+    setLoading(false);
+    setSelected(new Set());
   };
 
   useEffect(() => {
@@ -68,10 +84,9 @@ const AdminProducts = () => {
   };
 
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted"); load();
+    toast.success("Deleted"); setConfirmDelete(null); load();
   };
 
   const onDuplicate = async (p: Product) => {
@@ -95,12 +110,33 @@ const AdminProducts = () => {
   };
 
   const visible = products.filter((p) => {
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !p.slug.toLowerCase().includes(search.toLowerCase())) return false;
+    if (debouncedSearch && !p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) && !p.slug.toLowerCase().includes(debouncedSearch.toLowerCase())) return false;
     if (filter === "featured" && !p.featured) return false;
     if (filter === "out") return !p.in_stock;
     if (filter === "in") return p.in_stock;
     return true;
   });
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleAll = () => {
+    if (selected.size === visible.length) setSelected(new Set());
+    else setSelected(new Set(visible.map((p) => p.id!)));
+  };
+  const onBulkDelete = async () => {
+    if (selected.size === 0) return;
+    setBulkDeleting(true);
+    const { error } = await supabase.from("products").delete().in("id", Array.from(selected));
+    setBulkDeleting(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Deleted ${selected.size} products`); load();
+  };
+  const onBulkToggleStock = async (in_stock: boolean) => {
+    const { error } = await supabase.from("products").update({ in_stock }).in("id", Array.from(selected));
+    if (error) return toast.error(error.message);
+    toast.success(`Updated ${selected.size} products`); load();
+  };
 
   const getDiscount = (p: Product) => {
     if (!p.original_price || p.original_price <= p.price) return 0;
@@ -143,11 +179,40 @@ const AdminProducts = () => {
       </div>
 
       {/* Product Grid — SAME STYLE AS FRONTEND */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)}
+        </div>
+      ) : visible.length === 0 ? (
+        <EmptyState
+          title={products.length === 0 ? "No products yet" : "No matches"}
+          description={products.length === 0 ? "Add your first product to get started" : "Try adjusting your search or filters"}
+          action={products.length === 0 ? { label: "Add Product", onClick: () => setEditing({ ...empty, gallery: [] }) } : undefined}
+        />
+      ) : (
+        <>
+          {/* Bulk actions */}
+          {selected.size > 0 && (
+            <div className="mb-4 p-3 rounded-xl bg-[#f8f5f0] border border-[#e5e0d8]/60 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-sm font-medium" style={{ color: "#1a1208" }}>{selected.size} selected</span>
+              <div className="flex gap-2">
+                <button onClick={() => onBulkToggleStock(true)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-[#e5e0d8] bg-white hover:border-emerald-300 transition-colors">Enable</button>
+                <button onClick={() => onBulkToggleStock(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-[#e5e0d8] bg-white hover:border-amber-300 transition-colors">Disable</button>
+                <button onClick={onBulkDelete} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors">Delete</button>
+                <button onClick={() => setSelected(new Set())} className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">Clear</button>
+              </div>
+            </div>
+          )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {visible.map((p) => {
           const discount = getDiscount(p);
           return (
             <div key={p.id} className="group relative bg-white/70 backdrop-blur rounded-2xl border border-[#e5e0d8]/60 overflow-hidden hover:shadow-lg hover:border-[#c9a84c]/30 transition-all duration-300 hover:-translate-y-1">
+              {/* Select checkbox */}
+              <div className="absolute top-2 left-2 z-10">
+                <input type="checkbox" checked={selected.has(p.id!)} onChange={() => toggleSelect(p.id!)}
+                  className="w-4 h-4 rounded border-[#e5e0d8] bg-white/90 text-[#c9a84c] focus:ring-[#c9a84c]/30 cursor-pointer opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity" />
+              </div>
               {/* Image */}
               <div className="relative aspect-square overflow-hidden">
                 <img src={resolveImage(p.image_url)} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
@@ -176,7 +241,7 @@ const AdminProducts = () => {
                   <button onClick={() => onDuplicate(p)} className="w-8 h-8 rounded-full bg-white/90 border border-[#e5e0d8] flex items-center justify-center hover:bg-white transition-colors">
                     <Copy className="w-3 h-3" style={{ color: "#1a1208" }} />
                   </button>
-                  <button onClick={() => onDelete(p.id!)} className="w-8 h-8 rounded-full bg-white/90 border border-[#e5e0d8] flex items-center justify-center hover:bg-red-50 hover:border-red-200 transition-colors">
+                  <button onClick={() => setConfirmDelete(p.id!)} className="w-8 h-8 rounded-full bg-white/90 border border-[#e5e0d8] flex items-center justify-center hover:bg-red-50 hover:border-red-200 transition-colors">
                     <Trash2 className="w-3 h-3 text-red-500" />
                   </button>
                 </div>
@@ -214,6 +279,19 @@ const AdminProducts = () => {
           </div>
         )}
       </div>
+      </>
+      )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete && onDelete(confirmDelete)}
+        title="Delete Product"
+        description="This product will be permanently removed from your store. This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+      />
 
       {/* Edit Modal */}
       {editing && (
