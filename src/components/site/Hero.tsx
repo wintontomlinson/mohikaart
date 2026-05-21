@@ -114,31 +114,34 @@ const Hero = () => {
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* Gold dust particles */}
-        {!reduceMotion && [...Array(4)].map((_, i) => (
+        {/* Gold dust particles — enhanced cinematic */}
+        {!reduceMotion && [...Array(8)].map((_, i) => (
           <motion.span
             key={i}
             className="absolute rounded-full"
             style={{
-              width:  `${1.2 + (i % 4) * 1.6}px`,
-              height: `${1.2 + (i % 4) * 1.6}px`,
-              left:   `${5 + i * 6.5}%`,
-              top:    `${10 + (i % 7) * 11}%`,
-              background: i % 3 === 0
-                ? `hsl(34 58% 52%/0.35)`
-                : i % 3 === 1
-                ? `hsl(348 55% 72%/0.25)`
-                : `hsl(38 62% 72%/0.22)`,
+              width:  `${1 + (i % 5) * 1.2}px`,
+              height: `${1 + (i % 5) * 1.2}px`,
+              left:   `${3 + i * 11.5}%`,
+              top:    `${8 + (i * 13) % 75}%`,
+              background: i % 4 === 0
+                ? `hsl(34 58% 52%/0.4)`
+                : i % 4 === 1
+                ? `hsl(348 55% 72%/0.3)`
+                : i % 4 === 2
+                ? `hsl(38 62% 72%/0.25)`
+                : `hsl(34 48% 78%/0.35)`,
             }}
             animate={{
-              y: [0, -(18 + (i % 4) * 8), 0],
-              opacity: [0.15, 0.7, 0.15],
-              scale: [1, 1.5, 1],
+              y: [0, -(12 + (i % 5) * 6), 0],
+              x: [0, (i % 2 === 0 ? 4 : -4), 0],
+              opacity: [0.1, 0.65, 0.1],
+              scale: [1, 1.4, 1],
             }}
             transition={{
-              duration: 4 + i * 0.55,
+              duration: 3.5 + i * 0.6,
               repeat: Infinity,
-              delay: i * 0.35,
+              delay: i * 0.5,
               ease: "easeInOut",
             }}
           />
@@ -611,92 +614,8 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* ── MARQUEE STRIP ── premium ecommerce brand pillars */}
+      {/* ── BOTTOM ACCENT LINE ── */}
       <div className="relative mt-auto">
-        <div className="gold-divider" />
-        <div
-          className="relative overflow-hidden py-4"
-          style={{ background: "transparent" }}
-          onMouseEnter={(e) => {
-            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
-            if (track) track.style.animationPlayState = "paused";
-          }}
-          onMouseLeave={(e) => {
-            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
-            if (track) track.style.animationPlayState = "running";
-          }}
-        >
-          {/* Soft fade gradients on left/right edges */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-0 z-10"
-            style={{
-              width: "120px",
-              background:
-                "linear-gradient(to right, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.6) 60%, transparent 100%)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 z-10"
-            style={{
-              width: "120px",
-              background:
-                "linear-gradient(to left, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.6) 60%, transparent 100%)",
-            }}
-          />
-
-          <div className="marquee-strip flex whitespace-nowrap">
-            {[...Array(2)].map((_, i) => (
-              <span key={i} className="flex shrink-0 items-center">
-                {[
-                  "Handmade with Love",
-                  "Premium Resin Art",
-                  "Customized for You",
-                  "Luxury Packaging",
-                  "Pan India Delivery",
-                  "Memory Keepsakes",
-                  "Wedding Gifts",
-                  "Corporate Gifts",
-                  "Since 2021",
-                  "2000+ Happy Customers",
-                ].map((t) => (
-                  <span
-                    key={t}
-                    className="px-7 font-display marquee-pill"
-                    style={{
-                      fontWeight: 400,
-                      fontSize: "clamp(0.85rem, 1.3vw, 1.05rem)",
-                      letterSpacing: "0.04em",
-                      color: "hsl(25 10% 32%)",
-                      transition: "color 0.4s cubic-bezier(0.22,1,0.36,1)",
-                      cursor: "default",
-                    }}
-                  >
-                    {t}
-                    <motion.span
-                      className="mx-5 inline-block"
-                      style={{
-                        color: "hsl(34 58% 52%)",
-                        fontSize: "0.85em",
-                      }}
-                      animate={{
-                        rotate: [0, 360],
-                        scale: [1, 1.15, 1],
-                      }}
-                      transition={{
-                        rotate: { duration: 6, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
-                      }}
-                    >
-                      ✦
-                    </motion.span>
-                  </span>
-                ))}
-              </span>
-            ))}
-          </div>
-        </div>
         <div className="gold-divider" />
       </div>
     </section>
