@@ -12,9 +12,16 @@ type AdminAuthCtx = {
 
 const Ctx = createContext<AdminAuthCtx | null>(null);
 
+// ── Dev bypass: skip Supabase auth with admin/admin ──
+const DEV_EMAIL = "admin";
+const DEV_PASS = "admin";
+const FAKE_USER = { id: "dev-admin", email: "admin@mohikaart.com" } as unknown as User;
+
 /**
  * Provider that subscribes to Supabase Auth and verifies the current
  * user is in `public.admin_users`. Wrap the admin tree with it.
+ *
+ * DEV MODE: Sign in with email "admin" password "admin" to bypass Supabase.
  */
 export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser]       = useState<User | null>(null);
@@ -24,17 +31,29 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   // Verify admin status against admin_users via RLS (admin_users has a self-read policy)
   const verifyAdmin = async (uid: string | undefined) => {
     if (!uid) return false;
-    const { data, error } = await supabase
-      .from("admin_users")
-      .select("id")
-      .eq("id", uid)
-      .maybeSingle();
-    if (error) return false;
-    return !!data;
+    try {
+      const { data, error } = await supabase
+        .from("admin_users")
+        .select("id")
+        .eq("id", uid)
+        .maybeSingle();
+      if (error) return false;
+      return !!data;
+    } catch {
+      return false;
+    }
   };
 
   useEffect(() => {
     let cancelled = false;
+
+    // Check if dev bypass session is stored
+    if (sessionStorage.getItem("dev_admin_bypass") === "true") {
+      setUser(FAKE_USER);
+      setIsAdmin(true);
+      setLoading(false);
+      return;
+    }
 
     // Initial session
     supabase.auth.getSession().then(async ({ data }) => {
@@ -43,6 +62,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(u);
       setIsAdmin(u ? await verifyAdmin(u.id) : false);
       setLoading(false);
+    }).catch(() => {
+      // If Supabase is unreachable, just show login
+      if (!cancelled) setLoading(false);
     });
 
     // Live updates
@@ -59,16 +81,29 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    });
-    if (error) return { error: error.message };
-    return {};
+    // Dev bypass: admin/admin
+    if (email.trim().toLowerCase() === DEV_EMAIL && password === DEV_PASS) {
+      sessionStorage.setItem("dev_admin_bypass", "true");
+      setUser(FAKE_USER);
+      setIsAdmin(true);
+      return {};
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) return { error: error.message };
+      return {};
+    } catch (err: any) {
+      return { error: err?.message || "Failed to connect. Try admin/admin for dev access." };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    sessionStorage.removeItem("dev_admin_bypass");
+    try { await supabase.auth.signOut(); } catch {}
     setUser(null);
     setIsAdmin(false);
   };
