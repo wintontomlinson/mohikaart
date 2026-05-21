@@ -35,13 +35,13 @@ const Footer = () => {
   ];
 
   const categoryLinks = [
-    { to: "/category/name-keychains", label: "Name Keychains" },
-    { to: "/category/photo-frames", label: "Photo Frames" },
-    { to: "/category/wedding-keepsakes", label: "Wedding Keepsakes" },
-    { to: "/category/resin-trays", label: "Resin Trays" },
-    { to: "/category/coaster-sets", label: "Coaster Sets" },
-    { to: "/category/bookmarks", label: "Bookmarks" },
-    { to: "/category/gift-hampers", label: "Gift Hampers" },
+    { to: "/shop?category=keychain", label: "Name Keychains" },
+    { to: "/shop?category=frame", label: "Photo Frames" },
+    { to: "/shop?category=wedding", label: "Wedding Keepsakes" },
+    { to: "/shop?category=tray", label: "Resin Trays" },
+    { to: "/shop?category=coaster", label: "Coaster Sets" },
+    { to: "/shop?category=bookmark", label: "Bookmarks" },
+    { to: "/shop?category=hamper", label: "Gift Hampers" },
   ];
 
   const helpLinks = [
@@ -61,7 +61,7 @@ const Footer = () => {
   return (
     <footer style={{ background: "#1a1208", color: "#fdf9f0" }}>
       {/* Gold line top */}
-      <div aria-hidden style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent)" }} />
+      <div aria-hidden style={{ height: "1px", background: "linear-gradient(90deg, transparent, rgba(201,150,74,0.4), transparent)" }} />
 
       {/* ━━ TOP SECTION — 4 COLUMNS ━━ */}
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8 pt-16 pb-10">
@@ -78,10 +78,10 @@ const Footer = () => {
               <Monogram size={32} tone="background" />
               <Wordmark variant="dark" />
             </Link>
-            <p className="font-serif italic text-sm mb-3" style={{ color: "rgba(253,249,240,0.6)" }}>
+            <p className="font-serif italic text-sm mb-3" style={{ color: "rgba(253,249,240,0.65)" }}>
               Turning memories into timeless art.
             </p>
-            <p className="text-[12px] leading-relaxed mb-5" style={{ color: "rgba(253,249,240,0.4)", maxWidth: 260 }}>
+            <p className="text-[12px] leading-relaxed mb-5" style={{ color: "rgba(253,249,240,0.45)", maxWidth: 260 }}>
               Premium handcrafted resin keepsakes, personalized for every occasion. Pan India delivery.
             </p>
             {/* Social icons */}
@@ -94,7 +94,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   aria-label={s.label}
                   className="w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-300 hover:bg-[#c9a84c] hover:border-[#c9a84c] hover:text-[#1a1208] hover:scale-110"
-                  style={{ borderColor: "rgba(201,168,76,0.3)", color: "rgba(253,249,240,0.6)" }}
+                  style={{ borderColor: "rgba(201,150,74,0.25)", color: "rgba(253,249,240,0.6)" }}
                 >
                   <s.icon className="w-4 h-4" strokeWidth={1.6} />
                 </a>
@@ -118,7 +118,7 @@ const Footer = () => {
                   <Link
                     to={l.to}
                     className="text-[13px] transition-all duration-200 hover:text-[#c9a84c] hover:translate-x-1 inline-block"
-                    style={{ color: "rgba(253,249,240,0.55)" }}
+                    style={{ color: "rgba(253,249,240,0.6)" }}
                   >
                     {l.label}
                   </Link>
@@ -143,7 +143,7 @@ const Footer = () => {
                   <Link
                     to={l.to}
                     className="text-[13px] transition-all duration-200 hover:text-[#c9a84c] hover:translate-x-1 inline-block"
-                    style={{ color: "rgba(253,249,240,0.55)" }}
+                    style={{ color: "rgba(253,249,240,0.6)" }}
                   >
                     {l.label}
                   </Link>
@@ -168,7 +168,7 @@ const Footer = () => {
                   <Link
                     to={l.to}
                     className="text-[13px] transition-all duration-200 hover:text-[#c9a84c] hover:translate-x-1 inline-block"
-                    style={{ color: "rgba(253,249,240,0.55)" }}
+                    style={{ color: "rgba(253,249,240,0.6)" }}
                   >
                     {l.label}
                   </Link>
@@ -190,7 +190,7 @@ const Footer = () => {
               <a
                 href={`mailto:${email || "hello@mohikaart.com"}`}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] uppercase tracking-wider font-semibold border transition-all duration-300 hover:bg-[#c9a84c] hover:border-[#c9a84c] hover:text-[#1a1208]"
-                style={{ borderColor: "rgba(253,249,240,0.2)", color: "rgba(253,249,240,0.6)" }}
+                style={{ borderColor: "rgba(201,150,74,0.25)", color: "rgba(253,249,240,0.6)" }}
               >
                 <Mail className="w-3.5 h-3.5" /> Email Us
               </a>
@@ -200,15 +200,15 @@ const Footer = () => {
       </div>
 
       {/* ━━ MIDDLE — NEWSLETTER STRIP ━━ */}
-      <div style={{ background: "#2d2416" }}>
+      <div style={{ background: "rgba(201,150,74,0.06)" }}>
         <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium" style={{ color: "rgba(253,249,240,0.8)" }}>
+              <p className="text-sm font-medium" style={{ color: "rgba(253,249,240,0.85)" }}>
                 Get exclusive offers & new launches
               </p>
               <p className="text-[11px] mt-0.5" style={{ color: "rgba(253,249,240,0.4)" }}>
-                We won't spam, promise ✦
+                Join 2000+ happy customers ✦
               </p>
             </div>
             {subscribed ? (
@@ -221,9 +221,9 @@ const Footer = () => {
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder="you@email.com"
                   className="px-4 py-2.5 rounded-full text-sm outline-none transition-colors"
-                  style={{ background: "rgba(253,249,240,0.06)", border: "1px solid rgba(253,249,240,0.12)", color: "#fdf9f0", minWidth: 200 }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(201,168,76,0.5)"; }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(253,249,240,0.12)"; }}
+                  style={{ background: "rgba(253,249,240,0.06)", border: "1px solid rgba(201,150,74,0.15)", color: "#fdf9f0", minWidth: 200 }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(201,150,74,0.5)"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(201,150,74,0.15)"; }}
                 />
                 <button
                   type="submit"
@@ -240,11 +240,11 @@ const Footer = () => {
 
       {/* ━━ BOTTOM BAR ━━ */}
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-5">
-        <div style={{ height: "1px", background: "rgba(201,168,76,0.1)", marginBottom: "1.25rem" }} />
+        <div style={{ height: "1px", background: "rgba(201,150,74,0.08)", marginBottom: "1.25rem" }} />
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
           <p style={{ fontSize: "0.72rem", color: "rgba(253,249,240,0.4)" }}>
-            © 2024 Mohika Art. Made with{" "}
-            <Heart className="inline w-3 h-3" style={{ color: "#e53e3e", fill: "#e53e3e" }} />{" "}
+            © 2025 Mohika Art. Made with{" "}
+            <Heart className="inline w-3 h-3" style={{ color: "#c9a84c", fill: "#c9a84c" }} />{" "}
             in India
           </p>
           <div className="flex items-center gap-4">
