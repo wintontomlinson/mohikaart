@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Save, Eye, EyeOff } from "lucide-react";
+import { Save, Eye, EyeOff, Globe, CreditCard, Store } from "lucide-react";
 import { toast } from "sonner";
 import { DEFAULT_SETTINGS, StoreSettings, useInvalidateStoreSettings } from "@/lib/settings";
 import { DEFAULT_SEO, SeoSettings, fetchSetting, saveSetting, useInvalidateSetting } from "@/lib/cms";
 
 type RazorpayConfig = { key_id: string; mode: "test" | "live"; secret_configured: boolean };
 
-const inp = "w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-foreground/40 outline-none text-sm transition-colors";
+const inp = "w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-white placeholder:text-white/25 focus:border-amber-500/40 focus:bg-white/[0.05] outline-none text-sm transition-all";
 
 const AdminSettings = () => {
   const [rzp, setRzp] = useState<RazorpayConfig>({ key_id: "", mode: "test", secret_configured: false });
@@ -52,7 +52,7 @@ const AdminSettings = () => {
     setSavingStore(false);
     if (error) return toast.error(error.message);
     invalidateStore();
-    toast.success("Store settings saved - changes are live");
+    toast.success("Store settings saved");
   };
 
   const onSaveSeo = async () => {
@@ -65,56 +65,39 @@ const AdminSettings = () => {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">Loading…</div>
+    <div className="flex items-center justify-center h-48 text-white/40 text-sm">Loading…</div>
   );
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-2xl space-y-6 pb-20 lg:pb-0">
       <div>
-        <h1 className="font-display text-4xl">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">Configure store details and payment settings</p>
+        <h1 className="text-white text-3xl font-semibold">Settings</h1>
+        <p className="text-sm text-white/40 mt-1">Configure store details, SEO, and payments</p>
       </div>
 
-      {/* ── Store Info ─────────────────────────────────────────── */}
-      <div className="bg-background rounded-2xl border border-border overflow-hidden">
-        <div className="px-6 py-5 border-b border-border">
-          <h2 className="font-display text-xl">Store Information</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Contact details shown in the footer, contact page, WhatsApp button, and checkout.
-          </p>
-        </div>
-
-        <div className="p-6 space-y-5">
+      {/* Store Information */}
+      <SettingsCard icon={Store} title="Store Information" desc="Contact details shown across the site">
+        <div className="space-y-5">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-                WhatsApp Number (digits only)
-              </label>
+            <Field label="WhatsApp Number" hint="Include country code, digits only">
               <input
                 value={store.phone}
                 onChange={(e) => setStore((s) => ({ ...s, phone: e.target.value.replace(/\D/g, "") }))}
                 className={inp + " font-mono"}
                 placeholder="919876543210"
               />
-              <p className="text-[10px] text-muted-foreground mt-1">Include country code, no + or spaces</p>
-            </div>
-            <div>
-              <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-                Display Phone
-              </label>
+            </Field>
+            <Field label="Display Phone">
               <input
                 value={store.phone_display}
                 onChange={(e) => setStore((s) => ({ ...s, phone_display: e.target.value }))}
                 className={inp}
                 placeholder="+91 98765 43210"
               />
-              <p className="text-[10px] text-muted-foreground mt-1">Shown as text on the site</p>
-            </div>
+            </Field>
           </div>
-
           <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Email</label>
+            <Field label="Email">
               <input
                 type="email"
                 value={store.email}
@@ -122,13 +105,10 @@ const AdminSettings = () => {
                 className={inp}
                 placeholder="hello@mohikaart.com"
               />
-            </div>
-            <div>
-              <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-                Instagram Handle
-              </label>
+            </Field>
+            <Field label="Instagram Handle">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 text-sm">@</span>
                 <input
                   value={store.instagram}
                   onChange={(e) => setStore((s) => ({ ...s, instagram: e.target.value.replace(/^@/, "") }))}
@@ -136,194 +116,157 @@ const AdminSettings = () => {
                   placeholder="mohikaart"
                 />
               </div>
-            </div>
+            </Field>
           </div>
-
           <div className="max-w-xs">
-            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-              Free Shipping Threshold (₹)
-            </label>
-            <input
-              type="number"
-              value={store.free_shipping_threshold}
-              onChange={(e) => setStore((s) => ({ ...s, free_shipping_threshold: Number(e.target.value) || 0 }))}
-              className={inp}
-              placeholder="499"
-            />
-            <p className="text-[10px] text-muted-foreground mt-1">Shown in the announcement bar</p>
+            <Field label="Free Shipping Threshold (₹)" hint="Shown in announcement bar">
+              <input
+                type="number"
+                value={store.free_shipping_threshold}
+                onChange={(e) => setStore((s) => ({ ...s, free_shipping_threshold: Number(e.target.value) || 0 }))}
+                className={inp}
+                placeholder="499"
+              />
+            </Field>
           </div>
         </div>
+        <SaveBar saving={savingStore} onSave={onSaveStore} label="Save Store Info" />
+      </SettingsCard>
 
-        <div className="px-6 py-4 border-t border-border flex justify-end">
-          <button
-            onClick={onSaveStore}
-            disabled={savingStore}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm disabled:opacity-60 hover:opacity-85 transition-opacity"
-          >
-            <Save className="w-4 h-4" /> {savingStore ? "Saving…" : "Save Store Info"}
-          </button>
-        </div>
-      </div>
-
-      {/* ── SEO Settings ───────────────────────────────────────── */}
-      <div className="bg-background rounded-2xl border border-border overflow-hidden">
-        <div className="px-6 py-5 border-b border-border">
-          <h2 className="font-display text-xl">SEO Settings</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Page title, description and keywords used by search engines and social shares.
-          </p>
-        </div>
-        <div className="p-6 space-y-5">
-          <div>
-            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-              Site title
-            </label>
+      {/* SEO Settings */}
+      <SettingsCard icon={Globe} title="SEO Settings" desc="Page title, description, and social share">
+        <div className="space-y-5">
+          <Field label="Site Title" hint={`${seo.site_title.length}/60 characters`}>
             <input
               value={seo.site_title}
               onChange={(e) => setSeo((s) => ({ ...s, site_title: e.target.value }))}
               className={inp}
               placeholder="Mohika Art - Customized Resin Crafts"
             />
-            <p className="text-[10px] text-muted-foreground mt-1">
-              {seo.site_title.length}/60 characters
-            </p>
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-              Meta description
-            </label>
+          </Field>
+          <Field label="Meta Description" hint={`${seo.site_description.length}/160 characters`}>
             <textarea
               rows={3}
               value={seo.site_description}
               onChange={(e) => setSeo((s) => ({ ...s, site_description: e.target.value }))}
               className={inp + " resize-none"}
-              placeholder="One paragraph summary of your store (150–160 chars)"
+              placeholder="Brief summary (150-160 chars)"
             />
-            <p className="text-[10px] text-muted-foreground mt-1">
-              {seo.site_description.length}/160 characters
-            </p>
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-              Keywords
-            </label>
+          </Field>
+          <Field label="Keywords" hint="Comma-separated">
             <input
               value={seo.keywords}
               onChange={(e) => setSeo((s) => ({ ...s, keywords: e.target.value }))}
               className={inp}
-              placeholder="resin art, customized gifts, handmade gifts"
+              placeholder="resin art, customized gifts"
             />
-            <p className="text-[10px] text-muted-foreground mt-1">Comma-separated keywords</p>
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-              Social share image (URL)
-            </label>
+          </Field>
+          <Field label="Social Share Image (URL)" hint="1200×630px recommended">
             <input
               value={seo.og_image}
               onChange={(e) => setSeo((s) => ({ ...s, og_image: e.target.value }))}
               className={inp + " font-mono text-xs"}
-              placeholder="https://example.com/og-image.jpg"
+              placeholder="https://…"
             />
-            <p className="text-[10px] text-muted-foreground mt-1">
-              Used when your site is shared on WhatsApp, Facebook etc. Recommended: 1200×630px
-            </p>
-          </div>
+          </Field>
         </div>
-        <div className="px-6 py-4 border-t border-border flex justify-end">
-          <button
-            onClick={onSaveSeo}
-            disabled={savingSeo}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm disabled:opacity-60 hover:opacity-85 transition-opacity"
-          >
-            <Save className="w-4 h-4" /> {savingSeo ? "Saving…" : "Save SEO Settings"}
-          </button>
-        </div>
-      </div>
+        <SaveBar saving={savingSeo} onSave={onSaveSeo} label="Save SEO" />
+      </SettingsCard>
 
-      {/* ── Razorpay ───────────────────────────────────────────── */}
-      <div className="bg-background rounded-2xl border border-border overflow-hidden">
-        <div className="px-6 py-5 border-b border-border">
-          <h2 className="font-display text-xl">Razorpay Payments</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Enter your Razorpay Publishable Key ID to enable online payments at checkout.
-            Get it from{" "}
-            <a href="https://dashboard.razorpay.com/app/keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
-              razorpay.com/app/keys
-            </a>.
-          </p>
-        </div>
-
-        <div className="p-6 space-y-5">
-          <div>
-            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">Mode</label>
-            <div className="flex gap-3">
+      {/* Razorpay */}
+      <SettingsCard icon={CreditCard} title="Razorpay Payments" desc="Enable online payments at checkout">
+        <div className="space-y-5">
+          <Field label="Mode">
+            <div className="flex gap-2">
               {(["test", "live"] as const).map((m) => (
                 <button
                   key={m}
                   onClick={() => setRzp((r) => ({ ...r, mode: m }))}
-                  className={`px-5 py-2 rounded-full text-xs font-medium border capitalize transition-all ${
+                  className={`px-5 py-2 rounded-xl text-xs font-medium capitalize transition-all ${
                     rzp.mode === m
-                      ? "bg-foreground text-background border-foreground"
-                      : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                      ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                      : "bg-white/[0.03] text-white/40 border border-white/[0.06] hover:text-white/70"
                   }`}
                 >
                   {m}
                 </button>
               ))}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">
-              {rzp.mode === "test" ? "Test" : "Live"} Key ID
-            </label>
+          </Field>
+          <Field label={`${rzp.mode === "test" ? "Test" : "Live"} Key ID`} hint="Only the publishable Key ID — never your secret">
             <div className="relative">
               <input
                 type={showKey ? "text" : "password"}
                 value={rzp.key_id}
                 onChange={(e) => setRzp((r) => ({ ...r, key_id: e.target.value }))}
                 className={inp + " pr-11 font-mono"}
-                placeholder={rzp.mode === "test" ? "rzp_test_xxxxxxxxxxxxxxxxxxxx" : "rzp_live_xxxxxxxxxxxxxxxxxxxx"}
+                placeholder={rzp.mode === "test" ? "rzp_test_xxx" : "rzp_live_xxx"}
               />
               <button
                 type="button"
                 onClick={() => setShowKey((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors"
               >
                 {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Only the publishable Key ID is stored here. Never enter your Key Secret.
-            </p>
-          </div>
+          </Field>
 
           {rzp.key_id ? (
-            <div className="flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 px-4 py-3 rounded-xl">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-              Razorpay {rzp.mode} mode is configured. Online payments will appear at checkout.
+            <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/5 px-4 py-3 rounded-xl border border-emerald-500/15">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+              Razorpay {rzp.mode} mode configured. Online payments enabled.
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 px-4 py-3 rounded-xl">
+            <div className="flex items-center gap-2 text-xs text-amber-300 bg-amber-500/5 px-4 py-3 rounded-xl border border-amber-500/15">
               <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
-              No Key ID set. Customers will only see the WhatsApp order option at checkout.
+              No Key ID set. Only WhatsApp ordering will be available.
             </div>
           )}
         </div>
-
-        <div className="px-6 py-4 border-t border-border flex justify-end">
-          <button
-            onClick={onSaveRzp}
-            disabled={savingRzp}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background text-sm disabled:opacity-60 hover:opacity-85 transition-opacity"
-          >
-            <Save className="w-4 h-4" /> {savingRzp ? "Saving…" : "Save Payment Settings"}
-          </button>
-        </div>
-      </div>
+        <SaveBar saving={savingRzp} onSave={onSaveRzp} label="Save Payment Settings" />
+      </SettingsCard>
     </div>
   );
 };
+
+/* ── Helpers ── */
+
+const Field = ({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) => (
+  <div>
+    <label className="block text-[11px] uppercase tracking-widest mb-2 text-white/30 font-medium">{label}</label>
+    {children}
+    {hint && <p className="text-[10px] text-white/20 mt-1.5">{hint}</p>}
+  </div>
+);
+
+const SettingsCard = ({ icon: Icon, title, desc, children }: { icon: any; title: string; desc: string; children: React.ReactNode }) => (
+  <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] overflow-hidden">
+    <div className="px-6 py-5 border-b border-white/[0.04] flex items-center gap-3">
+      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+        <Icon className="w-4 h-4 text-amber-400" />
+      </div>
+      <div>
+        <h2 className="text-white font-semibold">{title}</h2>
+        <p className="text-[11px] text-white/30 mt-0.5">{desc}</p>
+      </div>
+    </div>
+    <div className="p-6">
+      {children}
+    </div>
+  </div>
+);
+
+const SaveBar = ({ saving, onSave, label }: { saving: boolean; onSave: () => void; label: string }) => (
+  <div className="mt-6 pt-5 border-t border-white/[0.04] flex justify-end">
+    <button
+      onClick={onSave}
+      disabled={saving}
+      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-400 disabled:opacity-50 transition-colors shadow-lg shadow-amber-500/20"
+    >
+      <Save className="w-4 h-4" /> {saving ? "Saving…" : label}
+    </button>
+  </div>
+);
 
 export default AdminSettings;

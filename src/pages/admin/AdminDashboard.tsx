@@ -2,14 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/site";
 import {
-  Package, ShoppingCart, IndianRupee, TrendingUp, Star, AlertCircle,
-  Mail, Sparkles, Megaphone, Ticket, ArrowUpRight, MessageSquareQuote,
-  BarChart3, Users,
+  Package, ShoppingCart, IndianRupee, TrendingUp, TrendingDown, AlertCircle,
+  Mail, Sparkles, ArrowUpRight, MessageSquareQuote, BarChart3, Users, Ticket,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
-  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip,
-  PieChart, Pie, Cell, Legend,
+  AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip,
+  PieChart, Pie, Cell,
 } from "recharts";
 
 type Order = {
@@ -31,10 +30,11 @@ type Stats = {
   totalRevenue: number;
   monthRevenue: number;
   weekRevenue: number;
+  prevWeekRevenue: number;
   recentOrders: Order[];
   newInquiries: number;
   totalInquiries: number;
-  ordersByDay: { day: string; orders: number; revenue: number }[];
+  ordersByDay: { day: string; revenue: number; orders: number }[];
   ordersByStatus: { name: string; value: number; color: string }[];
   topProducts: { name: string; qty: number; revenue: number }[];
 };
@@ -43,7 +43,7 @@ const STATUS_COLORS: Record<string, string> = {
   pending:           "#f59e0b",
   payment_submitted: "#06b6d4",
   confirmed:         "#3b82f6",
-  shipped:           "#6366f1",
+  shipped:           "#8b5cf6",
   delivered:         "#10b981",
   cancelled:         "#ef4444",
 };
@@ -66,8 +66,7 @@ const AdminDashboard = () => {
       const allOrders: Order[] = (orders ?? []) as Order[];
       const allInquiries = inquiries ?? [];
 
-      // Last 14 days revenue chart
-      const ordersByDay: { day: string; orders: number; revenue: number }[] = [];
+      const ordersByDay: { day: string; revenue: number; orders: number }[] = [];
       for (let i = 13; i >= 0; i--) {
         const d = new Date();
         d.setHours(0, 0, 0, 0);
@@ -85,14 +84,12 @@ const AdminDashboard = () => {
         });
       }
 
-      // Orders by status
       const ordersByStatus = Object.keys(STATUS_COLORS).map((s) => ({
-        name: s,
+        name: s.replace("_", " "),
         value: allOrders.filter((o) => o.status === s).length,
         color: STATUS_COLORS[s],
       })).filter((s) => s.value > 0);
 
-      // Top products by qty across order items
       const productMap = new Map<string, { qty: number; revenue: number }>();
       allOrders.forEach((o) => {
         const items = Array.isArray(o.items) ? o.items : [];
@@ -111,7 +108,19 @@ const AdminDashboard = () => {
 
       const now = Date.now();
       const monthAgo = now - 30 * 24 * 3600 * 1000;
-      const weekAgo  = now -  7 * 24 * 3600 * 1000;
+      const weekAgo = now - 7 * 24 * 3600 * 1000;
+      const prevWeekStart = now - 14 * 24 * 3600 * 1000;
+
+      const weekRevenue = allOrders
+        .filter((o) => new Date(o.created_at).getTime() >= weekAgo)
+        .reduce((s, o) => s + (Number(o.total) || 0), 0);
+
+      const prevWeekRevenue = allOrders
+        .filter((o) => {
+          const t = new Date(o.created_at).getTime();
+          return t >= prevWeekStart && t < weekAgo;
+        })
+        .reduce((s, o) => s + (Number(o.total) || 0), 0);
 
       setStats({
         totalProducts: products?.length ?? 0,
@@ -123,11 +132,10 @@ const AdminDashboard = () => {
         monthRevenue: allOrders
           .filter((o) => new Date(o.created_at).getTime() >= monthAgo)
           .reduce((s, o) => s + (Number(o.total) || 0), 0),
-        weekRevenue: allOrders
-          .filter((o) => new Date(o.created_at).getTime() >= weekAgo)
-          .reduce((s, o) => s + (Number(o.total) || 0), 0),
-        recentOrders: allOrders.slice(0, 5),
-        newInquiries: allInquiries.filter((i) => i.status === "new").length,
+        weekRevenue,
+        prevWeekRevenue,
+        recentOrders: allOrders.slice(0, 6),
+        newInquiries: allInquiries.filter((i: any) => i.status === "new").length,
         totalInquiries: allInquiries.length,
         ordersByDay,
         ordersByStatus,
@@ -147,180 +155,209 @@ const AdminDashboard = () => {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
-        Loading dashboard…
+      <div className="flex items-center justify-center h-48 text-white/40 text-sm">
+        <span className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          Loading dashboard…
+        </span>
       </div>
     );
 
   const s = stats!;
-
-  const statCards = [
-    { label: "Revenue",       value: formatINR(s.totalRevenue), sub: `₹${s.monthRevenue.toLocaleString()} this month`, icon: IndianRupee, color: "from-emerald-500/10 to-emerald-500/5", iconColor: "text-emerald-600", link: "/admin/orders" },
-    { label: "Orders",        value: s.totalOrders,             sub: `${s.pendingOrders} pending`,                     icon: ShoppingCart, color: "from-amber-500/10 to-amber-500/5", iconColor: "text-amber-600", link: "/admin/orders" },
-    { label: "Products",      value: s.totalProducts,           sub: `${s.featuredProducts} featured`,                 icon: Package,      color: "from-violet-500/10 to-violet-500/5", iconColor: "text-violet-600", link: "/admin/products" },
-    { label: "Out of Stock",  value: s.outOfStock,              sub: "need restocking",                                icon: AlertCircle,  color: "from-rose-500/10 to-rose-500/5", iconColor: "text-rose-600", link: "/admin/products" },
-    { label: "Inquiries",     value: s.totalInquiries,          sub: `${s.newInquiries} new`,                          icon: Mail,         color: "from-sky-500/10 to-sky-500/5", iconColor: "text-sky-600", link: "/admin/inquiries" },
-  ];
-
-  const statusColor: Record<string, string> = {
-    pending:           "bg-amber-100 text-amber-700",
-    payment_submitted: "bg-cyan-100 text-cyan-700",
-    confirmed:         "bg-blue-100 text-blue-700",
-    shipped:           "bg-indigo-100 text-indigo-700",
-    delivered:         "bg-emerald-100 text-emerald-700",
-    cancelled:         "bg-rose-100 text-rose-700",
-  };
+  const weekChange = s.prevWeekRevenue > 0
+    ? ((s.weekRevenue - s.prevWeekRevenue) / s.prevWeekRevenue) * 100
+    : null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 pb-20 lg:pb-0">
+      {/* Header */}
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
-          <p className="text-sm text-muted-foreground">{greeting} 👋</p>
-          <h1 className="font-display text-4xl mt-1">Dashboard</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-white/40">{greeting} 👋</p>
+          <h1 className="text-white text-3xl font-semibold mt-1">Dashboard</h1>
+          <p className="text-sm text-white/40 mt-1">
             Last 7 days: {formatINR(s.weekRevenue)} ·{" "}
             {s.ordersByDay.slice(-7).reduce((sum, d) => sum + d.orders, 0)} orders
           </p>
         </div>
         <Link
-          to="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-muted text-xs"
+          to="/admin/analytics"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-xs text-white/60 hover:text-white/90 transition-all"
         >
-          <ArrowUpRight className="w-3.5 h-3.5" /> View Live Site
+          <BarChart3 className="w-3.5 h-3.5" /> Full Analytics
         </Link>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {statCards.map((c) => (
-          <Link
-            key={c.label}
-            to={c.link}
-            className={`relative bg-background rounded-2xl border border-border p-5 hover:border-foreground/20 hover:shadow-sm transition-all overflow-hidden group`}
-          >
-            <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${c.color} blur-2xl opacity-60`} />
-            <div className={`relative w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${c.iconColor} bg-current/10`}>
-              <c.icon className="w-5 h-5" />
-            </div>
-            <div className="relative font-display text-2xl xl:text-3xl">{c.value}</div>
-            <div className="relative text-xs font-medium mt-0.5">{c.label}</div>
-            <div className="relative text-[11px] text-muted-foreground mt-0.5">{c.sub}</div>
-          </Link>
-        ))}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <KPICard
+          label="Revenue"
+          value={formatINR(s.totalRevenue)}
+          sub={`₹${s.monthRevenue.toLocaleString("en-IN")} this month`}
+          icon={IndianRupee}
+          color="emerald"
+          change={weekChange}
+          to="/admin/orders"
+        />
+        <KPICard
+          label="Orders"
+          value={s.totalOrders.toString()}
+          sub={`${s.pendingOrders} pending`}
+          icon={ShoppingCart}
+          color="amber"
+          to="/admin/orders"
+        />
+        <KPICard
+          label="Products"
+          value={s.totalProducts.toString()}
+          sub={`${s.featuredProducts} featured`}
+          icon={Package}
+          color="violet"
+          to="/admin/products"
+        />
+        <KPICard
+          label="Inquiries"
+          value={s.totalInquiries.toString()}
+          sub={`${s.newInquiries} new`}
+          icon={Mail}
+          color="sky"
+          to="/admin/inquiries"
+        />
       </div>
 
-      {/* Charts row */}
+      {/* Charts */}
       <div className="grid lg:grid-cols-3 gap-4">
-        {/* Revenue chart */}
-        <div className="lg:col-span-2 bg-background rounded-2xl border border-border p-5">
+        {/* Revenue Chart */}
+        <div className="lg:col-span-2 bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="font-display text-xl">Revenue Trend</h2>
-              <p className="text-xs text-muted-foreground">Last 14 days</p>
+              <h2 className="text-white font-semibold">Revenue Trend</h2>
+              <p className="text-xs text-white/30 mt-0.5">Last 14 days</p>
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-white/30">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Revenue (₹)
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> Revenue
               </span>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={s.ordersByDay} margin={{ top: 5, right: 0, bottom: 0, left: 0 }}>
+          <ResponsiveContainer width="100%" height={240}>
+            <AreaChart data={s.ordersByDay}>
               <defs>
-                <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(38, 72%, 62%)" />
-                  <stop offset="100%" stopColor="hsl(34, 52%, 42%)" />
+                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(25 10% 55%)" }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(25 10% 55%)" }} width={40} />
-              <Tooltip
-                cursor={{ fill: "hsl(34 28% 92% / 0.4)" }}
-                contentStyle={{
-                  background: "hsl(36 42% 99%)",
-                  border: "1px solid hsl(34 28% 87%)",
-                  borderRadius: "0.75rem",
-                  fontSize: "12px",
-                  boxShadow: "0 8px 28px -8px hsl(22 22% 22%/0.18)",
-                }}
-                formatter={(value: number, key: string) =>
-                  key === "revenue" ? [formatINR(value), "Revenue"] : [value, "Orders"]
-                }
+              <XAxis
+                dataKey="day"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10, fill: "rgba(255,255,255,0.2)" }}
               />
-              <Bar dataKey="revenue" fill="url(#goldGrad)" radius={[8, 8, 0, 0]} />
-            </BarChart>
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fontSize: 10, fill: "rgba(255,255,255,0.2)" }}
+                width={45}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "#1a1a22",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  borderRadius: "12px",
+                  fontSize: "12px",
+                  color: "#fff",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                }}
+                labelStyle={{ color: "rgba(255,255,255,0.5)" }}
+                formatter={(value: number) => [formatINR(value), "Revenue"]}
+              />
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                fill="url(#revGrad)"
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Status pie chart */}
-        <div className="bg-background rounded-2xl border border-border p-5">
-          <h2 className="font-display text-xl mb-1">Order Status</h2>
-          <p className="text-xs text-muted-foreground mb-4">Breakdown by status</p>
+        {/* Order Status Pie */}
+        <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-5">
+          <h2 className="text-white font-semibold mb-1">Order Status</h2>
+          <p className="text-xs text-white/30 mb-4">Distribution breakdown</p>
           {s.ordersByStatus.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie
-                  data={s.ordersByStatus}
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {s.ordersByStatus.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: "hsl(36 42% 99%)",
-                    border: "1px solid hsl(34 28% 87%)",
-                    borderRadius: "0.75rem",
-                    fontSize: "12px",
-                    textTransform: "capitalize",
-                  }}
-                />
-                <Legend
-                  iconType="circle"
-                  wrapperStyle={{ fontSize: "11px", textTransform: "capitalize" }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <>
+              <ResponsiveContainer width="100%" height={180}>
+                <PieChart>
+                  <Pie
+                    data={s.ordersByStatus}
+                    innerRadius={55}
+                    outerRadius={75}
+                    paddingAngle={3}
+                    dataKey="value"
+                    strokeWidth={0}
+                  >
+                    {s.ordersByStatus.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "#1a1a22",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      borderRadius: "12px",
+                      fontSize: "11px",
+                      color: "#fff",
+                      textTransform: "capitalize",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {s.ordersByStatus.slice(0, 4).map((st) => (
+                  <div key={st.name} className="flex items-center gap-2 text-xs">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: st.color }} />
+                    <span className="text-white/40 capitalize truncate">{st.name}</span>
+                    <span className="text-white/70 ml-auto font-medium">{st.value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
-            <div className="h-[220px] flex items-center justify-center text-xs text-muted-foreground">
+            <div className="h-[200px] flex items-center justify-center text-xs text-white/20">
               No orders yet
             </div>
           )}
         </div>
       </div>
 
-      {/* Recent orders + Top products */}
+      {/* Recent Orders + Top Products */}
       <div className="grid lg:grid-cols-2 gap-4">
-        <div className="bg-background rounded-2xl border border-border overflow-hidden">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-display text-xl">Recent Orders</h2>
-            <Link to="/admin/orders" className="text-xs text-foreground/50 hover:text-foreground tracking-wide">
+        {/* Recent Orders */}
+        <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] overflow-hidden">
+          <div className="flex items-center justify-between p-5 border-b border-white/[0.04]">
+            <h2 className="text-white font-semibold">Recent Orders</h2>
+            <Link to="/admin/orders" className="text-xs text-amber-400/70 hover:text-amber-400 transition-colors">
               View all →
             </Link>
           </div>
           {s.recentOrders.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              No orders yet.
-            </div>
+            <div className="p-10 text-center text-sm text-white/20">No orders yet.</div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-white/[0.04]">
               {s.recentOrders.map((o) => (
-                <div key={o.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors">
+                <div key={o.id} className="flex items-center justify-between px-5 py-3 hover:bg-white/[0.02] transition-colors">
                   <div>
-                    <div className="text-sm font-medium">#{o.order_number}</div>
-                    <div className="text-xs text-muted-foreground">{o.customer_name}</div>
+                    <div className="text-sm text-white/80 font-medium">#{o.order_number}</div>
+                    <div className="text-xs text-white/30">{o.customer_name}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full font-medium ${statusColor[o.status] ?? "bg-muted text-muted-foreground"}`}>
-                      {o.status}
+                    <StatusBadge status={o.status} />
+                    <span className="text-sm text-white/80 font-medium tabular-nums">
+                      {formatINR(o.total)}
                     </span>
-                    <span className="text-sm font-medium tabular-nums">{formatINR(o.total)}</span>
                   </div>
                 </div>
               ))}
@@ -328,31 +365,28 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        <div className="bg-background rounded-2xl border border-border overflow-hidden">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="font-display text-xl">Top Products</h2>
-            <Link to="/admin/products" className="text-xs text-foreground/50 hover:text-foreground tracking-wide">
+        {/* Top Products */}
+        <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] overflow-hidden">
+          <div className="flex items-center justify-between p-5 border-b border-white/[0.04]">
+            <h2 className="text-white font-semibold">Top Products</h2>
+            <Link to="/admin/products" className="text-xs text-amber-400/70 hover:text-amber-400 transition-colors">
               Manage →
             </Link>
           </div>
           {s.topProducts.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">
-              No order items yet.
-            </div>
+            <div className="p-10 text-center text-sm text-white/20">No sales data yet.</div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-white/[0.04]">
               {s.topProducts.map((p, i) => (
-                <div key={p.name} className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors">
+                <div key={p.name} className="flex items-center justify-between px-5 py-3 hover:bg-white/[0.02] transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="font-display text-2xl text-amber-700/70 w-8 shrink-0">
-                      {i + 1}
-                    </span>
+                    <span className="text-lg font-semibold text-amber-400/50 w-6 shrink-0 tabular-nums">{i + 1}</span>
                     <div className="min-w-0">
-                      <div className="text-sm font-medium truncate">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">{p.qty} sold</div>
+                      <div className="text-sm text-white/80 font-medium truncate">{p.name}</div>
+                      <div className="text-xs text-white/30">{p.qty} sold</div>
                     </div>
                   </div>
-                  <span className="text-sm font-medium tabular-nums shrink-0">
+                  <span className="text-sm text-white/70 font-medium tabular-nums shrink-0">
                     {formatINR(p.revenue)}
                   </span>
                 </div>
@@ -362,36 +396,94 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Quick links to all admin areas */}
+      {/* Quick Actions */}
       <div>
-        <h2 className="font-display text-xl mb-4">Quick Actions</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <h2 className="text-white font-semibold mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {[
-            { to: "/admin/analytics",     icon: BarChart3,         label: "Analytics",           desc: "Revenue, orders & insights" },
-            { to: "/admin/products",      icon: Package,           label: "Manage Products",     desc: "Add, edit or remove products" },
-            { to: "/admin/categories",    icon: TrendingUp,        label: "Categories",          desc: "Organize your catalogue" },
-            { to: "/admin/coupons",       icon: Ticket,            label: "Coupons",             desc: "Create discount codes" },
-            { to: "/admin/orders",        icon: ShoppingCart,      label: "Orders",              desc: "Track & fulfill orders" },
-            { to: "/admin/inquiries",     icon: Mail,              label: "Inquiries",           desc: "Reply to contact forms" },
-            { to: "/admin/testimonials",  icon: MessageSquareQuote,label: "Testimonials",        desc: "Manage customer reviews" },
-            { to: "/admin/hero",          icon: Sparkles,          label: "Hero Section",        desc: "Edit headline & stats" },
-            { to: "/admin/announcements", icon: Megaphone,         label: "Announcements",       desc: "Top bar messages" },
-            { to: "/admin/images",        icon: Star,              label: "Site Images",         desc: "Update photos" },
-            { to: "/admin/users",         icon: Users,             label: "Admin Users",         desc: "Manage your team" },
+            { to: "/admin/products", icon: Package, label: "Products", desc: "Manage catalogue" },
+            { to: "/admin/orders", icon: ShoppingCart, label: "Orders", desc: "Track & fulfill" },
+            { to: "/admin/categories", icon: Tag, label: "Categories", desc: "Organize products" },
+            { to: "/admin/coupons", icon: Ticket, label: "Coupons", desc: "Discount codes" },
+            { to: "/admin/inquiries", icon: Mail, label: "Inquiries", desc: "Customer messages" },
+            { to: "/admin/testimonials", icon: MessageSquareQuote, label: "Reviews", desc: "Manage reviews" },
+            { to: "/admin/hero", icon: Sparkles, label: "Hero", desc: "Edit homepage" },
+            { to: "/admin/users", icon: Users, label: "Team", desc: "Admin access" },
           ].map((q) => (
             <Link
               key={q.to}
               to={q.to}
-              className="bg-background rounded-2xl border border-border p-5 hover:border-foreground/25 hover:shadow-sm transition-all group"
+              className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-4 hover:border-white/[0.1] hover:bg-[#1e1e28] transition-all group"
             >
-              <q.icon className="w-5 h-5 mb-3 text-muted-foreground group-hover:text-amber-600 transition-colors" />
-              <div className="font-medium text-sm">{q.label}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">{q.desc}</div>
+              <q.icon className="w-5 h-5 mb-3 text-white/30 group-hover:text-amber-400/70 transition-colors" />
+              <div className="text-sm text-white/80 font-medium">{q.label}</div>
+              <div className="text-[11px] text-white/30 mt-0.5">{q.desc}</div>
             </Link>
           ))}
         </div>
       </div>
     </div>
+  );
+};
+
+/* ── Helper Components ── */
+
+const KPICard = ({
+  label, value, sub, icon: Icon, color, change, to,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  icon: any;
+  color: string;
+  change?: number | null;
+  to: string;
+}) => {
+  const colors: Record<string, { icon: string; glow: string }> = {
+    emerald: { icon: "text-emerald-400", glow: "from-emerald-500/10" },
+    amber:   { icon: "text-amber-400",   glow: "from-amber-500/10" },
+    violet:  { icon: "text-violet-400",  glow: "from-violet-500/10" },
+    sky:     { icon: "text-sky-400",     glow: "from-sky-500/10" },
+  };
+  const c = colors[color] ?? colors.amber;
+
+  return (
+    <Link
+      to={to}
+      className="relative bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-4 lg:p-5 hover:border-white/[0.08] transition-all group overflow-hidden"
+    >
+      <div className={`absolute -top-10 -right-10 w-28 h-28 rounded-full bg-gradient-to-br ${c.glow} to-transparent blur-2xl opacity-50`} />
+      <div className={`relative w-9 h-9 rounded-xl bg-white/[0.04] flex items-center justify-center mb-3 ${c.icon}`}>
+        <Icon className="w-4.5 h-4.5" />
+      </div>
+      <div className="relative text-white text-xl lg:text-2xl font-semibold">{value}</div>
+      <div className="relative text-xs text-white/50 font-medium mt-0.5">{label}</div>
+      <div className="relative text-[11px] text-white/25 mt-0.5">{sub}</div>
+      {change !== undefined && change !== null && (
+        <div className={`relative inline-flex items-center gap-1 mt-2 text-[10px] px-2 py-0.5 rounded-full font-medium ${
+          change >= 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+        }`}>
+          {change >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+          {change >= 0 ? "+" : ""}{change.toFixed(0)}% vs last week
+        </div>
+      )}
+    </Link>
+  );
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const colors: Record<string, string> = {
+    pending:           "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    payment_submitted: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    confirmed:         "bg-blue-500/10 text-blue-400 border-blue-500/20",
+    shipped:           "bg-violet-500/10 text-violet-400 border-violet-500/20",
+    delivered:         "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    cancelled:         "bg-red-500/10 text-red-400 border-red-500/20",
+  };
+  return (
+    <span className={`text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full font-medium border ${colors[status] ?? "bg-white/5 text-white/40 border-white/10"}`}>
+      {status.replace("_", " ")}
+    </span>
   );
 };
 

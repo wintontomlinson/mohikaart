@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, ChevronDown, X } from "lucide-react";
+import { Mail, ChevronDown, X, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 
 type Inquiry = {
@@ -16,10 +16,10 @@ type Inquiry = {
 
 const STATUS = ["new", "replied", "closed"];
 
-const statusColors: Record<string, string> = {
-  new:     "bg-blue-100 text-blue-700 border-blue-200",
-  replied: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  closed:  "bg-muted text-muted-foreground border-border",
+const statusStyles: Record<string, string> = {
+  new:     "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  replied: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  closed:  "bg-white/5 text-white/30 border-white/10",
 };
 
 const fmt = (d: string) => new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -51,154 +51,138 @@ const AdminInquiries = () => {
   const counts = STATUS.reduce((acc, s) => ({ ...acc, [s]: inquiries.filter((i) => i.status === s).length }), {} as Record<string, number>);
 
   return (
-    <div>
+    <div className="pb-20 lg:pb-0">
       <div className="mb-8">
-        <h1 className="font-display text-4xl">Inquiries</h1>
-        <p className="text-sm text-muted-foreground mt-1">{inquiries.length} total from the contact form</p>
+        <h1 className="text-white text-3xl font-semibold">Inquiries</h1>
+        <p className="text-sm text-white/40 mt-1">{inquiries.length} total from custom order form</p>
       </div>
 
-      {/* Filter tabs */}
+      {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={() => setFilter("all")}
-          className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-all ${filter === "all" ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"}`}
-        >
-          All ({inquiries.length})
-        </button>
+        <FilterBtn active={filter === "all"} onClick={() => setFilter("all")}>All ({inquiries.length})</FilterBtn>
         {STATUS.map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium border capitalize transition-all ${filter === s ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"}`}
-          >
+          <FilterBtn key={s} active={filter === s} onClick={() => setFilter(s)}>
             {s} ({counts[s] ?? 0})
-          </button>
+          </FilterBtn>
         ))}
       </div>
 
       {/* Table */}
-      <div className="bg-background rounded-2xl border border-border overflow-hidden">
+      <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-widest text-muted-foreground">
-              <tr>
-                <th className="text-left p-4">Name</th>
-                <th className="text-left p-4 hidden md:table-cell">Contact</th>
-                <th className="text-left p-4 hidden lg:table-cell">Product</th>
-                <th className="text-left p-4 hidden lg:table-cell">Date</th>
-                <th className="text-left p-4">Status</th>
-                <th className="p-4"></th>
+            <thead>
+              <tr className="border-b border-white/[0.04]">
+                <th className="text-left p-4 text-[11px] uppercase tracking-widest text-white/30 font-medium">Name</th>
+                <th className="text-left p-4 text-[11px] uppercase tracking-widest text-white/30 font-medium hidden md:table-cell">Contact</th>
+                <th className="text-left p-4 text-[11px] uppercase tracking-widest text-white/30 font-medium hidden lg:table-cell">Product</th>
+                <th className="text-left p-4 text-[11px] uppercase tracking-widest text-white/30 font-medium hidden lg:table-cell">Date</th>
+                <th className="text-left p-4 text-[11px] uppercase tracking-widest text-white/30 font-medium">Status</th>
+                <th className="p-4 w-12"></th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((inq) => (
-                <tr key={inq.id} className="border-t border-border hover:bg-muted/20 transition-colors">
+                <tr key={inq.id} className="border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors">
                   <td className="p-4">
-                    <div className="font-medium">{inq.name}</div>
-                    <div className="text-xs text-muted-foreground md:hidden">{inq.email}</div>
+                    <div className="text-white/80 font-medium">{inq.name}</div>
+                    <div className="text-xs text-white/25 md:hidden">{inq.email}</div>
                   </td>
                   <td className="p-4 hidden md:table-cell">
-                    <div>{inq.email}</div>
-                    <div className="text-xs text-muted-foreground">{inq.phone}</div>
+                    <div className="text-white/60">{inq.email}</div>
+                    <div className="text-xs text-white/25">{inq.phone}</div>
                   </td>
-                  <td className="p-4 hidden lg:table-cell text-muted-foreground">{inq.product ?? "-"}</td>
-                  <td className="p-4 hidden lg:table-cell text-muted-foreground">{fmt(inq.created_at)}</td>
+                  <td className="p-4 hidden lg:table-cell text-white/35">{inq.product ?? "—"}</td>
+                  <td className="p-4 hidden lg:table-cell text-white/30">{fmt(inq.created_at)}</td>
                   <td className="p-4">
                     <div className="relative inline-flex items-center">
                       <select
                         value={inq.status}
                         onChange={(e) => updateStatus(inq.id, e.target.value)}
                         disabled={updatingId === inq.id}
-                        className={`appearance-none pl-2.5 pr-7 py-1 rounded-full text-[10px] uppercase tracking-widest font-medium border cursor-pointer outline-none transition-all ${statusColors[inq.status] ?? "bg-muted text-muted-foreground border-border"}`}
+                        className={`appearance-none pl-2.5 pr-7 py-1 rounded-lg text-[10px] uppercase tracking-widest font-medium border cursor-pointer outline-none bg-transparent transition-all ${statusStyles[inq.status] ?? "bg-white/5 text-white/40 border-white/10"}`}
                       >
                         {STATUS.map((s) => (
-                          <option key={s} value={s} className="text-foreground bg-background capitalize">{s}</option>
+                          <option key={s} value={s} className="text-white bg-[#1a1a22] capitalize">{s}</option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-2 w-3 h-3 pointer-events-none opacity-60" />
+                      <ChevronDown className="absolute right-2 w-3 h-3 pointer-events-none opacity-40" />
                     </div>
                   </td>
                   <td className="p-4 text-right">
-                    <button
-                      onClick={() => setViewing(inq)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors"
-                    >
-                      <Mail className="w-4 h-4" />
+                    <button onClick={() => setViewing(inq)} className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/30 hover:text-white/70 transition-colors">
+                      <MessageSquare className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="p-10 text-center text-muted-foreground">No inquiries found.</td></tr>
+                <tr><td colSpan={6} className="p-12 text-center text-white/20 text-sm">No inquiries found.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Detail modal */}
+      {/* Detail Modal */}
       {viewing && (
-        <div className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6">
-          <div className="bg-background w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl md:rounded-3xl shadow-2xl">
-            <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6">
+          <div className="bg-[#1a1a22] w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl md:rounded-2xl border border-white/[0.06] shadow-2xl">
+            <div className="sticky top-0 bg-[#1a1a22] border-b border-white/[0.04] px-6 py-4 flex items-center justify-between z-10">
               <div>
-                <h2 className="font-display text-2xl">Inquiry from {viewing.name}</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">{fmt(viewing.created_at)}</p>
+                <h2 className="text-white text-xl font-semibold">Inquiry from {viewing.name}</h2>
+                <p className="text-xs text-white/30 mt-0.5">{fmt(viewing.created_at)}</p>
               </div>
-              <button onClick={() => setViewing(null)} className="w-9 h-9 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
+              <button onClick={() => setViewing(null)} className="w-9 h-9 rounded-xl hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white/70 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-6 space-y-5">
-              <div>
-                <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Status</h3>
+              <Section title="Status">
                 <div className="relative inline-flex items-center">
                   <select
                     value={viewing.status}
                     onChange={(e) => updateStatus(viewing.id, e.target.value)}
-                    className={`appearance-none pl-3 pr-8 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-medium border cursor-pointer outline-none ${statusColors[viewing.status] ?? "bg-muted text-muted-foreground border-border"}`}
+                    className={`appearance-none pl-3 pr-8 py-1.5 rounded-lg text-[10px] uppercase tracking-widest font-medium border cursor-pointer outline-none bg-transparent ${statusStyles[viewing.status] ?? "bg-white/5 text-white/40 border-white/10"}`}
                   >
                     {STATUS.map((s) => (
-                      <option key={s} value={s} className="text-foreground bg-background capitalize">{s}</option>
+                      <option key={s} value={s} className="text-white bg-[#1a1a22] capitalize">{s}</option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-2.5 w-3 h-3 pointer-events-none opacity-60" />
+                  <ChevronDown className="absolute right-2.5 w-3 h-3 pointer-events-none opacity-40" />
                 </div>
-              </div>
+              </Section>
 
-              <div>
-                <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Contact</h3>
-                <div className="bg-muted/40 rounded-xl p-4 space-y-1.5 text-sm">
-                  <div className="font-medium">{viewing.name}</div>
-                  <div className="text-muted-foreground">{viewing.email}</div>
-                  <div className="text-muted-foreground">{viewing.phone}</div>
+              <Section title="Contact">
+                <div className="bg-white/[0.02] rounded-xl p-4 space-y-1.5 text-sm border border-white/[0.04]">
+                  <div className="text-white/80 font-medium">{viewing.name}</div>
+                  <div className="text-white/40">{viewing.email}</div>
+                  <div className="text-white/40">{viewing.phone}</div>
                 </div>
-              </div>
+              </Section>
 
               {viewing.product && (
-                <div>
-                  <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Product of Interest</h3>
-                  <div className="bg-muted/40 rounded-xl px-4 py-3 text-sm">{viewing.product}</div>
-                </div>
+                <Section title="Product of Interest">
+                  <div className="bg-white/[0.02] rounded-xl px-4 py-3 text-sm text-white/60 border border-white/[0.04]">{viewing.product}</div>
+                </Section>
               )}
 
-              <div>
-                <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Their Idea</h3>
-                <div className="bg-muted/40 rounded-xl p-4 text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{viewing.idea}</div>
-              </div>
+              <Section title="Their Idea">
+                <div className="bg-white/[0.02] rounded-xl p-4 text-sm text-white/50 leading-relaxed whitespace-pre-wrap border border-white/[0.04]">{viewing.idea}</div>
+              </Section>
 
               <div className="flex gap-3 pt-2">
                 <a
                   href={`mailto:${viewing.email}`}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 text-white text-sm font-medium hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
                 >
-                  <Mail className="w-4 h-4" /> Reply by Email
+                  <Mail className="w-4 h-4" /> Reply Email
                 </a>
                 <a
                   href={`https://wa.me/91${viewing.phone.replace(/\D/g, "").slice(-10)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-white/[0.08] text-sm text-white/70 hover:bg-white/5 transition-colors"
                 >
                   WhatsApp
                 </a>
@@ -210,5 +194,25 @@ const AdminInquiries = () => {
     </div>
   );
 };
+
+const FilterBtn = ({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) => (
+  <button
+    onClick={onClick}
+    className={`px-3.5 py-1.5 rounded-lg text-xs font-medium capitalize transition-all ${
+      active
+        ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+        : "bg-white/[0.03] text-white/40 border border-white/[0.06] hover:text-white/70 hover:border-white/[0.1]"
+    }`}
+  >
+    {children}
+  </button>
+);
+
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <div>
+    <h3 className="text-[11px] uppercase tracking-widest text-white/30 font-medium mb-3">{title}</h3>
+    {children}
+  </div>
+);
 
 export default AdminInquiries;

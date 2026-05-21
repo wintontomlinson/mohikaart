@@ -4,17 +4,13 @@ import {
   LogOut, Package, Image as ImageIcon, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail, Sparkles, MessageSquareQuote,
   Megaphone, Ticket, Search, Eye, EyeOff, ShieldAlert, Users, BarChart3,
+  X, ChevronRight, Bell, Moon, Sun,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import logo from "@/assets/mohika-mark.png";
 
 /** Public helper kept for old imports (now backed by real auth) */
-export const isAdmin = () => {
-  // The React tree decides admin status via useAdminAuth(); legacy callers
-  // (none remaining) used to check localStorage. Always return false here so
-  // any stale code is forced through the proper provider.
-  return false;
-};
+export const isAdmin = () => false;
 
 /* ──────────────────────────────────────────────────────────
    Sign-in screen
@@ -22,10 +18,10 @@ export const isAdmin = () => {
 const AdminLogin = () => {
   const { signIn } = useAdminAuth();
   const [email, setEmail] = useState("");
-  const [pw, setPw]       = useState("");
-  const [show, setShow]   = useState(false);
-  const [err, setErr]     = useState("");
-  const [busy, setBusy]   = useState(false);
+  const [pw, setPw] = useState("");
+  const [show, setShow] = useState(false);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,42 +33,35 @@ const AdminLogin = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse 70% 60% at 30% 20%, hsl(348 55% 93%/0.6), transparent 60%)," +
-          "radial-gradient(ellipse 50% 50% at 80% 80%, hsl(38 65% 91%/0.55), transparent 60%)," +
-          "linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%)",
-      }}
-    >
-      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blush/20 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-champagne/15 blur-3xl pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0f0f12]">
+      {/* Background accents */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-amber-500/5 to-transparent blur-3xl" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tl from-violet-500/5 to-transparent blur-3xl" />
+      </div>
 
       <form
         onSubmit={onSubmit}
-        className="bg-card/95 backdrop-blur-xl rounded-3xl p-10 w-full max-w-md shadow-2xl border border-border relative z-10"
+        className="relative bg-[#1a1a22]/90 backdrop-blur-2xl rounded-3xl p-10 w-full max-w-md shadow-2xl border border-white/[0.06]"
       >
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-foreground flex items-center justify-center p-2">
+        <div className="flex items-center gap-3 mb-10">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400/20 to-amber-600/20 flex items-center justify-center p-2 border border-amber-500/20">
             <img src={logo} alt="Mohika Art" className="w-full h-full object-contain" />
           </div>
           <div>
-            <div className="font-display text-2xl text-gold-grad leading-none" style={{ fontWeight: 350 }}>
-              Mohika <span className="italic">Art</span>
+            <div className="font-display text-2xl text-white leading-none">
+              Mohika <span className="text-amber-400 italic">Art</span>
             </div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Admin Panel</div>
+            <div className="text-[10px] uppercase tracking-[0.3em] text-white/40 mt-1">Admin Console</div>
           </div>
         </div>
 
-        <h1 className="font-display text-3xl mb-1">Welcome back</h1>
-        <p className="text-sm text-muted-foreground mb-8">
-          Sign in with your admin credentials to access the panel.
-        </p>
+        <h1 className="text-white text-2xl font-semibold mb-1">Welcome back</h1>
+        <p className="text-sm text-white/50 mb-8">Sign in to manage your store.</p>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground">Email</label>
+            <label className="block text-[11px] uppercase tracking-widest mb-2 text-white/40 font-medium">Email</label>
             <input
               type="email"
               autoComplete="email"
@@ -81,12 +70,11 @@ const AdminLogin = () => {
               value={email}
               onChange={(e) => { setEmail(e.target.value); setErr(""); }}
               placeholder="you@mohikaart.com"
-              className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-foreground/50 outline-none text-sm transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder:text-white/25 focus:border-amber-500/40 focus:bg-white/[0.06] outline-none text-sm transition-all"
             />
           </div>
-
           <div>
-            <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground">Password</label>
+            <label className="block text-[11px] uppercase tracking-widest mb-2 text-white/40 font-medium">Password</label>
             <div className="relative">
               <input
                 type={show ? "text" : "password"}
@@ -95,13 +83,12 @@ const AdminLogin = () => {
                 value={pw}
                 onChange={(e) => { setPw(e.target.value); setErr(""); }}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 pr-11 rounded-xl bg-background border border-border focus:border-foreground/50 outline-none text-sm transition-colors"
+                className="w-full px-4 py-3 pr-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white placeholder:text-white/25 focus:border-amber-500/40 focus:bg-white/[0.06] outline-none text-sm transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShow((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={show ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
               >
                 {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -109,23 +96,23 @@ const AdminLogin = () => {
           </div>
 
           {err && (
-            <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg flex items-start gap-2">
-              <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>{err}</span>
-            </p>
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+              <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <span className="text-sm text-red-300">{err}</span>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={busy || !email || !pw}
-            className="w-full px-6 py-3 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-semibold hover:from-amber-400 hover:to-amber-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-amber-500/20"
           >
             {busy ? "Signing in…" : "Sign In"}
           </button>
         </div>
 
-        <Link to="/" className="block text-center mt-5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-          ← Back to site
+        <Link to="/" className="block text-center mt-6 text-xs text-white/30 hover:text-white/60 transition-colors">
+          ← Back to store
         </Link>
       </form>
     </div>
@@ -133,26 +120,25 @@ const AdminLogin = () => {
 };
 
 /* ──────────────────────────────────────────────────────────
-   Authenticated-but-not-admin screen
+   Not Authorized screen
    ────────────────────────────────────────────────────────── */
 const NotAuthorized = () => {
   const { signOut, user } = useAdminAuth();
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
-      <div className="bg-card border border-border rounded-2xl shadow-luxe p-10 max-w-md text-center">
-        <ShieldAlert className="w-10 h-10 text-amber-600 mx-auto mb-4" />
-        <h2 className="font-display text-2xl mb-2">Not authorized</h2>
-        <p className="text-sm text-muted-foreground mb-6">
-          {user?.email ? <><strong>{user.email}</strong> is signed in but not an admin.</> : "You are not signed in as an admin."}
-          {" "}If this is your account, ask the site owner to grant admin access.
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[#0f0f12]">
+      <div className="bg-[#1a1a22]/90 backdrop-blur-2xl border border-white/[0.06] rounded-3xl shadow-2xl p-10 max-w-md text-center">
+        <ShieldAlert className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+        <h2 className="text-white text-2xl font-semibold mb-2">Access Denied</h2>
+        <p className="text-sm text-white/50 mb-6">
+          {user?.email ? <><strong className="text-white/70">{user.email}</strong> does not have admin privileges.</> : "You are not signed in as an admin."}
         </p>
         <div className="flex gap-3 justify-center">
-          <Link to="/" className="px-5 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors">
-            Back to site
+          <Link to="/" className="px-5 py-2.5 rounded-xl border border-white/10 text-sm text-white/70 hover:bg-white/5 transition-colors">
+            Back to store
           </Link>
           <button
             onClick={signOut}
-            className="px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity"
+            className="px-5 py-2.5 rounded-xl bg-white/10 text-sm text-white hover:bg-white/15 transition-colors"
           >
             Sign out
           </button>
@@ -163,28 +149,28 @@ const NotAuthorized = () => {
 };
 
 /* ──────────────────────────────────────────────────────────
-   The actual admin shell (same UI as before, just wires
-   into Supabase Auth instead of localStorage password)
+   Admin Shell - Modern Dark Theme Layout
    ────────────────────────────────────────────────────────── */
 const AdminShell = ({ children }: { children?: ReactNode }) => {
   const { isAdmin, loading, user, signOut } = useAdminAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [search, setSearch]         = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [search, setSearch] = useState("");
   const { pathname } = useLocation();
   const nav = useNavigate();
 
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
-
-  // Always start admin pages at the top, prevents the visual "white gap"
-  // that appears when navigating into /admin from a scrolled storefront page.
+  useEffect(() => { setSidebarOpen(false); }, [pathname]);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
-        Loading…
+      <div className="min-h-screen flex items-center justify-center bg-[#0f0f12]">
+        <div className="flex items-center gap-3 text-white/50 text-sm">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          Loading…
+        </div>
       </div>
     );
   }
@@ -193,26 +179,26 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
 
   const groups: { title: string; items: { to: string; icon: any; label: string }[] }[] = [
     { title: "Overview", items: [
-      { to: "/admin",           icon: LayoutDashboard, label: "Dashboard" },
-      { to: "/admin/analytics", icon: BarChart3,       label: "Analytics" },
+      { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/admin/analytics", icon: BarChart3, label: "Analytics" },
     ]},
     { title: "Catalogue", items: [
-      { to: "/admin/products",    icon: Package, label: "Products" },
-      { to: "/admin/categories",  icon: Tag,     label: "Categories" },
-      { to: "/admin/coupons",     icon: Ticket,  label: "Coupons" },
+      { to: "/admin/products", icon: Package, label: "Products" },
+      { to: "/admin/categories", icon: Tag, label: "Categories" },
+      { to: "/admin/coupons", icon: Ticket, label: "Coupons" },
     ]},
     { title: "Customers", items: [
-      { to: "/admin/orders",     icon: ShoppingCart,        label: "Orders" },
-      { to: "/admin/inquiries",  icon: Mail,                label: "Inquiries" },
+      { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
+      { to: "/admin/inquiries", icon: Mail, label: "Inquiries" },
       { to: "/admin/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
     ]},
     { title: "Content", items: [
-      { to: "/admin/hero",          icon: Sparkles,  label: "Hero Section" },
+      { to: "/admin/hero", icon: Sparkles, label: "Hero Section" },
       { to: "/admin/announcements", icon: Megaphone, label: "Announcements" },
-      { to: "/admin/images",        icon: ImageIcon, label: "Site Images" },
+      { to: "/admin/images", icon: ImageIcon, label: "Site Images" },
     ]},
     { title: "System", items: [
-      { to: "/admin/users",    icon: Users,    label: "Admin Users" },
+      { to: "/admin/users", icon: Users, label: "Admin Users" },
       { to: "/admin/settings", icon: Settings, label: "Settings" },
     ]},
   ];
@@ -223,7 +209,7 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
     flatItems.find((i) => i.to === "/admin/products")!,
     flatItems.find((i) => i.to === "/admin/orders")!,
     flatItems.find((i) => i.to === "/admin/inquiries")!,
-    flatItems.find((i) => i.to === "/admin/hero")!,
+    flatItems.find((i) => i.to === "/admin/settings")!,
   ];
 
   const filtered = search.trim()
@@ -232,166 +218,206 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
         .filter((g) => g.items.length > 0)
     : groups;
 
-  const SidebarContent = () => (
-    <>
-      <div className="p-5 border-b border-background/10 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-background/95 flex items-center justify-center p-1.5 shrink-0">
-          <img src={logo} alt="Mohika Art" width={40} height={40} className="w-full h-full object-contain" />
-        </div>
-        <div>
-          <div className="font-display text-xl text-gold-grad leading-none" style={{ fontWeight: 350 }}>
-            Mohika <span className="italic">Art</span>
-          </div>
-          <div className="text-[9px] uppercase tracking-[0.3em] text-background/60 mt-1.5">Admin Panel</div>
-        </div>
-      </div>
-
-      <div className="p-4 pb-2">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/[0.06] border border-background/10">
-          <Search className="w-3.5 h-3.5 text-background/40 shrink-0" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search menu..."
-            className="flex-1 outline-none bg-transparent text-xs text-background placeholder:text-background/40"
-          />
-        </div>
-      </div>
-
-      <nav className="flex-1 p-4 pt-2 overflow-y-auto space-y-4">
-        {filtered.map((group) => (
-          <div key={group.title}>
-            <div className="text-[9px] uppercase tracking-[0.25em] text-background/40 font-semibold px-3 mb-2">
-              {group.title}
-            </div>
-            <div className="space-y-0.5">
-              {group.items.map((it) => {
-                const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
-                return (
-                  <Link
-                    key={it.to}
-                    to={it.to}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all ${
-                      active
-                        ? "bg-[rgba(201,168,76,0.12)] text-[#c9a84c] font-medium border-l-2 border-[#c9a84c]"
-                        : "text-background/65 hover:text-background hover:bg-background/8"
-                    }`}
-                  >
-                    <it.icon className="w-4 h-4 shrink-0" />
-                    {it.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-        {filtered.length === 0 && (
-          <div className="text-xs text-background/40 px-3 py-6 text-center">No matches</div>
-        )}
-      </nav>
-
-      <div className="p-4 border-t border-background/10 space-y-1">
-        {user && (
-          <div className="px-3 py-2 mb-1 text-[10px] text-background/60 truncate" title={user.email ?? undefined}>
-            {user.email}
-          </div>
-        )}
-        <Link
-          to="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
-        >
-          <Home className="w-4 h-4 shrink-0" /> View Site
-        </Link>
-        <button
-          onClick={async () => { await signOut(); nav("/admin"); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
-        >
-          <LogOut className="w-4 h-4 shrink-0" /> Sign out
-        </button>
-      </div>
-    </>
+  // Get current page title
+  const currentPage = flatItems.find(
+    (i) => pathname === i.to || (i.to !== "/admin" && pathname.startsWith(i.to))
   );
 
   return (
-    <div
-      className="bg-muted/30 flex"
-      style={{
-        minHeight: "100dvh",
-        // Explicitly anchor to the absolute viewport top, guards against
-        // rare layouts where the admin tree gets pushed down by stale
-        // scroll position, browser autofill insets, or chrome quirks.
-        marginTop: 0,
-        paddingTop: 0,
-      }}
-    >
-      <aside className="w-64 shrink-0 bg-foreground text-background hidden md:flex flex-col sticky top-0 h-screen self-start">
-        <SidebarContent />
-      </aside>
-
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-foreground/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-foreground text-background flex flex-col shadow-2xl">
-            <SidebarContent />
-          </aside>
-        </div>
+    <div className="min-h-screen bg-[#0f0f12] flex">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
-      <div className="flex-1 min-w-0">
-        <header className="md:hidden bg-foreground text-background px-4 py-3.5 flex items-center justify-between sticky top-0 z-40">
+      {/* Sidebar */}
+      <aside
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen ${
+          collapsed ? "w-[72px]" : "w-[260px]"
+        } bg-[#14141b] border-r border-white/[0.04] flex flex-col transition-all duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+        {/* Logo */}
+        <div className={`flex items-center gap-3 p-5 border-b border-white/[0.04] ${collapsed ? "justify-center px-3" : ""}`}>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/20 to-amber-600/10 flex items-center justify-center p-1.5 shrink-0 border border-amber-500/10">
+            <img src={logo} alt="Mohika Art" className="w-full h-full object-contain" />
+          </div>
+          {!collapsed && (
+            <div className="overflow-hidden">
+              <div className="font-display text-lg text-white leading-none">
+                Mohika <span className="text-amber-400 italic">Art</span>
+              </div>
+              <div className="text-[9px] uppercase tracking-[0.3em] text-white/30 mt-1">Admin</div>
+            </div>
+          )}
           <button
-            onClick={() => setMobileOpen(true)}
-            className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-            aria-label="Open menu"
+            onClick={() => setSidebarOpen(false)}
+            className="ml-auto lg:hidden w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/40"
           >
-            <Menu className="w-4 h-4" />
+            <X className="w-4 h-4" />
           </button>
-          <div className="font-display text-lg text-gold-grad">Admin Panel</div>
-          <button
-            onClick={async () => { await signOut(); }}
-            className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-            aria-label="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </header>
+        </div>
 
-        <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-foreground text-background border-t border-background/10 flex">
-          {bottomNavItems.map((it) => {
-            const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
-            return (
-              <Link
-                key={it.to}
-                to={it.to}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 text-[9.5px] tracking-wider transition-colors ${
-                  active ? "text-background" : "text-background/50"
-                }`}
-              >
-                <it.icon className="w-4 h-4" />
-                {it.label}
-              </Link>
-            );
-          })}
-          <Link
-            to="/"
-            className="flex-1 flex flex-col items-center gap-1 py-3 text-[9.5px] tracking-wider text-background/50 transition-colors"
-          >
-            <Home className="w-4 h-4" />
-            Site
-          </Link>
+        {/* Search */}
+        {!collapsed && (
+          <div className="px-4 pt-4 pb-2">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <Search className="w-3.5 h-3.5 text-white/25 shrink-0" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search…"
+                className="flex-1 outline-none bg-transparent text-xs text-white placeholder:text-white/25"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 pt-2 overflow-y-auto space-y-5 scrollbar-thin scrollbar-thumb-white/5">
+          {filtered.map((group) => (
+            <div key={group.title}>
+              {!collapsed && (
+                <div className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-semibold px-3 mb-2">
+                  {group.title}
+                </div>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((it) => {
+                  const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
+                  return (
+                    <Link
+                      key={it.to}
+                      to={it.to}
+                      title={collapsed ? it.label : undefined}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all group relative ${
+                        active
+                          ? "bg-amber-500/10 text-amber-400 font-medium"
+                          : "text-white/45 hover:text-white/80 hover:bg-white/[0.03]"
+                      } ${collapsed ? "justify-center" : ""}`}
+                    >
+                      {active && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-amber-400" />
+                      )}
+                      <it.icon className="w-[18px] h-[18px] shrink-0" />
+                      {!collapsed && <span>{it.label}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {!collapsed && filtered.length === 0 && (
+            <div className="text-xs text-white/20 px-3 py-6 text-center">No results</div>
+          )}
         </nav>
 
-        <main className="p-4 md:p-10 pb-24 md:pb-10">
-          {children ?? <Outlet />}
+        {/* Bottom section */}
+        <div className={`p-4 border-t border-white/[0.04] space-y-2 ${collapsed ? "px-2" : ""}`}>
+          {!collapsed && user && (
+            <div className="px-3 py-2 text-[11px] text-white/30 truncate" title={user.email ?? undefined}>
+              {user.email}
+            </div>
+          )}
+          <Link
+            to="/"
+            target="_blank"
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] text-white/40 hover:text-white/70 hover:bg-white/[0.03] transition-all ${collapsed ? "justify-center" : ""}`}
+          >
+            <Home className="w-4 h-4 shrink-0" />
+            {!collapsed && "View Store"}
+          </Link>
+          <button
+            onClick={signOut}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] text-red-400/60 hover:text-red-400 hover:bg-red-500/5 transition-all w-full ${collapsed ? "justify-center" : ""}`}
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            {!collapsed && "Sign Out"}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Top header bar */}
+        <header className="sticky top-0 z-30 bg-[#0f0f12]/80 backdrop-blur-xl border-b border-white/[0.04]">
+          <div className="flex items-center justify-between h-16 px-4 lg:px-8">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden w-9 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center text-white/60 transition-colors"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setCollapsed(!collapsed)}
+                className="hidden lg:flex w-9 h-9 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] items-center justify-center text-white/40 transition-colors"
+              >
+                <Menu className="w-4 h-4" />
+              </button>
+              {currentPage && (
+                <div className="flex items-center gap-2">
+                  <currentPage.icon className="w-4 h-4 text-amber-400/70" />
+                  <h1 className="text-white/90 text-sm font-medium">{currentPage.label}</h1>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Link
+                to="/"
+                target="_blank"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-all"
+              >
+                <Eye className="w-3.5 h-3.5" />
+                Live Site
+              </Link>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400/30 to-amber-600/30 flex items-center justify-center text-[11px] font-bold text-amber-300 border border-amber-500/20">
+                {user?.email?.[0]?.toUpperCase() ?? "A"}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 p-4 lg:p-8">
+          <Outlet />
+          {children}
         </main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#14141b]/95 backdrop-blur-xl border-t border-white/[0.04] px-2 py-1.5 flex justify-around safe-area-inset-bottom">
+        {bottomNavItems.map((it) => {
+          const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
+          return (
+            <Link
+              key={it.to}
+              to={it.to}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${
+                active ? "text-amber-400" : "text-white/35"
+              }`}
+            >
+              <it.icon className="w-5 h-5" />
+              <span className="text-[9px] font-medium">{it.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 };
 
-const AdminLayout = ({ children }: { children?: ReactNode }) => (
+/* ──────────────────────────────────────────────────────────
+   Export wrapped with auth provider
+   ────────────────────────────────────────────────────────── */
+const AdminLayout = () => (
   <AdminAuthProvider>
-    <AdminShell>{children}</AdminShell>
+    <AdminShell />
   </AdminAuthProvider>
 );
 

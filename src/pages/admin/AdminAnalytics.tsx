@@ -26,11 +26,11 @@ type Order = {
 type Range = "7d" | "30d" | "90d" | "ytd" | "all";
 
 const RANGES: Record<Range, { label: string; days: number | null }> = {
-  "7d":  { label: "Last 7 days",  days: 7 },
-  "30d": { label: "Last 30 days", days: 30 },
-  "90d": { label: "Last 90 days", days: 90 },
-  "ytd": { label: "Year to date", days: null },
-  "all": { label: "All time",     days: null },
+  "7d":  { label: "7 days",  days: 7 },
+  "30d": { label: "30 days", days: 30 },
+  "90d": { label: "90 days", days: 90 },
+  "ytd": { label: "YTD",     days: null },
+  "all": { label: "All",     days: null },
 };
 
 const fmtDay = (d: Date) =>
@@ -72,7 +72,6 @@ const AdminAnalytics = () => {
     filtered.forEach((o) => counts.set(o.customer_email.toLowerCase(), (counts.get(o.customer_email.toLowerCase()) ?? 0) + 1));
     const repeatCustomers = Array.from(counts.values()).filter((n) => n > 1).length;
 
-    // Previous-period comparison
     const days = RANGES[range].days;
     let prevRevenue = 0, prevOrders = 0;
     if (days) {
@@ -89,18 +88,9 @@ const AdminAnalytics = () => {
     const revChange = prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : null;
     const orderChange = prevOrders > 0 ? ((completed.length - prevOrders) / prevOrders) * 100 : null;
 
-    return {
-      revenue,
-      orders: completed.length,
-      customers: customers.size,
-      repeatCustomers,
-      avgOrder,
-      revChange,
-      orderChange,
-    };
+    return { revenue, orders: completed.length, customers: customers.size, repeatCustomers, avgOrder, revChange, orderChange };
   }, [filtered, orders, range]);
 
-  // Daily revenue series
   const dailySeries = useMemo(() => {
     const days = RANGES[range].days ?? 90;
     const map = new Map<string, { day: string; revenue: number; orders: number }>();
@@ -115,15 +105,11 @@ const AdminAnalytics = () => {
       if (o.status === "cancelled") return;
       const key = new Date(o.created_at).toISOString().slice(0, 10);
       const ex = map.get(key);
-      if (ex) {
-        ex.revenue += Number(o.total || 0);
-        ex.orders += 1;
-      }
+      if (ex) { ex.revenue += Number(o.total || 0); ex.orders += 1; }
     });
     return Array.from(map.values());
   }, [filtered, range]);
 
-  // Top cities
   const topCities = useMemo(() => {
     const m = new Map<string, { city: string; orders: number; revenue: number }>();
     filtered.forEach((o) => {
@@ -140,14 +126,8 @@ const AdminAnalytics = () => {
   const exportCSV = () => {
     const headers = ["Order #", "Date", "Status", "Customer Email", "City", "State", "Subtotal", "Total"];
     const rows = filtered.map((o) => [
-      o.order_number,
-      new Date(o.created_at).toISOString(),
-      o.status,
-      o.customer_email,
-      o.shipping_city,
-      o.shipping_state ?? "",
-      o.subtotal,
-      o.total,
+      o.order_number, new Date(o.created_at).toISOString(), o.status,
+      o.customer_email, o.shipping_city, o.shipping_state ?? "", o.subtotal, o.total,
     ]);
     const csv = [headers, ...rows]
       .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
@@ -161,25 +141,23 @@ const AdminAnalytics = () => {
     URL.revokeObjectURL(url);
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">Loading…</div>;
-  }
+  if (loading) return <div className="flex items-center justify-center h-48 text-white/40 text-sm">Loading…</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 lg:pb-0">
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-display text-4xl">Analytics</h1>
-          <p className="text-sm text-muted-foreground mt-1">Insights from your store performance</p>
+          <h1 className="text-white text-3xl font-semibold">Analytics</h1>
+          <p className="text-sm text-white/40 mt-1">Store performance insights</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex bg-background border border-border rounded-full p-1">
+          <div className="inline-flex bg-[#1a1a22] border border-white/[0.06] rounded-xl p-1">
             {(Object.keys(RANGES) as Range[]).map((r) => (
               <button
                 key={r}
                 onClick={() => setRange(r)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                  range === r ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  range === r ? "bg-amber-500/15 text-amber-400" : "text-white/40 hover:text-white/70"
                 }`}
               >
                 {RANGES[r].label}
@@ -188,90 +166,55 @@ const AdminAnalytics = () => {
           </div>
           <button
             onClick={exportCSV}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-muted text-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-xs text-white/60"
           >
-            <Download className="w-3.5 h-3.5" /> Export CSV
+            <Download className="w-3.5 h-3.5" /> Export
           </button>
         </div>
       </div>
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <KPI
-          label="Revenue"
-          value={formatINR(stats.revenue)}
-          icon={IndianRupee}
-          color="emerald"
-          change={stats.revChange}
-        />
-        <KPI
-          label="Orders"
-          value={stats.orders}
-          icon={ShoppingCart}
-          color="amber"
-          change={stats.orderChange}
-        />
-        <KPI
-          label="Customers"
-          value={stats.customers}
-          icon={Users}
-          color="violet"
-        />
-        <KPI
-          label="Repeat Buyers"
-          value={stats.repeatCustomers}
-          icon={Repeat}
-          color="sky"
-        />
-        <KPI
-          label="Avg. Order"
-          value={formatINR(stats.avgOrder)}
-          icon={Calendar}
-          color="rose"
-        />
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <KPI label="Revenue" value={formatINR(stats.revenue)} icon={IndianRupee} color="emerald" change={stats.revChange} />
+        <KPI label="Orders" value={stats.orders} icon={ShoppingCart} color="amber" change={stats.orderChange} />
+        <KPI label="Customers" value={stats.customers} icon={Users} color="violet" />
+        <KPI label="Repeat" value={stats.repeatCustomers} icon={Repeat} color="sky" />
+        <KPI label="Avg. Order" value={formatINR(stats.avgOrder)} icon={Calendar} color="rose" />
       </div>
 
-      {/* Revenue chart */}
-      <div className="bg-background rounded-2xl border border-border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="font-display text-xl">Revenue Over Time</h2>
-            <p className="text-xs text-muted-foreground">{RANGES[range].label}</p>
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={280}>
+      {/* Revenue Chart */}
+      <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-6">
+        <h2 className="text-white font-semibold mb-1">Revenue Over Time</h2>
+        <p className="text-xs text-white/30 mb-4">{RANGES[range].label}</p>
+        <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={dailySeries}>
             <defs>
-              <linearGradient id="aRev" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="hsl(34 58% 52%)" stopOpacity={0.45} />
-                <stop offset="100%" stopColor="hsl(34 58% 52%)" stopOpacity={0} />
+              <linearGradient id="aRev2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(34 28% 92%)" vertical={false} />
-            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(25 10% 55%)" }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(25 10% 55%)" }} width={50} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "rgba(255,255,255,0.2)" }} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "rgba(255,255,255,0.2)" }} width={50} />
             <Tooltip
-              contentStyle={{
-                background: "hsl(36 42% 99%)",
-                border: "1px solid hsl(34 28% 87%)",
-                borderRadius: "0.75rem",
-                fontSize: "12px",
-              }}
+              contentStyle={{ background: "#1a1a22", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", fontSize: "12px", color: "#fff" }}
               formatter={(v: number, k: string) => k === "revenue" ? [formatINR(v), "Revenue"] : [v, "Orders"]}
             />
-            <Area type="monotone" dataKey="revenue" stroke="hsl(34 58% 52%)" strokeWidth={2} fill="url(#aRev)" />
+            <Area type="monotone" dataKey="revenue" stroke="#f59e0b" strokeWidth={2} fill="url(#aRev2)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Top cities + Orders bar */}
+      {/* Bottom row */}
       <div className="grid lg:grid-cols-2 gap-4">
-        <div className="bg-background rounded-2xl border border-border p-6">
-          <h2 className="font-display text-xl mb-4">Top Cities</h2>
+        {/* Top Cities */}
+        <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-6">
+          <h2 className="text-white font-semibold mb-4">Top Cities</h2>
           {topCities.length === 0 ? (
-            <div className="text-center text-sm text-muted-foreground py-12">No orders in this period</div>
+            <div className="text-center text-sm text-white/20 py-12">No orders in this period</div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {topCities.map((c, i) => {
                 const max = topCities[0].revenue || 1;
                 const pct = (c.revenue / max) * 100;
@@ -279,20 +222,14 @@ const AdminAnalytics = () => {
                   <div key={c.city}>
                     <div className="flex items-baseline justify-between text-sm mb-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="font-display text-lg text-amber-700/70 w-6">{i + 1}</span>
-                        <span className="font-medium">{c.city}</span>
-                        <span className="text-xs text-muted-foreground">({c.orders} order{c.orders === 1 ? "" : "s"})</span>
+                        <span className="text-lg font-semibold text-amber-400/50 w-6">{i + 1}</span>
+                        <span className="text-white/70 font-medium">{c.city}</span>
+                        <span className="text-[11px] text-white/25">({c.orders})</span>
                       </div>
-                      <span className="tabular-nums font-medium">{formatINR(c.revenue)}</span>
+                      <span className="tabular-nums text-white/70 font-medium">{formatINR(c.revenue)}</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${pct}%`,
-                          background: "linear-gradient(90deg, hsl(34 58% 52%), hsl(38 72% 62%))",
-                        }}
-                      />
+                    <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
@@ -301,22 +238,16 @@ const AdminAnalytics = () => {
           )}
         </div>
 
-        <div className="bg-background rounded-2xl border border-border p-6">
-          <h2 className="font-display text-xl mb-4">Orders Per Day</h2>
-          <ResponsiveContainer width="100%" height={250}>
+        {/* Orders Per Day */}
+        <div className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-6">
+          <h2 className="text-white font-semibold mb-4">Orders Per Day</h2>
+          <ResponsiveContainer width="100%" height={230}>
             <BarChart data={dailySeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(34 28% 92%)" vertical={false} />
-              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(25 10% 55%)" }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(25 10% 55%)" }} allowDecimals={false} width={30} />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(36 42% 99%)",
-                  border: "1px solid hsl(34 28% 87%)",
-                  borderRadius: "0.75rem",
-                  fontSize: "12px",
-                }}
-              />
-              <Bar dataKey="orders" fill="hsl(34 58% 52%)" radius={[6, 6, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "rgba(255,255,255,0.2)" }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "rgba(255,255,255,0.2)" }} allowDecimals={false} width={30} />
+              <Tooltip contentStyle={{ background: "#1a1a22", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", fontSize: "12px", color: "#fff" }} />
+              <Bar dataKey="orders" fill="#f59e0b" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -325,35 +256,27 @@ const AdminAnalytics = () => {
   );
 };
 
-const colorClasses: Record<string, { bg: string; icon: string; chip: string }> = {
-  emerald: { bg: "from-emerald-500/10 to-emerald-500/5", icon: "text-emerald-600", chip: "bg-emerald-100 text-emerald-700" },
-  amber:   { bg: "from-amber-500/10 to-amber-500/5",     icon: "text-amber-600",   chip: "bg-amber-100 text-amber-700" },
-  violet:  { bg: "from-violet-500/10 to-violet-500/5",   icon: "text-violet-600",  chip: "bg-violet-100 text-violet-700" },
-  sky:     { bg: "from-sky-500/10 to-sky-500/5",         icon: "text-sky-600",     chip: "bg-sky-100 text-sky-700" },
-  rose:    { bg: "from-rose-500/10 to-rose-500/5",       icon: "text-rose-600",    chip: "bg-rose-100 text-rose-700" },
+const colorMap: Record<string, { icon: string; glow: string }> = {
+  emerald: { icon: "text-emerald-400", glow: "from-emerald-500/10" },
+  amber:   { icon: "text-amber-400",   glow: "from-amber-500/10" },
+  violet:  { icon: "text-violet-400",  glow: "from-violet-500/10" },
+  sky:     { icon: "text-sky-400",     glow: "from-sky-500/10" },
+  rose:    { icon: "text-rose-400",    glow: "from-rose-500/10" },
 };
 
-const KPI = ({
-  label, value, icon: Icon, color, change,
-}: {
-  label: string;
-  value: string | number;
-  icon: any;
-  color: keyof typeof colorClasses;
-  change?: number | null;
-}) => {
-  const cls = colorClasses[color];
+const KPI = ({ label, value, icon: Icon, color, change }: { label: string; value: string | number; icon: any; color: string; change?: number | null }) => {
+  const c = colorMap[color] ?? colorMap.amber;
   return (
-    <div className="relative bg-background rounded-2xl border border-border p-5 overflow-hidden">
-      <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${cls.bg} blur-2xl opacity-60`} />
-      <div className={`relative w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${cls.icon} bg-current/10`}>
-        <Icon className="w-5 h-5" />
+    <div className="relative bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-4 overflow-hidden">
+      <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full bg-gradient-to-br ${c.glow} to-transparent blur-2xl opacity-50`} />
+      <div className={`relative w-9 h-9 rounded-xl bg-white/[0.04] flex items-center justify-center mb-3 ${c.icon}`}>
+        <Icon className="w-4 h-4" />
       </div>
-      <div className="relative font-display text-2xl xl:text-3xl">{value}</div>
-      <div className="relative text-xs font-medium mt-0.5">{label}</div>
+      <div className="relative text-white text-xl font-semibold">{value}</div>
+      <div className="relative text-xs text-white/40 mt-0.5">{label}</div>
       {change !== undefined && change !== null && (
         <div className={`relative inline-flex items-center gap-1 mt-2 text-[10px] px-2 py-0.5 rounded-full font-medium ${
-          change >= 0 ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+          change >= 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
         }`}>
           {change >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
           {change >= 0 ? "+" : ""}{change.toFixed(1)}%

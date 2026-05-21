@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ImageUpload from "./ImageUpload";
 import { toast } from "sonner";
+import { Image as ImageIcon } from "lucide-react";
 
 type Slot = { key: string; image_url: string; alt: string | null };
 
@@ -15,20 +16,20 @@ const SECTIONS: { title: string; slots: { key: string; label: string; desc?: str
   {
     title: "About",
     slots: [
-      { key: "about_1", label: "About - main image",      desc: "Large top-left photo in the About collage" },
-      { key: "about_2", label: "About - secondary image", desc: "Bottom-right photo in the About collage" },
-      { key: "about_3", label: "About - accent image",    desc: "Small overlapping accent photo in the About collage" },
+      { key: "about_1", label: "About - main image", desc: "Large photo in the About collage" },
+      { key: "about_2", label: "About - secondary image", desc: "Supporting photo" },
+      { key: "about_3", label: "About - accent image", desc: "Small accent photo" },
     ],
   },
   {
     title: "Gallery",
     slots: [
-      { key: "gallery_1", label: "Gallery photo 1", desc: "Top-left slot in the studio gallery grid" },
-      { key: "gallery_2", label: "Gallery photo 2", desc: "Top-center slot" },
-      { key: "gallery_3", label: "Gallery photo 3", desc: "Top-right slot" },
-      { key: "gallery_4", label: "Gallery photo 4", desc: "Bottom-left slot" },
-      { key: "gallery_5", label: "Gallery photo 5", desc: "Bottom-center slot" },
-      { key: "gallery_6", label: "Gallery photo 6", desc: "Bottom-right slot" },
+      { key: "gallery_1", label: "Gallery photo 1" },
+      { key: "gallery_2", label: "Gallery photo 2" },
+      { key: "gallery_3", label: "Gallery photo 3" },
+      { key: "gallery_4", label: "Gallery photo 4" },
+      { key: "gallery_5", label: "Gallery photo 5" },
+      { key: "gallery_6", label: "Gallery photo 6" },
     ],
   },
 ];
@@ -55,20 +56,25 @@ const AdminImages = () => {
   };
 
   return (
-    <div>
-      <h1 className="font-display text-4xl mb-2">Site Images</h1>
-      <p className="text-sm text-muted-foreground mb-8">Replace the photos shown across the site. Changes are live immediately.</p>
+    <div className="pb-20 lg:pb-0">
+      <div className="mb-8">
+        <h1 className="text-white text-3xl font-semibold">Site Images</h1>
+        <p className="text-sm text-white/40 mt-1">Replace photos across the site. Changes are live immediately.</p>
+      </div>
 
-      <div className="space-y-10 max-w-2xl">
+      <div className="space-y-8 max-w-2xl">
         {SECTIONS.map((section) => (
           <div key={section.title}>
-            <h2 className="font-display text-xl mb-4 pb-2 border-b border-border">{section.title}</h2>
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/[0.04]">
+              <ImageIcon className="w-4 h-4 text-amber-400/70" />
+              <h2 className="text-white font-semibold">{section.title}</h2>
+            </div>
             <div className="space-y-4">
               {section.slots.map((s) => (
-                <div key={s.key} className="bg-background rounded-2xl border border-border p-6">
-                  <div className="font-serif text-lg mb-0.5">{s.label}</div>
-                  {s.desc && <p className="text-xs text-muted-foreground mb-1">{s.desc}</p>}
-                  <div className="text-[10px] text-muted-foreground/50 font-mono mb-4">key: {s.key}</div>
+                <div key={s.key} className="bg-[#1a1a22] rounded-2xl border border-white/[0.04] p-6">
+                  <div className="text-white/80 font-medium mb-0.5">{s.label}</div>
+                  {s.desc && <p className="text-xs text-white/30 mb-1">{s.desc}</p>}
+                  <div className="text-[10px] text-white/15 font-mono mb-4">key: {s.key}</div>
                   <ImageUpload
                     bucket="site-images"
                     value={data[s.key]?.image_url}
