@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Menu, X, ShoppingBag, ChevronDown, Heart, Briefcase,
-  BookOpen, HelpCircle, Truck, ArrowRight, Sparkles, Search,
+  Menu, X, ShoppingBag, ChevronDown, ArrowRight, Search,
 } from "lucide-react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";

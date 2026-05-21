@@ -46,8 +46,8 @@ const Footer = () => {
 
   const helpLinks = [
     { to: "/shipping", label: "Shipping Policy" },
-    { to: "/shipping", label: "Return Policy" },
-    { to: "/shipping", label: "Privacy Policy" },
+    { to: "/return-policy", label: "Return Policy" },
+    { to: "/privacy-policy", label: "Privacy Policy" },
     { to: "/faq", label: "FAQ" },
     { to: "/contact", label: "Track My Order" },
   ];
@@ -248,14 +248,18 @@ const Footer = () => {
             in India
           </p>
           <div className="flex items-center gap-4">
-            {["Privacy Policy", "Return Policy", "Terms"].map((t) => (
+            {[
+              { label: "Privacy Policy", to: "/privacy-policy" },
+              { label: "Return Policy", to: "/return-policy" },
+              { label: "Terms", to: "/terms" },
+            ].map((t) => (
               <Link
-                key={t}
-                to="/shipping"
+                key={t.label}
+                to={t.to}
                 style={{ fontSize: "0.72rem", color: "rgba(253,249,240,0.4)" }}
                 className="transition-colors hover:text-[#c9a84c]"
               >
-                {t}
+                {t.label}
               </Link>
             ))}
           </div>

@@ -4,15 +4,13 @@ import {
   LogOut, Package, Image as ImageIcon, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail, Sparkles, MessageSquareQuote,
   Megaphone, Ticket, Search, Eye, EyeOff, ShieldAlert, Users, BarChart3,
+  Bell, X, Moon, Sun, ChevronRight,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import logo from "@/assets/mohika-mark.png";
 
 /** Public helper kept for old imports (now backed by real auth) */
 export const isAdmin = () => {
-  // The React tree decides admin status via useAdminAuth(); legacy callers
-  // (none remaining) used to check localStorage. Always return false here so
-  // any stale code is forced through the proper provider.
   return false;
 };
 
@@ -61,7 +59,7 @@ const AdminLogin = () => {
             <div className="font-display text-2xl text-gold-grad leading-none" style={{ fontWeight: 350 }}>
               Mohika <span className="italic">Art</span>
             </div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Admin Panel</div>
+            <div className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Admin Panel</div>
           </div>
         </div>
 
@@ -163,28 +161,31 @@ const NotAuthorized = () => {
 };
 
 /* ──────────────────────────────────────────────────────────
-   The actual admin shell (same UI as before, just wires
-   into Supabase Auth instead of localStorage password)
+   The upgraded admin shell with better UI
    ────────────────────────────────────────────────────────── */
 const AdminShell = ({ children }: { children?: ReactNode }) => {
   const { isAdmin, loading, user, signOut } = useAdminAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch]         = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { pathname } = useLocation();
   const nav = useNavigate();
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
-  // Always start admin pages at the top, prevents the visual "white gap"
-  // that appears when navigating into /admin from a scrolled storefront page.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [pathname]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
-        Loading…
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center p-1.5 animate-pulse">
+            <img src={logo} alt="" className="w-full h-full object-contain" />
+          </div>
+          <span className="text-sm text-muted-foreground">Loading admin…</span>
+        </div>
       </div>
     );
   }
@@ -223,7 +224,7 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
     flatItems.find((i) => i.to === "/admin/products")!,
     flatItems.find((i) => i.to === "/admin/orders")!,
     flatItems.find((i) => i.to === "/admin/inquiries")!,
-    flatItems.find((i) => i.to === "/admin/hero")!,
+    flatItems.find((i) => i.to === "/admin/settings")!,
   ];
 
   const filtered = search.trim()
@@ -232,38 +233,55 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
         .filter((g) => g.items.length > 0)
     : groups;
 
+  // Current page title
+  const currentPage = flatItems.find((i) => pathname === i.to || (i.to !== "/admin" && pathname.startsWith(i.to)));
+
   const SidebarContent = () => (
     <>
-      <div className="p-5 border-b border-background/10 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-background/95 flex items-center justify-center p-1.5 shrink-0">
-          <img src={logo} alt="Mohika Art" width={40} height={40} className="w-full h-full object-contain" />
+      {/* Logo area */}
+      <div className="p-5 border-b border-white/[0.08] flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-white/95 flex items-center justify-center p-1.5 shrink-0 shadow-sm">
+          <img src={logo} alt="Mohika Art" width={36} height={36} className="w-full h-full object-contain" />
         </div>
-        <div>
-          <div className="font-display text-xl text-gold-grad leading-none" style={{ fontWeight: 350 }}>
-            Mohika <span className="italic">Art</span>
+        {!sidebarCollapsed && (
+          <div>
+            <div className="font-display text-lg leading-none text-white/95" style={{ fontWeight: 350 }}>
+              Mohika <span className="italic">Art</span>
+            </div>
+            <div className="text-[9px] uppercase tracking-[0.25em] text-white/50 mt-1.5">Admin Panel</div>
           </div>
-          <div className="text-[9px] uppercase tracking-[0.3em] text-background/60 mt-1.5">Admin Panel</div>
-        </div>
+        )}
       </div>
 
-      <div className="p-4 pb-2">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/[0.06] border border-background/10">
-          <Search className="w-3.5 h-3.5 text-background/40 shrink-0" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search menu..."
-            className="flex-1 outline-none bg-transparent text-xs text-background placeholder:text-background/40"
-          />
+      {/* Search */}
+      {!sidebarCollapsed && (
+        <div className="p-4 pb-2">
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.15] transition-colors">
+            <Search className="w-3.5 h-3.5 text-white/40 shrink-0" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search menu..."
+              className="flex-1 outline-none bg-transparent text-xs text-white placeholder:text-white/40"
+            />
+            {search && (
+              <button onClick={() => setSearch("")} className="text-white/40 hover:text-white">
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <nav className="flex-1 p-4 pt-2 overflow-y-auto space-y-4">
+      {/* Navigation */}
+      <nav className="flex-1 p-3 pt-1 overflow-y-auto space-y-5">
         {filtered.map((group) => (
           <div key={group.title}>
-            <div className="text-[9px] uppercase tracking-[0.25em] text-background/40 font-semibold px-3 mb-2">
-              {group.title}
-            </div>
+            {!sidebarCollapsed && (
+              <div className="text-[9px] uppercase tracking-[0.22em] text-white/35 font-semibold px-3 mb-2">
+                {group.title}
+              </div>
+            )}
             <div className="space-y-0.5">
               {group.items.map((it) => {
                 const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
@@ -271,14 +289,18 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
                   <Link
                     key={it.to}
                     to={it.to}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all ${
+                    title={sidebarCollapsed ? it.label : undefined}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 group ${
                       active
-                        ? "bg-[rgba(201,168,76,0.12)] text-[#c9a84c] font-medium border-l-2 border-[#c9a84c]"
-                        : "text-background/65 hover:text-background hover:bg-background/8"
+                        ? "bg-gradient-to-r from-amber-500/15 to-amber-500/5 text-amber-300 font-medium shadow-[inset_0_0_0_1px_rgba(201,168,76,0.15)]"
+                        : "text-white/60 hover:text-white hover:bg-white/[0.06]"
                     }`}
                   >
-                    <it.icon className="w-4 h-4 shrink-0" />
-                    {it.label}
+                    <it.icon className={`w-[18px] h-[18px] shrink-0 ${active ? "text-amber-400" : "group-hover:text-white/80"}`} />
+                    {!sidebarCollapsed && <span>{it.label}</span>}
+                    {active && !sidebarCollapsed && (
+                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    )}
                   </Link>
                 );
               })}
@@ -286,27 +308,38 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="text-xs text-background/40 px-3 py-6 text-center">No matches</div>
+          <div className="text-xs text-white/40 px-3 py-6 text-center">No matches</div>
         )}
       </nav>
 
-      <div className="p-4 border-t border-background/10 space-y-1">
-        {user && (
-          <div className="px-3 py-2 mb-1 text-[10px] text-background/60 truncate" title={user.email ?? undefined}>
-            {user.email}
+      {/* Footer */}
+      <div className="p-3 border-t border-white/[0.08] space-y-1">
+        {user && !sidebarCollapsed && (
+          <div className="px-3 py-2 mb-1 flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/30 flex items-center justify-center text-[10px] font-bold text-amber-300 uppercase">
+              {(user.email ?? "A").charAt(0)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] text-white/70 truncate" title={user.email ?? undefined}>
+                {user.email}
+              </div>
+              <div className="text-[9px] text-white/40">Admin</div>
+            </div>
           </div>
         )}
         <Link
           to="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-white/55 hover:text-white hover:bg-white/[0.06] transition-all"
         >
-          <Home className="w-4 h-4 shrink-0" /> View Site
+          <Home className="w-4 h-4 shrink-0" />
+          {!sidebarCollapsed && "View Site"}
         </Link>
         <button
           onClick={async () => { await signOut(); nav("/admin"); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-white/55 hover:text-rose-300 hover:bg-rose-500/10 transition-all"
         >
-          <LogOut className="w-4 h-4 shrink-0" /> Sign out
+          <LogOut className="w-4 h-4 shrink-0" />
+          {!sidebarCollapsed && "Sign out"}
         </button>
       </div>
     </>
@@ -314,49 +347,104 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
 
   return (
     <div
-      className="bg-muted/30 flex"
+      className="flex"
       style={{
         minHeight: "100dvh",
-        // Explicitly anchor to the absolute viewport top, guards against
-        // rare layouts where the admin tree gets pushed down by stale
-        // scroll position, browser autofill insets, or chrome quirks.
+        background: "linear-gradient(135deg, hsl(35 20% 96%) 0%, hsl(34 15% 94%) 100%)",
         marginTop: 0,
         paddingTop: 0,
       }}
     >
-      <aside className="w-64 shrink-0 bg-foreground text-background hidden md:flex flex-col sticky top-0 h-screen self-start">
+      {/* Desktop sidebar */}
+      <aside
+        className={`${sidebarCollapsed ? "w-[72px]" : "w-[260px]"} shrink-0 hidden md:flex flex-col sticky top-0 h-screen self-start transition-all duration-300`}
+        style={{
+          background: "linear-gradient(180deg, hsl(22 25% 12%) 0%, hsl(22 20% 16%) 100%)",
+        }}
+      >
         <SidebarContent />
+        {/* Collapse toggle */}
+        <button
+          onClick={() => setSidebarCollapsed((v) => !v)}
+          className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-foreground text-background flex items-center justify-center shadow-md hover:scale-110 transition-transform z-10"
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${sidebarCollapsed ? "" : "rotate-180"}`} />
+        </button>
       </aside>
 
+      {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-foreground/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-foreground text-background flex flex-col shadow-2xl">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+          <aside
+            className="absolute left-0 top-0 bottom-0 w-72 flex flex-col shadow-2xl"
+            style={{
+              background: "linear-gradient(180deg, hsl(22 25% 12%) 0%, hsl(22 20% 16%) 100%)",
+            }}
+          >
             <SidebarContent />
           </aside>
         </div>
       )}
 
+      {/* Main content */}
       <div className="flex-1 min-w-0">
-        <header className="md:hidden bg-foreground text-background px-4 py-3.5 flex items-center justify-between sticky top-0 z-40">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu className="w-4 h-4" />
-          </button>
-          <div className="font-display text-lg text-gold-grad">Admin Panel</div>
-          <button
-            onClick={async () => { await signOut(); }}
-            className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-            aria-label="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+        {/* Top header bar */}
+        <header className="sticky top-0 z-40 backdrop-blur-xl border-b border-border/50" style={{ background: "rgba(252,250,246,0.85)" }}>
+          <div className="flex items-center justify-between px-4 md:px-8 h-16">
+            <div className="flex items-center gap-3">
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="md:hidden w-9 h-9 rounded-xl bg-foreground/5 flex items-center justify-center hover:bg-foreground/10 transition-colors"
+                aria-label="Open menu"
+              >
+                <Menu className="w-4.5 h-4.5" />
+              </button>
+
+              {/* Breadcrumb / page title */}
+              <div className="hidden md:flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Admin</span>
+                {currentPage && (
+                  <>
+                    <ChevronRight className="w-3 h-3 text-muted-foreground/50" />
+                    <span className="font-medium">{currentPage.label}</span>
+                  </>
+                )}
+              </div>
+              <div className="md:hidden font-display text-lg">
+                {currentPage?.label ?? "Dashboard"}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Notifications placeholder */}
+              <button className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all relative">
+                <Bell className="w-[18px] h-[18px]" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500" />
+              </button>
+
+              {/* View live site */}
+              <Link
+                to="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all"
+              >
+                <Eye className="w-3.5 h-3.5" /> Live Site
+              </Link>
+
+              {/* User avatar */}
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-[11px] font-bold text-amber-800 uppercase border border-amber-200/60">
+                {(user?.email ?? "A").charAt(0)}
+              </div>
+            </div>
+          </div>
         </header>
 
-        <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-foreground text-background border-t border-background/10 flex">
+        {/* Mobile bottom nav */}
+        <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/50 flex backdrop-blur-xl" style={{ background: "rgba(252,250,246,0.92)" }}>
           {bottomNavItems.map((it) => {
             const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
             return (
@@ -364,24 +452,18 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
                 key={it.to}
                 to={it.to}
                 className={`flex-1 flex flex-col items-center gap-1 py-3 text-[9.5px] tracking-wider transition-colors ${
-                  active ? "text-background" : "text-background/50"
+                  active ? "text-amber-700 font-medium" : "text-muted-foreground"
                 }`}
               >
-                <it.icon className="w-4 h-4" />
+                <it.icon className={`w-4.5 h-4.5 ${active ? "text-amber-600" : ""}`} />
                 {it.label}
               </Link>
             );
           })}
-          <Link
-            to="/"
-            className="flex-1 flex flex-col items-center gap-1 py-3 text-[9.5px] tracking-wider text-background/50 transition-colors"
-          >
-            <Home className="w-4 h-4" />
-            Site
-          </Link>
         </nav>
 
-        <main className="p-4 md:p-10 pb-24 md:pb-10">
+        {/* Page content */}
+        <main className="p-4 md:p-8 lg:p-10 pb-24 md:pb-10">
           {children ?? <Outlet />}
         </main>
       </div>

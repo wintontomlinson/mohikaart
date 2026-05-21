@@ -26,6 +26,9 @@ const CorporatePage  = lazy(() => import("./pages/CorporatePage"));
 const CareGuidePage  = lazy(() => import("./pages/CareGuidePage"));
 const FAQPage        = lazy(() => import("./pages/FAQPage"));
 const ShippingPage   = lazy(() => import("./pages/ShippingPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const ReturnPolicyPage  = lazy(() => import("./pages/ReturnPolicyPage"));
+const TermsPage         = lazy(() => import("./pages/TermsPage"));
 
 // Admin → entirely lazy so storefront visitors never download recharts
 const AdminLayout         = lazy(() => import("./pages/admin/AdminLayout"));
@@ -87,6 +90,9 @@ const App = () => (
               <Route path="/care-guide" element={<CareGuidePage />} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/shipping" element={<ShippingPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+              <Route path="/return-policy" element={<ReturnPolicyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
             </Route>
 
             {/* Admin */}
