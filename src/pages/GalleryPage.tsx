@@ -140,12 +140,17 @@ const GalleryPage = () => {
       </section>
 
       {/* ━━ STICKY FILTER BAR ━━ */}
-      <section
-        className="sticky top-[60px] md:top-[68px] z-30 border-y"
-        style={{ borderColor: "rgba(26,18,8,0.08)", background: "rgba(253,249,240,0.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+      <div
+        className="sticky top-0 z-40"
+        style={{
+          background: "rgba(253,249,240,0.97)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          boxShadow: "0 1px 0 rgba(26,18,8,0.06), 0 4px 16px -4px rgba(26,18,8,0.05)",
+        }}
       >
         <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
             {CATEGORIES.map((c) => {
               const isActive = activeCategory === c.slug;
               return (
@@ -154,15 +159,15 @@ const GalleryPage = () => {
                   onClick={() => setActiveCategory(c.slug)}
                   className="shrink-0 transition-all duration-300"
                   style={{
-                    padding: "7px 16px",
+                    padding: "6px 16px",
                     borderRadius: 9999,
-                    fontSize: 11,
+                    fontSize: 10,
                     textTransform: "uppercase",
-                    letterSpacing: "0.1em",
+                    letterSpacing: "0.12em",
                     fontWeight: 600,
                     background: isActive ? "#1a1208" : "transparent",
-                    color: isActive ? "#fdf9f0" : "rgba(26,18,8,0.55)",
-                    border: `1px solid ${isActive ? "#1a1208" : "rgba(26,18,8,0.12)"}`,
+                    color: isActive ? "#fdf9f0" : "rgba(26,18,8,0.5)",
+                    border: `1px solid ${isActive ? "#1a1208" : "rgba(26,18,8,0.1)"}`,
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -172,7 +177,7 @@ const GalleryPage = () => {
             })}
           </div>
         </div>
-      </section>
+      </div>
 
       {/* ━━ MASONRY GRID ━━ */}
       <section className="max-w-[1280px] mx-auto px-6 lg:px-8 py-10 md:py-14">
