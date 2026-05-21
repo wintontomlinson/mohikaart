@@ -1,31 +1,24 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 import {
   LogOut, Package, Image as ImageIcon, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail, Sparkles, MessageSquareQuote,
   Megaphone, Ticket, Search, Eye, EyeOff, ShieldAlert, Users, BarChart3,
+  X, Command,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import logo from "@/assets/mohika-mark.png";
 
-/** Public helper kept for old imports (now backed by real auth) */
-export const isAdmin = () => {
-  // The React tree decides admin status via useAdminAuth(); legacy callers
-  // (none remaining) used to check localStorage. Always return false here so
-  // any stale code is forced through the proper provider.
-  return false;
-};
+export const isAdmin = () => false;
 
-/* ──────────────────────────────────────────────────────────
-   Sign-in screen
-   ────────────────────────────────────────────────────────── */
+/* ─── Login ─── */
 const AdminLogin = () => {
   const { signIn } = useAdminAuth();
   const [email, setEmail] = useState("");
-  const [pw, setPw]       = useState("");
-  const [show, setShow]   = useState(false);
-  const [err, setErr]     = useState("");
-  const [busy, setBusy]   = useState(false);
+  const [pw, setPw] = useState("");
+  const [show, setShow] = useState(false);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,361 +30,267 @@ const AdminLogin = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse 70% 60% at 30% 20%, hsl(348 55% 93%/0.6), transparent 60%)," +
-          "radial-gradient(ellipse 50% 50% at 80% 80%, hsl(38 65% 91%/0.55), transparent 60%)," +
-          "linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%)",
-      }}
-    >
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
+      style={{ background: "radial-gradient(ellipse 70% 60% at 30% 20%, hsl(348 55% 93%/0.6), transparent 60%), radial-gradient(ellipse 50% 50% at 80% 80%, hsl(38 65% 91%/0.55), transparent 60%), linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%)" }}>
       <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blush/20 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-champagne/15 blur-3xl pointer-events-none" />
-
-      <form
-        onSubmit={onSubmit}
-        className="bg-card/95 backdrop-blur-xl rounded-3xl p-10 w-full max-w-md shadow-2xl border border-border relative z-10"
-      >
+      <form onSubmit={onSubmit} className="bg-white/80 backdrop-blur-2xl rounded-3xl p-10 w-full max-w-md shadow-2xl border border-white/60 relative z-10">
         <div className="flex items-center gap-3 mb-8">
           <div className="w-12 h-12 rounded-2xl bg-foreground flex items-center justify-center p-2">
             <img src={logo} alt="Mohika Art" className="w-full h-full object-contain" />
           </div>
           <div>
-            <div className="font-display text-2xl text-gold-grad leading-none" style={{ fontWeight: 350 }}>
-              Mohika <span className="italic">Art</span>
-            </div>
+            <div className="font-display text-2xl leading-none" style={{ color: "#1a1208" }}>Mohika <span className="italic" style={{ color: "#c9a84c" }}>Art</span></div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Admin Panel</div>
           </div>
         </div>
-
-        <h1 className="font-display text-3xl mb-1">Welcome back</h1>
-        <p className="text-sm text-muted-foreground mb-8">
-          Sign in with your admin credentials to access the panel.
-        </p>
-
+        <h1 className="font-display text-3xl mb-1" style={{ color: "#1a1208" }}>Welcome back</h1>
+        <p className="text-sm text-muted-foreground mb-8">Sign in to manage your store.</p>
         <div className="space-y-4">
           <div>
             <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground">Email</label>
-            <input
-              type="email"
-              autoComplete="email"
-              autoFocus
-              required
-              value={email}
+            <input type="email" autoComplete="email" autoFocus required value={email}
               onChange={(e) => { setEmail(e.target.value); setErr(""); }}
               placeholder="you@mohikaart.com"
-              className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-foreground/50 outline-none text-sm transition-colors"
-            />
+              className="w-full px-4 py-3 rounded-xl bg-white border border-[#e5e0d8] focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/20 outline-none text-sm transition-all" />
           </div>
-
           <div>
             <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground">Password</label>
             <div className="relative">
-              <input
-                type={show ? "text" : "password"}
-                autoComplete="current-password"
-                required
-                value={pw}
+              <input type={show ? "text" : "password"} autoComplete="current-password" required value={pw}
                 onChange={(e) => { setPw(e.target.value); setErr(""); }}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 pr-11 rounded-xl bg-background border border-border focus:border-foreground/50 outline-none text-sm transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShow((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                aria-label={show ? "Hide password" : "Show password"}
-              >
+                className="w-full px-4 py-3 pr-11 rounded-xl bg-white border border-[#e5e0d8] focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/20 outline-none text-sm transition-all" />
+              <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
-
           {err && (
-            <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg flex items-start gap-2">
-              <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>{err}</span>
-            </p>
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200">
+              <ShieldAlert className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+              <span className="text-sm text-red-600">{err}</span>
+            </div>
           )}
-
-          <button
-            type="submit"
-            disabled={busy || !email || !pw}
-            className="w-full px-6 py-3 rounded-full bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-          >
+          <button type="submit" disabled={busy || !email || !pw}
+            className="w-full px-6 py-3.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
+            style={{ background: "#1a1208", color: "#fdf9f0" }}>
             {busy ? "Signing in…" : "Sign In"}
           </button>
         </div>
-
-        <Link to="/" className="block text-center mt-5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-          ← Back to site
-        </Link>
+        <Link to="/" className="block text-center mt-5 text-xs text-muted-foreground hover:text-foreground transition-colors">← Back to store</Link>
       </form>
     </div>
   );
 };
 
-/* ──────────────────────────────────────────────────────────
-   Authenticated-but-not-admin screen
-   ────────────────────────────────────────────────────────── */
+/* ─── Not Authorized ─── */
 const NotAuthorized = () => {
   const { signOut, user } = useAdminAuth();
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
-      <div className="bg-card border border-border rounded-2xl shadow-luxe p-10 max-w-md text-center">
-        <ShieldAlert className="w-10 h-10 text-amber-600 mx-auto mb-4" />
-        <h2 className="font-display text-2xl mb-2">Not authorized</h2>
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "hsl(36 42% 98%)" }}>
+      <div className="bg-white/80 backdrop-blur-xl border border-[#e5e0d8] rounded-3xl shadow-2xl p-10 max-w-md text-center">
+        <ShieldAlert className="w-10 h-10 mx-auto mb-4" style={{ color: "#c9a84c" }} />
+        <h2 className="font-display text-2xl mb-2" style={{ color: "#1a1208" }}>Not authorized</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          {user?.email ? <><strong>{user.email}</strong> is signed in but not an admin.</> : "You are not signed in as an admin."}
-          {" "}If this is your account, ask the site owner to grant admin access.
+          {user?.email ? <><strong>{user.email}</strong> doesn't have admin access.</> : "Not signed in as admin."}
         </p>
         <div className="flex gap-3 justify-center">
-          <Link to="/" className="px-5 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors">
-            Back to site
-          </Link>
-          <button
-            onClick={signOut}
-            className="px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity"
-          >
-            Sign out
-          </button>
+          <Link to="/" className="px-5 py-2.5 rounded-xl border border-[#e5e0d8] text-sm hover:bg-[#f5f0e8] transition-colors">Back to store</Link>
+          <button onClick={signOut} className="px-5 py-2.5 rounded-xl text-sm text-white" style={{ background: "#1a1208" }}>Sign out</button>
         </div>
       </div>
     </div>
   );
 };
 
-/* ──────────────────────────────────────────────────────────
-   The actual admin shell (same UI as before, just wires
-   into Supabase Auth instead of localStorage password)
-   ────────────────────────────────────────────────────────── */
+/* ─── Admin Shell ─── */
 const AdminShell = ({ children }: { children?: ReactNode }) => {
   const { isAdmin, loading, user, signOut } = useAdminAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [search, setSearch]         = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [search, setSearch] = useState("");
   const { pathname } = useLocation();
-  const nav = useNavigate();
 
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => { setSidebarOpen(false); }, [pathname]);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [pathname]);
 
-  // Always start admin pages at the top, prevents the visual "white gap"
-  // that appears when navigating into /admin from a scrolled storefront page.
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-  }, [pathname]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
-        Loading…
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(36 42% 98%)" }}>
+      <div className="flex items-center gap-3 text-muted-foreground text-sm">
+        <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#c9a84c" }} />Loading…
       </div>
-    );
-  }
+    </div>
+  );
   if (!user) return <AdminLogin />;
   if (!isAdmin) return <NotAuthorized />;
 
-  const groups: { title: string; items: { to: string; icon: any; label: string }[] }[] = [
+  const groups = [
     { title: "Overview", items: [
-      { to: "/admin",           icon: LayoutDashboard, label: "Dashboard" },
-      { to: "/admin/analytics", icon: BarChart3,       label: "Analytics" },
+      { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/admin/analytics", icon: BarChart3, label: "Analytics" },
     ]},
     { title: "Catalogue", items: [
-      { to: "/admin/products",    icon: Package, label: "Products" },
-      { to: "/admin/categories",  icon: Tag,     label: "Categories" },
-      { to: "/admin/coupons",     icon: Ticket,  label: "Coupons" },
+      { to: "/admin/products", icon: Package, label: "Products" },
+      { to: "/admin/categories", icon: Tag, label: "Categories" },
+      { to: "/admin/coupons", icon: Ticket, label: "Coupons" },
     ]},
     { title: "Customers", items: [
-      { to: "/admin/orders",     icon: ShoppingCart,        label: "Orders" },
-      { to: "/admin/inquiries",  icon: Mail,                label: "Inquiries" },
+      { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
+      { to: "/admin/inquiries", icon: Mail, label: "Inquiries" },
       { to: "/admin/testimonials", icon: MessageSquareQuote, label: "Testimonials" },
     ]},
     { title: "Content", items: [
-      { to: "/admin/hero",          icon: Sparkles,  label: "Hero Section" },
+      { to: "/admin/hero", icon: Sparkles, label: "Hero Section" },
       { to: "/admin/announcements", icon: Megaphone, label: "Announcements" },
-      { to: "/admin/images",        icon: ImageIcon, label: "Site Images" },
+      { to: "/admin/images", icon: ImageIcon, label: "Site Images" },
     ]},
     { title: "System", items: [
-      { to: "/admin/users",    icon: Users,    label: "Admin Users" },
+      { to: "/admin/users", icon: Users, label: "Admin Users" },
       { to: "/admin/settings", icon: Settings, label: "Settings" },
     ]},
   ];
 
   const flatItems = groups.flatMap((g) => g.items);
-  const bottomNavItems = [
-    flatItems[0],
-    flatItems.find((i) => i.to === "/admin/products")!,
-    flatItems.find((i) => i.to === "/admin/orders")!,
-    flatItems.find((i) => i.to === "/admin/inquiries")!,
-    flatItems.find((i) => i.to === "/admin/hero")!,
-  ];
+  const bottomNavItems = [flatItems[0], flatItems.find((i) => i.to === "/admin/products")!, flatItems.find((i) => i.to === "/admin/orders")!, flatItems.find((i) => i.to === "/admin/inquiries")!, flatItems.find((i) => i.to === "/admin/settings")!];
 
   const filtered = search.trim()
-    ? groups
-        .map((g) => ({ ...g, items: g.items.filter((i) => i.label.toLowerCase().includes(search.toLowerCase())) }))
-        .filter((g) => g.items.length > 0)
+    ? groups.map((g) => ({ ...g, items: g.items.filter((i) => i.label.toLowerCase().includes(search.toLowerCase())) })).filter((g) => g.items.length > 0)
     : groups;
 
-  const SidebarContent = () => (
-    <>
-      <div className="p-5 border-b border-background/10 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-xl bg-background/95 flex items-center justify-center p-1.5 shrink-0">
-          <img src={logo} alt="Mohika Art" width={40} height={40} className="w-full h-full object-contain" />
-        </div>
-        <div>
-          <div className="font-display text-xl text-gold-grad leading-none" style={{ fontWeight: 350 }}>
-            Mohika <span className="italic">Art</span>
-          </div>
-          <div className="text-[9px] uppercase tracking-[0.3em] text-background/60 mt-1.5">Admin Panel</div>
-        </div>
-      </div>
-
-      <div className="p-4 pb-2">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/[0.06] border border-background/10">
-          <Search className="w-3.5 h-3.5 text-background/40 shrink-0" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search menu..."
-            className="flex-1 outline-none bg-transparent text-xs text-background placeholder:text-background/40"
-          />
-        </div>
-      </div>
-
-      <nav className="flex-1 p-4 pt-2 overflow-y-auto space-y-4">
-        {filtered.map((group) => (
-          <div key={group.title}>
-            <div className="text-[9px] uppercase tracking-[0.25em] text-background/40 font-semibold px-3 mb-2">
-              {group.title}
-            </div>
-            <div className="space-y-0.5">
-              {group.items.map((it) => {
-                const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
-                return (
-                  <Link
-                    key={it.to}
-                    to={it.to}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all ${
-                      active
-                        ? "bg-[rgba(201,168,76,0.12)] text-[#c9a84c] font-medium border-l-2 border-[#c9a84c]"
-                        : "text-background/65 hover:text-background hover:bg-background/8"
-                    }`}
-                  >
-                    <it.icon className="w-4 h-4 shrink-0" />
-                    {it.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-        {filtered.length === 0 && (
-          <div className="text-xs text-background/40 px-3 py-6 text-center">No matches</div>
-        )}
-      </nav>
-
-      <div className="p-4 border-t border-background/10 space-y-1">
-        {user && (
-          <div className="px-3 py-2 mb-1 text-[10px] text-background/60 truncate" title={user.email ?? undefined}>
-            {user.email}
-          </div>
-        )}
-        <Link
-          to="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
-        >
-          <Home className="w-4 h-4 shrink-0" /> View Site
-        </Link>
-        <button
-          onClick={async () => { await signOut(); nav("/admin"); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-background/65 hover:text-background hover:bg-background/10 transition-all"
-        >
-          <LogOut className="w-4 h-4 shrink-0" /> Sign out
-        </button>
-      </div>
-    </>
-  );
+  const currentPage = flatItems.find((i) => pathname === i.to || (i.to !== "/admin" && pathname.startsWith(i.to)));
 
   return (
-    <div
-      className="bg-muted/30 flex"
-      style={{
-        minHeight: "100dvh",
-        // Explicitly anchor to the absolute viewport top, guards against
-        // rare layouts where the admin tree gets pushed down by stale
-        // scroll position, browser autofill insets, or chrome quirks.
-        marginTop: 0,
-        paddingTop: 0,
-      }}
-    >
-      <aside className="w-64 shrink-0 bg-foreground text-background hidden md:flex flex-col sticky top-0 h-screen self-start">
-        <SidebarContent />
+    <div className="min-h-screen flex" style={{ background: "hsl(36 42% 97%)" }}>
+      {/* Mobile overlay */}
+      {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
+
+      {/* Sidebar */}
+      <aside className={`fixed lg:sticky top-0 left-0 z-50 h-screen ${collapsed ? "w-[72px]" : "w-[260px]"} flex flex-col transition-all duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+        {/* Floating sidebar card */}
+        <div className="m-3 flex-1 flex flex-col rounded-2xl bg-white/70 backdrop-blur-xl border border-[#e5e0d8]/60 shadow-[0_8px_40px_-12px_rgba(26,18,8,0.08)] overflow-hidden">
+          {/* Logo */}
+          <div className={`flex items-center gap-3 p-5 ${collapsed ? "justify-center px-3" : ""}`}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center p-1.5 shrink-0" style={{ background: "linear-gradient(135deg, #1a1208, #2d2015)" }}>
+              <img src={logo} alt="Mohika Art" className="w-full h-full object-contain" />
+            </div>
+            {!collapsed && (
+              <div>
+                <div className="font-display text-lg leading-none" style={{ color: "#1a1208" }}>Mohika <span className="italic" style={{ color: "#c9a84c" }}>Art</span></div>
+                <div className="text-[9px] uppercase tracking-[0.3em] text-muted-foreground mt-1">Admin</div>
+              </div>
+            )}
+            <button onClick={() => setSidebarOpen(false)} className="ml-auto lg:hidden w-8 h-8 rounded-lg hover:bg-[#f5f0e8] flex items-center justify-center text-muted-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Search */}
+          {!collapsed && (
+            <div className="px-4 pb-3">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#f8f5f0] border border-[#e5e0d8]/50">
+                <Search className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…"
+                  className="flex-1 outline-none bg-transparent text-xs text-foreground placeholder:text-muted-foreground/50" />
+                <kbd className="hidden sm:inline text-[9px] px-1.5 py-0.5 rounded bg-white border border-[#e5e0d8] text-muted-foreground">⌘K</kbd>
+              </div>
+            </div>
+          )}
+
+          {/* Nav */}
+          <nav className="flex-1 px-3 overflow-y-auto space-y-4">
+            {filtered.map((group) => (
+              <div key={group.title}>
+                {!collapsed && <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/50 font-semibold px-3 mb-1.5">{group.title}</div>}
+                <div className="space-y-0.5">
+                  {group.items.map((it) => {
+                    const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
+                    return (
+                      <Link key={it.to} to={it.to} title={collapsed ? it.label : undefined}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all relative ${collapsed ? "justify-center" : ""} ${
+                          active ? "bg-[#1a1208] text-white font-medium shadow-md" : "text-[#3d2b1f]/70 hover:text-[#1a1208] hover:bg-[#f5f0e8]"
+                        }`}>
+                        <it.icon className={`w-[18px] h-[18px] shrink-0 ${active ? "text-[#c9a84c]" : ""}`} />
+                        {!collapsed && <span>{it.label}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </nav>
+
+          {/* Bottom */}
+          <div className={`p-4 border-t border-[#e5e0d8]/50 space-y-1 ${collapsed ? "px-2" : ""}`}>
+            {!collapsed && user && (
+              <div className="px-3 py-1.5 text-[10px] text-muted-foreground truncate">{user.email}</div>
+            )}
+            <Link to="/" target="_blank" className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] text-muted-foreground hover:text-foreground hover:bg-[#f5f0e8] transition-all ${collapsed ? "justify-center" : ""}`}>
+              <Home className="w-4 h-4 shrink-0" />{!collapsed && "View Store"}
+            </Link>
+            <button onClick={signOut} className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] text-red-500/70 hover:text-red-600 hover:bg-red-50 transition-all w-full ${collapsed ? "justify-center" : ""}`}>
+              <LogOut className="w-4 h-4 shrink-0" />{!collapsed && "Sign Out"}
+            </button>
+          </div>
+        </div>
       </aside>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-foreground/50" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-72 bg-foreground text-background flex flex-col shadow-2xl">
-            <SidebarContent />
-          </aside>
-        </div>
-      )}
-
-      <div className="flex-1 min-w-0">
-        <header className="md:hidden bg-foreground text-background px-4 py-3.5 flex items-center justify-between sticky top-0 z-40">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu className="w-4 h-4" />
-          </button>
-          <div className="font-display text-lg text-gold-grad">Admin Panel</div>
-          <button
-            onClick={async () => { await signOut(); }}
-            className="w-9 h-9 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
-            aria-label="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        {/* Topbar */}
+        <header className="sticky top-0 z-30 mx-3 mt-3 rounded-2xl bg-white/70 backdrop-blur-xl border border-[#e5e0d8]/60 shadow-[0_4px_24px_-8px_rgba(26,18,8,0.06)]">
+          <div className="flex items-center justify-between h-14 px-4 lg:px-6">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setSidebarOpen(true)} className="lg:hidden w-9 h-9 rounded-xl bg-[#f8f5f0] hover:bg-[#f0ebe3] flex items-center justify-center transition-colors">
+                <Menu className="w-4 h-4" style={{ color: "#1a1208" }} />
+              </button>
+              <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:flex w-9 h-9 rounded-xl bg-[#f8f5f0] hover:bg-[#f0ebe3] items-center justify-center transition-colors">
+                <Menu className="w-4 h-4" style={{ color: "#1a1208" }} />
+              </button>
+              {currentPage && (
+                <div className="flex items-center gap-2">
+                  <currentPage.icon className="w-4 h-4" style={{ color: "#c9a84c" }} />
+                  <h1 className="text-sm font-medium" style={{ color: "#1a1208" }}>{currentPage.label}</h1>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Link to="/" target="_blank" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-[#f5f0e8] transition-all">
+                <Eye className="w-3.5 h-3.5" />Live Site
+              </Link>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white" style={{ background: "linear-gradient(135deg, #1a1208, #c9a84c)" }}>
+                {user?.email?.[0]?.toUpperCase() ?? "A"}
+              </div>
+            </div>
+          </div>
         </header>
 
-        <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-foreground text-background border-t border-background/10 flex">
-          {bottomNavItems.map((it) => {
-            const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
-            return (
-              <Link
-                key={it.to}
-                to={it.to}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 text-[9.5px] tracking-wider transition-colors ${
-                  active ? "text-background" : "text-background/50"
-                }`}
-              >
-                <it.icon className="w-4 h-4" />
-                {it.label}
-              </Link>
-            );
-          })}
-          <Link
-            to="/"
-            className="flex-1 flex flex-col items-center gap-1 py-3 text-[9.5px] tracking-wider text-background/50 transition-colors"
-          >
-            <Home className="w-4 h-4" />
-            Site
-          </Link>
-        </nav>
-
-        <main className="p-4 md:p-10 pb-24 md:pb-10">
-          {children ?? <Outlet />}
+        {/* Content */}
+        <main className="flex-1 p-4 lg:p-8 pt-6">
+          <Outlet />
+          {children}
         </main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden mx-3 mb-3 rounded-2xl bg-white/80 backdrop-blur-xl border border-[#e5e0d8]/60 shadow-[0_-4px_24px_-8px_rgba(26,18,8,0.08)] px-2 py-2 flex justify-around">
+        {bottomNavItems.map((it) => {
+          const active = pathname === it.to || (it.to !== "/admin" && pathname.startsWith(it.to));
+          return (
+            <Link key={it.to} to={it.to} className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all ${active ? "text-[#1a1208]" : "text-muted-foreground/50"}`}>
+              <it.icon className={`w-5 h-5 ${active ? "text-[#c9a84c]" : ""}`} />
+              <span className="text-[9px] font-medium">{it.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 };
 
-const AdminLayout = ({ children }: { children?: ReactNode }) => (
+const AdminLayout = () => (
   <AdminAuthProvider>
-    <AdminShell>{children}</AdminShell>
+    <AdminShell />
   </AdminAuthProvider>
 );
 

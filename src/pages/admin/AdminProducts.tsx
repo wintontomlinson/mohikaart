@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
 import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, Download } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
+import ConfirmModal from "@/components/admin/ConfirmModal";
+import { ProductCardSkeleton } from "@/components/admin/Skeleton";
+import EmptyState from "@/components/admin/EmptyState";
 
 type Product = {
   id?: string;
@@ -28,8 +31,14 @@ const empty: Product = {
   gallery: [], badge: null, featured: false, in_stock: true, sort_order: 0,
 };
 
-const slugify = (s: string) =>
-  s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
+  Bestseller: { bg: "#1a1208", color: "#c9a84c" },
+  New: { bg: "#c9a84c", color: "#1a1208" },
+  Popular: { bg: "#f5e6f0", color: "#1a1208" },
+  Premium: { bg: "#2d2015", color: "#c9a84c" },
+};
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,125 +46,55 @@ const AdminProducts = () => {
   const [editing, setEditing] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "featured" | "in" | "out">("all");
+  const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const load = async () => {
     const { data } = await supabase.from("products").select("*").order("sort_order");
-    setProducts((data ?? []).map((p: any) => ({
-      ...p,
-      gallery: Array.isArray(p.gallery) ? p.gallery : [],
-    })) as Product[]);
+    setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [] })) as Product[]);
+    setLoading(false);
     setSelected(new Set());
   };
 
   useEffect(() => {
     load();
-    supabase.from("categories").select("slug,name").order("sort_order")
-      .then(({ data }) => setCats((data ?? []) as any));
+    supabase.from("categories").select("slug,name").order("sort_order").then(({ data }) => setCats((data ?? []) as any));
   }, []);
 
   const onSave = async () => {
     if (!editing) return;
     if (!editing.name.trim()) { toast.error("Name is required"); return; }
-    const payload = {
-      ...editing,
-      slug: editing.slug || slugify(editing.name),
-      price: Number(editing.price) || 0,
-      original_price: editing.original_price ? Number(editing.original_price) : null,
-      sort_order: Number(editing.sort_order) || 0,
-    };
+    const payload = { ...editing, slug: editing.slug || slugify(editing.name), price: Number(editing.price) || 0, original_price: editing.original_price ? Number(editing.original_price) : null, sort_order: Number(editing.sort_order) || 0 };
     setSaving(true);
-    const { error } = editing.id
-      ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
+    const { error } = editing.id ? await supabase.from("products").update(payload).eq("id", editing.id) : await supabase.from("products").insert(payload);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(editing.id ? "Product updated" : "Product created");
-    setEditing(null);
-    load();
+    setEditing(null); load();
   };
 
   const onDelete = async (id: string) => {
-    if (!confirm("Delete this product?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted");
-    load();
+    toast.success("Deleted"); setConfirmDelete(null); load();
   };
 
   const onDuplicate = async (p: Product) => {
     const { id, ...rest } = p;
-    // Strip generated columns we don't want to copy verbatim.
-    delete (rest as any).created_at;
-    delete (rest as any).updated_at;
-    const copy = {
-      ...rest,
-      name: `${p.name} (Copy)`,
-      slug: `${p.slug}-copy-${Date.now().toString(36).slice(-4)}`,
-      featured: false,
-    };
-    const { error } = await supabase.from("products").insert(copy);
+    delete (rest as any).created_at; delete (rest as any).updated_at;
+    const { error } = await supabase.from("products").insert({ ...rest, name: `${p.name} (Copy)`, slug: `${p.slug}-copy-${Date.now().toString(36).slice(-4)}`, featured: false });
     if (error) return toast.error(error.message);
-    toast.success("Duplicated");
-    load();
-  };
-
-  const onBulkDelete = async () => {
-    if (selected.size === 0) return;
-    if (!confirm(`Delete ${selected.size} product${selected.size === 1 ? "" : "s"}?`)) return;
-    const { error } = await supabase.from("products").delete().in("id", Array.from(selected));
-    if (error) return toast.error(error.message);
-    toast.success(`Deleted ${selected.size}`);
-    load();
-  };
-
-  const onBulkSetStock = async (in_stock: boolean) => {
-    if (selected.size === 0) return;
-    const { error } = await supabase.from("products").update({ in_stock }).in("id", Array.from(selected));
-    if (error) return toast.error(error.message);
-    toast.success(`${in_stock ? "Restocked" : "Marked out of stock"}: ${selected.size}`);
-    load();
-  };
-
-  const onBulkSetFeatured = async (featured: boolean) => {
-    if (selected.size === 0) return;
-    const { error } = await supabase.from("products").update({ featured }).in("id", Array.from(selected));
-    if (error) return toast.error(error.message);
-    toast.success(`Updated ${selected.size}`);
-    load();
-  };
-
-  const exportCSV = () => {
-    const list = visible;
-    const headers = ["Name", "Slug", "Category", "Price (INR)", "Original price", "Featured", "In stock", "Sort order", "Image URL"];
-    const rows = list.map((p) => [
-      p.name, p.slug, p.category_slug ?? "", p.price, p.original_price ?? "",
-      p.featured ? "yes" : "no", p.in_stock ? "yes" : "no", p.sort_order, p.image_url ?? "",
-    ]);
-    const csv = [headers, ...rows]
-      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `mohika-products-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const toggleSelect = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
-  const toggleAll = () => {
-    if (selected.size === visible.length) setSelected(new Set());
-    else setSelected(new Set(visible.map((p) => p.id!)));
+    toast.success("Duplicated"); load();
   };
 
   const toggleFeatured = async (p: Product) => {
@@ -170,256 +109,251 @@ const AdminProducts = () => {
     setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, in_stock: !p.in_stock } : x)));
   };
 
-  // Search + filter
   const visible = products.filter((p) => {
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !p.slug.toLowerCase().includes(search.toLowerCase())) return false;
+    if (debouncedSearch && !p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) && !p.slug.toLowerCase().includes(debouncedSearch.toLowerCase())) return false;
     if (filter === "featured" && !p.featured) return false;
     if (filter === "out") return !p.in_stock;
     if (filter === "in") return p.in_stock;
     return true;
   });
 
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  };
+  const toggleAll = () => {
+    if (selected.size === visible.length) setSelected(new Set());
+    else setSelected(new Set(visible.map((p) => p.id!)));
+  };
+  const onBulkDelete = async () => {
+    if (selected.size === 0) return;
+    setBulkDeleting(true);
+    const { error } = await supabase.from("products").delete().in("id", Array.from(selected));
+    setBulkDeleting(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Deleted ${selected.size} products`); load();
+  };
+  const onBulkToggleStock = async (in_stock: boolean) => {
+    const { error } = await supabase.from("products").update({ in_stock }).in("id", Array.from(selected));
+    if (error) return toast.error(error.message);
+    toast.success(`Updated ${selected.size} products`); load();
+  };
+
+  const getDiscount = (p: Product) => {
+    if (!p.original_price || p.original_price <= p.price) return 0;
+    return Math.round(((p.original_price - p.price) / p.original_price) * 100);
+  };
+
   return (
-    <div>
+    <div className="pb-24 lg:pb-0">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
-          <h1 className="font-display text-4xl">Products</h1>
+          <h1 className="font-display text-3xl" style={{ color: "#1a1208" }}>Products</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {products.length} total · {products.filter((p) => p.featured).length} featured · {products.filter((p) => !p.in_stock).length} out of stock
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={exportCSV}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-border text-sm hover:bg-muted transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" /> CSV
-          </button>
-          <button onClick={() => setEditing({ ...empty, gallery: [] })} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm hover:opacity-85 transition-opacity">
-            <Plus className="w-4 h-4" /> New Product
-          </button>
-        </div>
+        <button onClick={() => setEditing({ ...empty, gallery: [] })}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg transition-all hover:scale-[1.02]"
+          style={{ background: "#1a1208", color: "#fdf9f0" }}>
+          <Plus className="w-4 h-4" /> New Product
+        </button>
       </div>
 
-      {/* Filter + search bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-5">
-        <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-background border border-border min-w-[220px] flex-1 max-w-md">
-          <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or slug..."
-            className="flex-1 outline-none bg-transparent text-sm placeholder:text-muted-foreground/60"
-          />
-          {search && (
-            <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
+      {/* Search + Filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/80 backdrop-blur border border-[#e5e0d8]/60 flex-1 max-w-md shadow-sm">
+          <Search className="w-4 h-4 text-muted-foreground/60 shrink-0" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products…"
+            className="flex-1 outline-none bg-transparent text-sm placeholder:text-muted-foreground/50" />
+          {search && <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground"><X className="w-3.5 h-3.5" /></button>}
         </div>
         <div className="flex gap-1.5 flex-wrap">
-          {[
-            { id: "all",      label: "All" },
-            { id: "featured", label: "Featured" },
-            { id: "in",       label: "In stock" },
-            { id: "out",      label: "Out of stock" },
-          ].map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id as any)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                filter === f.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-              }`}
-            >
-              {f.label}
-            </button>
+          {[{ id: "all", label: "All" }, { id: "featured", label: "Featured" }, { id: "in", label: "In Stock" }, { id: "out", label: "Out of Stock" }].map((f) => (
+            <button key={f.id} onClick={() => setFilter(f.id as any)}
+              className={`px-3.5 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold border transition-all ${
+                filter === f.id ? "border-[#1a1208] bg-[#1a1208] text-[#fdf9f0]" : "border-[#e5e0d8] text-muted-foreground hover:border-[#c9a84c]/50 bg-white/60"
+              }`}>{f.label}</button>
           ))}
         </div>
       </div>
 
-      <div className="bg-background rounded-2xl border border-border overflow-hidden">
-        {selected.size > 0 && (
-          <div className="bg-amber-50/70 border-b border-amber-200 px-4 py-2.5 flex items-center justify-between flex-wrap gap-2 text-xs">
-            <div className="font-medium">
-              {selected.size} selected
+      {/* Product Grid — SAME STYLE AS FRONTEND */}
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)}
+        </div>
+      ) : visible.length === 0 ? (
+        <EmptyState
+          title={products.length === 0 ? "No products yet" : "No matches"}
+          description={products.length === 0 ? "Add your first product to get started" : "Try adjusting your search or filters"}
+          action={products.length === 0 ? { label: "Add Product", onClick: () => setEditing({ ...empty, gallery: [] }) } : undefined}
+        />
+      ) : (
+        <>
+          {/* Bulk actions */}
+          {selected.size > 0 && (
+            <div className="mb-4 p-3 rounded-xl bg-[#f8f5f0] border border-[#e5e0d8]/60 flex items-center justify-between flex-wrap gap-2">
+              <span className="text-sm font-medium" style={{ color: "#1a1208" }}>{selected.size} selected</span>
+              <div className="flex gap-2">
+                <button onClick={() => onBulkToggleStock(true)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-[#e5e0d8] bg-white hover:border-emerald-300 transition-colors">Enable</button>
+                <button onClick={() => onBulkToggleStock(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-[#e5e0d8] bg-white hover:border-amber-300 transition-colors">Disable</button>
+                <button onClick={onBulkDelete} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors">Delete</button>
+                <button onClick={() => setSelected(new Set())} className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">Clear</button>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              <button onClick={() => onBulkSetFeatured(true)}  className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">Mark featured</button>
-              <button onClick={() => onBulkSetFeatured(false)} className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">Unfeature</button>
-              <button onClick={() => onBulkSetStock(true)}     className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">In stock</button>
-              <button onClick={() => onBulkSetStock(false)}    className="px-3 py-1.5 rounded-full bg-background border border-border hover:border-foreground/30 transition-colors">Out of stock</button>
-              <button onClick={onBulkDelete}                   className="px-3 py-1.5 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">Delete</button>
-              <button onClick={() => setSelected(new Set())}   className="px-3 py-1.5 rounded-full hover:bg-foreground/5 transition-colors">Clear</button>
+          )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {visible.map((p) => {
+          const discount = getDiscount(p);
+          return (
+            <div key={p.id} className="group relative bg-white/70 backdrop-blur rounded-2xl border border-[#e5e0d8]/60 overflow-hidden hover:shadow-lg hover:border-[#c9a84c]/30 transition-all duration-300 hover:-translate-y-1">
+              {/* Select checkbox */}
+              <div className="absolute top-2 left-2 z-10">
+                <input type="checkbox" checked={selected.has(p.id!)} onChange={() => toggleSelect(p.id!)}
+                  className="w-4 h-4 rounded border-[#e5e0d8] bg-white/90 text-[#c9a84c] focus:ring-[#c9a84c]/30 cursor-pointer opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity" />
+              </div>
+              {/* Image */}
+              <div className="relative aspect-square overflow-hidden">
+                <img src={resolveImage(p.image_url)} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
+                {/* Badge */}
+                {p.badge && (
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[8px] uppercase tracking-wider font-bold"
+                    style={{ background: BADGE_STYLES[p.badge]?.bg || "#1a1208", color: BADGE_STYLES[p.badge]?.color || "#c9a84c" }}>
+                    {p.badge}
+                  </div>
+                )}
+                {/* Discount */}
+                {discount > 0 && (
+                  <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-red-500 text-white">-{discount}%</div>
+                )}
+                {/* Stock badge */}
+                {!p.in_stock && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <span className="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold" style={{ color: "#1a1208" }}>Out of Stock</span>
+                  </div>
+                )}
+                {/* Hover actions */}
+                <div className="absolute inset-x-2 bottom-2 flex gap-1.5 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                  <button onClick={() => setEditing({ ...p, gallery: p.gallery ?? [] })} className="flex-1 py-2 rounded-full text-[9px] uppercase tracking-wider font-semibold flex items-center justify-center gap-1" style={{ background: "#1a1208", color: "#fdf9f0" }}>
+                    <Pencil className="w-3 h-3" /> Edit
+                  </button>
+                  <button onClick={() => onDuplicate(p)} className="w-8 h-8 rounded-full bg-white/90 border border-[#e5e0d8] flex items-center justify-center hover:bg-white transition-colors">
+                    <Copy className="w-3 h-3" style={{ color: "#1a1208" }} />
+                  </button>
+                  <button onClick={() => setConfirmDelete(p.id!)} className="w-8 h-8 rounded-full bg-white/90 border border-[#e5e0d8] flex items-center justify-center hover:bg-red-50 hover:border-red-200 transition-colors">
+                    <Trash2 className="w-3 h-3 text-red-500" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Card body */}
+              <div className="p-3">
+                <div className="text-[8px] uppercase tracking-[0.18em] font-semibold mb-0.5" style={{ color: "#c9a84c" }}>
+                  {p.category_slug?.replace(/-/g, " ") || "Uncategorized"}
+                </div>
+                <h3 className="text-[12px] sm:text-[13px] font-medium leading-tight mb-1.5 line-clamp-2" style={{ color: "#1a1208" }}>{p.name}</h3>
+                <div className="flex items-center gap-0.5 mb-1.5">
+                  {[...Array(5)].map((_, j) => <Star key={j} className="w-2.5 h-2.5" style={{ fill: "#c9a84c", color: "#c9a84c" }} />)}
+                </div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-semibold text-[13px]" style={{ color: "#1a1208" }}>{formatINR(p.price)}</span>
+                  {p.original_price && <span className="text-[10px] line-through text-muted-foreground">{formatINR(p.original_price)}</span>}
+                </div>
+                {/* Quick toggles */}
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#e5e0d8]/40">
+                  <button onClick={() => toggleFeatured(p)} className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${p.featured ? "border-[#c9a84c] bg-[#c9a84c]/10 text-[#8a6d2b]" : "border-[#e5e0d8] text-muted-foreground hover:border-[#c9a84c]/50"}`}>
+                    {p.featured ? "★ Featured" : "Feature"}
+                  </button>
+                  <button onClick={() => toggleStock(p)} className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${p.in_stock ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}>
+                    {p.in_stock ? "In Stock" : "Out"}
+                  </button>
+                </div>
+              </div>
             </div>
+          );
+        })}
+        {visible.length === 0 && (
+          <div className="col-span-full py-20 text-center text-muted-foreground text-sm">
+            {products.length === 0 ? 'No products yet. Click "New Product" to add one.' : "No products match your filters."}
           </div>
         )}
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-xs uppercase tracking-widest text-muted-foreground">
-            <tr>
-              <th className="text-left p-4 w-10">
-                <input
-                  type="checkbox"
-                  checked={visible.length > 0 && selected.size === visible.length}
-                  onChange={toggleAll}
-                  className="cursor-pointer"
-                  title="Select all"
-                />
-              </th>
-              <th className="text-left p-4">Product</th>
-              <th className="text-left p-4 hidden md:table-cell">Category</th>
-              <th className="text-left p-4">Price</th>
-              <th className="text-left p-4 hidden md:table-cell">Featured</th>
-              <th className="text-left p-4 hidden md:table-cell">Stock</th>
-              <th className="p-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((p) => (
-              <tr key={p.id} className={`border-t border-border hover:bg-muted/20 transition-colors ${selected.has(p.id!) ? "bg-amber-50/30" : ""}`}>
-                <td className="p-4">
-                  <input
-                    type="checkbox"
-                    checked={selected.has(p.id!)}
-                    onChange={() => toggleSelect(p.id!)}
-                    className="cursor-pointer"
-                  />
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-3">
-                    <img src={resolveImage(p.image_url)} alt={p.name} className="w-12 h-12 rounded-lg object-cover" />
-                    <div>
-                      <div className="font-serif text-base">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">{p.slug}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 hidden md:table-cell text-muted-foreground">{p.category_slug ?? "-"}</td>
-                <td className="p-4 font-medium">{formatINR(Number(p.price))}</td>
-                <td className="p-4 hidden md:table-cell">
-                  <button
-                    onClick={() => toggleFeatured(p)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
-                    title={p.featured ? "Remove from featured" : "Mark as featured"}
-                  >
-                    <Star className={`w-4 h-4 ${p.featured ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
-                  </button>
-                </td>
-                <td className="p-4 hidden md:table-cell">
-                  <button
-                    onClick={() => toggleStock(p)}
-                    className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-widest font-medium transition-colors ${
-                      p.in_stock
-                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                        : "bg-rose-100 text-rose-700 hover:bg-rose-200"
-                    }`}
-                  >
-                    {p.in_stock ? "In stock" : "Out"}
-                  </button>
-                </td>
-                <td className="p-4 text-right">
-                  <button onClick={() => onDuplicate(p)} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted" title="Duplicate"><Copy className="w-4 h-4" /></button>
-                  <button onClick={() => setEditing({ ...p, gallery: p.gallery ?? [] })} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted ml-1" title="Edit"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => onDelete(p.id!)} className="inline-flex items-center justify-center w-8 h-8 rounded-lg hover:bg-destructive/10 text-destructive ml-1" title="Delete"><Trash2 className="w-4 h-4" /></button>
-                </td>
-              </tr>
-            ))}
-            {visible.length === 0 && (
-              <tr><td colSpan={7} className="p-10 text-center text-muted-foreground">
-                {products.length === 0 ? `No products yet. Click "New Product" to add one.` : "No products match your filters."}
-              </td></tr>
-            )}
-          </tbody>
-        </table>
       </div>
+      </>
+      )}
 
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete && onDelete(confirmDelete)}
+        title="Delete Product"
+        description="This product will be permanently removed from your store. This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+      />
+
+      {/* Edit Modal */}
       {editing && (
-        <div className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6 animate-fade-in">
-          <div className="bg-background w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-3xl md:rounded-3xl shadow-luxe">
-            <div className="sticky top-0 bg-background border-b border-border p-6 flex items-center justify-between">
-              <h2 className="font-display text-2xl">{editing.id ? "Edit Product" : "New Product"}</h2>
-              <button onClick={() => setEditing(null)} className="w-9 h-9 rounded-full hover:bg-muted flex items-center justify-center"><X className="w-4 h-4" /></button>
+        <div className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-6">
+          <div className="bg-white w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-3xl md:rounded-3xl shadow-2xl border border-[#e5e0d8]/60">
+            <div className="sticky top-0 bg-white border-b border-[#e5e0d8]/60 p-6 flex items-center justify-between z-10 rounded-t-3xl">
+              <h2 className="font-display text-xl" style={{ color: "#1a1208" }}>{editing.id ? "Edit Product" : "New Product"}</h2>
+              <button onClick={() => setEditing(null)} className="w-9 h-9 rounded-xl hover:bg-[#f5f0e8] flex items-center justify-center transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
             <div className="p-6 space-y-5">
               <ImageUpload value={editing.image_url} onChange={(url) => setEditing({ ...editing, image_url: url })} label="Main image" />
 
-              {/* Gallery images */}
               <div>
-                <label className="block text-xs uppercase tracking-widest mb-3 text-muted-foreground">Gallery images</label>
+                <label className="block text-[11px] uppercase tracking-widest mb-3 text-muted-foreground font-medium">Gallery</label>
                 <div className="flex flex-wrap gap-3">
                   {(editing.gallery ?? []).map((url, i) => (
-                    <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-border group">
+                    <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-[#e5e0d8] group">
                       <img src={resolveImage(url)} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setEditing({ ...editing, gallery: editing.gallery.filter((_, j) => j !== i) })}
-                        className="absolute inset-0 bg-foreground/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remove"
-                      >
+                      <button onClick={() => setEditing({ ...editing, gallery: editing.gallery.filter((_, j) => j !== i) })}
+                        className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <X className="w-4 h-4 text-white" />
                       </button>
                     </div>
                   ))}
                   <GalleryUpload onUploaded={(url) => setEditing({ ...editing, gallery: [...(editing.gallery ?? []), url] })} />
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">Additional images shown in the product page gallery. Click × to remove.</p>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="Name">
-                  <input value={editing.name}
-                    onChange={(e) => setEditing({ ...editing, name: e.target.value, slug: editing.slug || slugify(e.target.value) })}
-                    className={input} />
-                </Field>
-                <Field label="Slug (URL)">
-                  <input value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: slugify(e.target.value) })} className={input} />
-                </Field>
+                <Field label="Name"><input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value, slug: editing.slug || slugify(e.target.value) })} className={inp} placeholder="Product name" /></Field>
+                <Field label="Slug"><input value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: slugify(e.target.value) })} className={inp} /></Field>
               </div>
-
-              <Field label="Short description">
-                <input value={editing.short_description ?? ""} onChange={(e) => setEditing({ ...editing, short_description: e.target.value })} className={input} />
-              </Field>
-              <Field label="Description">
-                <textarea rows={4} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} className={input + " resize-none"} />
-              </Field>
-
+              <Field label="Short description"><input value={editing.short_description ?? ""} onChange={(e) => setEditing({ ...editing, short_description: e.target.value })} className={inp} /></Field>
+              <Field label="Description"><textarea rows={4} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} className={inp + " resize-none"} /></Field>
               <div className="grid sm:grid-cols-3 gap-4">
-                <Field label="Price (₹)">
-                  <input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} className={input} />
-                </Field>
-                <Field label="Original price">
-                  <input type="number" value={editing.original_price ?? ""} onChange={(e) => setEditing({ ...editing, original_price: e.target.value ? Number(e.target.value) : null })} className={input} />
-                </Field>
-                <Field label="Sort order">
-                  <input type="number" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} className={input} />
-                </Field>
+                <Field label="Price (₹)"><input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} className={inp} /></Field>
+                <Field label="Original Price"><input type="number" value={editing.original_price ?? ""} onChange={(e) => setEditing({ ...editing, original_price: e.target.value ? Number(e.target.value) : null })} className={inp} /></Field>
+                <Field label="Sort Order"><input type="number" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} className={inp} /></Field>
               </div>
-
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="Category">
-                  <select value={editing.category_slug ?? ""} onChange={(e) => setEditing({ ...editing, category_slug: e.target.value || null })} className={input}>
-                    <option value="">None</option>
-                    {cats.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
-                  </select>
-                </Field>
-                <Field label="Badge (e.g. Bestseller)">
-                  <input value={editing.badge ?? ""} onChange={(e) => setEditing({ ...editing, badge: e.target.value || null })} className={input} />
-                </Field>
+                <Field label="Category"><select value={editing.category_slug ?? ""} onChange={(e) => setEditing({ ...editing, category_slug: e.target.value || null })} className={inp}>
+                  <option value="">None</option>{cats.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                </select></Field>
+                <Field label="Badge"><select value={editing.badge ?? ""} onChange={(e) => setEditing({ ...editing, badge: e.target.value || null })} className={inp}>
+                  <option value="">None</option><option value="Bestseller">Bestseller</option><option value="New">New</option><option value="Popular">Popular</option><option value="Premium">Premium</option>
+                </select></Field>
               </div>
-
-              <div className="flex flex-wrap gap-6">
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={editing.featured} onChange={(e) => setEditing({ ...editing, featured: e.target.checked })} /> Featured on homepage
+              <div className="flex flex-wrap gap-5">
+                <label className="inline-flex items-center gap-2.5 text-sm cursor-pointer" style={{ color: "#3d2b1f" }}>
+                  <input type="checkbox" checked={editing.featured} onChange={(e) => setEditing({ ...editing, featured: e.target.checked })} className="w-4 h-4 rounded border-[#e5e0d8] text-[#c9a84c] focus:ring-[#c9a84c]/30" /> Featured
                 </label>
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={editing.in_stock} onChange={(e) => setEditing({ ...editing, in_stock: e.target.checked })} /> In stock
+                <label className="inline-flex items-center gap-2.5 text-sm cursor-pointer" style={{ color: "#3d2b1f" }}>
+                  <input type="checkbox" checked={editing.in_stock} onChange={(e) => setEditing({ ...editing, in_stock: e.target.checked })} className="w-4 h-4 rounded border-[#e5e0d8] text-[#c9a84c] focus:ring-[#c9a84c]/30" /> In Stock
                 </label>
               </div>
             </div>
-            <div className="sticky bottom-0 bg-background border-t border-border p-6 flex justify-end gap-3">
-              <button onClick={() => setEditing(null)} className="px-5 py-2.5 rounded-full border border-border">Cancel</button>
-              <button onClick={onSave} disabled={saving} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-foreground text-background btn-glow disabled:opacity-60">
+            <div className="sticky bottom-0 bg-white border-t border-[#e5e0d8]/60 p-6 flex justify-end gap-3 rounded-b-3xl">
+              <button onClick={() => setEditing(null)} className="px-5 py-2.5 rounded-xl border border-[#e5e0d8] text-sm hover:bg-[#f5f0e8] transition-colors">Cancel</button>
+              <button onClick={onSave} disabled={saving} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 shadow-lg transition-all"
+                style={{ background: "#1a1208", color: "#fdf9f0" }}>
                 <Save className="w-4 h-4" /> {saving ? "Saving…" : "Save"}
               </button>
             </div>
@@ -430,19 +364,15 @@ const AdminProducts = () => {
   );
 };
 
-const input = "w-full px-4 py-2.5 rounded-xl bg-background border border-border focus:border-gold outline-none text-sm";
+const inp = "w-full px-4 py-2.5 rounded-xl bg-white border border-[#e5e0d8] focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/20 outline-none text-sm transition-all";
 const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div>
-    <label className="block text-xs uppercase tracking-widest mb-2 text-muted-foreground">{label}</label>
-    {children}
-  </div>
+  <div><label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground font-medium">{label}</label>{children}</div>
 );
 
 const GalleryUpload = ({ onUploaded }: { onUploaded: (url: string) => void }) => {
   const [busy, setBusy] = useState(false);
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]; if (!file) return;
     setBusy(true);
     try {
       const ext = file.name.split(".").pop() || "jpg";
@@ -450,19 +380,14 @@ const GalleryUpload = ({ onUploaded }: { onUploaded: (url: string) => void }) =>
       const { error } = await supabase.storage.from("product-images").upload(name, file, { cacheControl: "3600", upsert: false });
       if (error) throw error;
       const { data } = supabase.storage.from("product-images").getPublicUrl(name);
-      onUploaded(data.publicUrl);
-      toast.success("Image added to gallery");
-    } catch (err: any) {
-      toast.error(err.message || "Upload failed");
-    } finally {
-      setBusy(false);
-      e.target.value = "";
-    }
+      onUploaded(data.publicUrl); toast.success("Image added");
+    } catch (err: any) { toast.error(err.message || "Upload failed"); }
+    finally { setBusy(false); e.target.value = ""; }
   };
   return (
-    <label className={`w-20 h-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-gold/50 hover:bg-gold/5 transition-all ${busy ? "opacity-60 pointer-events-none" : ""}`}>
-      <ImagePlus className="w-5 h-5 text-muted-foreground" />
-      <span className="text-[9px] text-muted-foreground">{busy ? "…" : "Add"}</span>
+    <label className={`w-20 h-20 rounded-xl border-2 border-dashed border-[#e5e0d8] flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-[#c9a84c]/50 hover:bg-[#c9a84c]/5 transition-all ${busy ? "opacity-60 pointer-events-none" : ""}`}>
+      <ImagePlus className="w-5 h-5 text-muted-foreground/50" />
+      <span className="text-[9px] text-muted-foreground/50">{busy ? "…" : "Add"}</span>
       <input type="file" accept="image/*" onChange={onFile} className="hidden" disabled={busy} />
     </label>
   );
