@@ -1,87 +1,80 @@
-import { motion } from "framer-motion";
-import { ShieldCheck, Truck, Package2, Heart, Star } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { useTestimonials } from "@/lib/cms";
+import { motion, useInView } from "framer-motion";
+import { Shield, Truck, Package, Award, Star, Heart } from "lucide-react";
+import { useRef } from "react";
 
-type Pill = { icon: LucideIcon; label: string; sub: string };
+const EASE = [0.22, 1, 0.36, 1] as const;
 
-const RATING = 4.9;
+const trustItems = [
+  { icon: Package, label: "Premium Packaging", desc: "Gift-ready boxes" },
+  { icon: Truck, label: "Pan-India Delivery", desc: "Free above ₹999" },
+  { icon: Shield, label: "Quality Assured", desc: "Handcrafted perfection" },
+  { icon: Award, label: "2000+ Orders", desc: "Trusted by many" },
+  { icon: Star, label: "4.9★ Rating", desc: "Top-rated seller" },
+  { icon: Heart, label: "Made with Love", desc: "Since 2021" },
+];
 
 const TrustBar = () => {
-  const reviews = useTestimonials();
-  const reviewCount = Math.max(reviews.length, 0);
-  // Below 50 we render the rating-only fallback so the pill never reads cheap;
-  // once the brand has 50+ verified reviews on file the live count starts
-  // displaying automatically. Do not lower this threshold without a real review
-  // aggregate (Google / dedicated reviews table) backing the volume.
-  const reviewLabel =
-    reviewCount >= 50
-      ? `${RATING} / 5 from ${reviewCount} Reviews`
-      : `${RATING} / 5 Verified Reviews`;
-
-  const pills: Pill[] = [
-    { icon: ShieldCheck, label: "Secure Payments", sub: "UPI · Cards · Net banking" },
-    { icon: Truck,       label: "Free Pan-India Shipping", sub: "Insured · Tracked" },
-    { icon: Package2,    label: "Premium Packaging", sub: "Gift-ready, every order" },
-    { icon: Heart,       label: "Handmade with Love", sub: "Poured by hand in India" },
-    { icon: Star,        label: reviewLabel, sub: "Verified buyers" },
-  ];
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-40px" });
 
   return (
-    <section
-      aria-label="Trust and assurance highlights"
-      className="relative py-8 md:py-10 bg-blush/15"
-    >
-      <div className="gold-divider" aria-hidden="true" />
-      <div className="container">
-        <motion.ul
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="
-            flex md:justify-center items-stretch gap-3 md:gap-4
-            overflow-x-auto md:overflow-visible
-            snap-x snap-mandatory md:snap-none
-            -mx-4 px-4 md:mx-0 md:px-0
-            py-4
-            no-scrollbar
-          "
-        >
-          {pills.map((p, i) => (
-            <motion.li
-              key={p.label}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="
-                glass rounded-full
-                snap-start shrink-0 md:shrink
-                flex items-center gap-3
-                px-4 py-3 md:px-5 md:py-3
-                shadow-soft
-              "
+    <section className="py-6 md:py-8 relative overflow-hidden">
+      {/* Subtle top/bottom borders */}
+      <div
+        className="absolute top-0 inset-x-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent)" }}
+      />
+      <div
+        className="absolute bottom-0 inset-x-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent)" }}
+      />
+
+      <div ref={ref} className="max-w-[1280px] mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-center gap-4 md:gap-8 lg:gap-10 flex-wrap">
+          {trustItems.map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: EASE }}
+              className="flex items-center gap-2.5 group cursor-default"
             >
-              <span
-                className="w-9 h-9 rounded-full flex items-center justify-center bg-gold/10 text-gold shrink-0"
-                aria-hidden="true"
+              <motion.div
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-400"
+                style={{
+                  background: "rgba(201,168,76,0.08)",
+                  border: "1px solid rgba(201,168,76,0.12)",
+                }}
+                whileHover={{
+                  scale: 1.12,
+                  background: "rgba(201,168,76,0.15)",
+                  borderColor: "rgba(201,168,76,0.3)",
+                }}
               >
-                <p.icon className="w-4 h-4" />
-              </span>
-              <span className="flex flex-col leading-tight">
-                <span className="eyebrow text-[0.62rem]" style={{ marginBottom: 0 }}>
-                  {p.label}
-                </span>
-                <span className="text-[11px] text-muted-foreground tracking-wide">
-                  {p.sub}
-                </span>
-              </span>
-            </motion.li>
+                <item.icon
+                  className="w-4 h-4 transition-colors duration-300"
+                  style={{ color: "#c9a84c" }}
+                  strokeWidth={1.6}
+                />
+              </motion.div>
+              <div className="hidden sm:block">
+                <div
+                  className="text-[11px] font-semibold leading-tight"
+                  style={{ color: "#3D2B1F" }}
+                >
+                  {item.label}
+                </div>
+                <div
+                  className="text-[10px] leading-tight mt-0.5"
+                  style={{ color: "rgba(61,43,31,0.5)" }}
+                >
+                  {item.desc}
+                </div>
+              </div>
+            </motion.div>
           ))}
-        </motion.ul>
+        </div>
       </div>
-      <div className="gold-divider" aria-hidden="true" />
     </section>
   );
 };
