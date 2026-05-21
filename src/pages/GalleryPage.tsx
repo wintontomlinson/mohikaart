@@ -141,9 +141,9 @@ const GalleryPage = () => {
 
       {/* ━━ STICKY FILTER BAR ━━ */}
       <div
-        className="sticky top-[60px] md:top-[68px] z-40"
+        className="sticky top-0 z-40"
         style={{
-          background: "rgba(253,249,240,0.96)",
+          background: "rgba(253,249,240,0.97)",
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
           boxShadow: "0 1px 0 rgba(26,18,8,0.06), 0 4px 16px -4px rgba(26,18,8,0.05)",
