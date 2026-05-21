@@ -611,44 +611,38 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* ── MARQUEE STRIP ── premium ecommerce brand pillars */}
+      {/* ── MARQUEE STRIP ── luxury fashion-brand ticker */}
       <div className="relative mt-auto">
         <div className="gold-divider" />
         <div
-          className="relative overflow-hidden py-4"
+          className="marquee-container relative overflow-hidden py-5"
           style={{ background: "transparent" }}
-          onMouseEnter={(e) => {
-            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
-            if (track) track.style.animationPlayState = "paused";
-          }}
-          onMouseLeave={(e) => {
-            const track = e.currentTarget.querySelector(".marquee-strip") as HTMLElement | null;
-            if (track) track.style.animationPlayState = "running";
-          }}
         >
-          {/* Soft fade gradients on left/right edges */}
+          {/* Fade edges — left */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-y-0 left-0 z-10"
             style={{
-              width: "120px",
+              width: "clamp(60px, 10vw, 160px)",
               background:
-                "linear-gradient(to right, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.6) 60%, transparent 100%)",
+                "linear-gradient(to right, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.8) 40%, transparent 100%)",
             }}
           />
+          {/* Fade edges — right */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-y-0 right-0 z-10"
             style={{
-              width: "120px",
+              width: "clamp(60px, 10vw, 160px)",
               background:
-                "linear-gradient(to left, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.6) 60%, transparent 100%)",
+                "linear-gradient(to left, hsl(36 42% 99%) 0%, hsl(36 42% 99% / 0.8) 40%, transparent 100%)",
             }}
           />
 
-          <div className="marquee-strip flex whitespace-nowrap">
-            {[...Array(2)].map((_, i) => (
-              <span key={i} className="flex shrink-0 items-center">
+          {/* Track: duplicated content for seamless infinite loop */}
+          <div className="marquee-track-luxury flex whitespace-nowrap will-change-transform">
+            {[...Array(3)].map((_, setIdx) => (
+              <div key={setIdx} className="flex shrink-0 items-center" aria-hidden={setIdx > 0}>
                 {[
                   "Handmade with Love",
                   "Premium Resin Art",
@@ -658,42 +652,38 @@ const Hero = () => {
                   "Memory Keepsakes",
                   "Wedding Gifts",
                   "Corporate Gifts",
-                  "Since 2021",
-                  "2000+ Happy Customers",
-                ].map((t) => (
-                  <span
-                    key={t}
-                    className="px-7 font-display marquee-pill"
-                    style={{
-                      fontWeight: 400,
-                      fontSize: "clamp(0.85rem, 1.3vw, 1.05rem)",
-                      letterSpacing: "0.04em",
-                      color: "hsl(25 10% 32%)",
-                      transition: "color 0.4s cubic-bezier(0.22,1,0.36,1)",
-                      cursor: "default",
-                    }}
-                  >
-                    {t}
-                    <motion.span
-                      className="mx-5 inline-block"
+                ].map((text) => (
+                  <span key={`${setIdx}-${text}`} className="flex items-center">
+                    <span
+                      className="font-serif italic marquee-item"
                       style={{
-                        color: "hsl(34 58% 52%)",
-                        fontSize: "0.85em",
-                      }}
-                      animate={{
-                        rotate: [0, 360],
-                        scale: [1, 1.15, 1],
-                      }}
-                      transition={{
-                        rotate: { duration: 6, repeat: Infinity, ease: "linear" },
-                        scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+                        fontSize: "clamp(0.9rem, 1.4vw, 1.1rem)",
+                        fontWeight: 400,
+                        letterSpacing: "0.02em",
+                        color: "hsl(25 10% 30%)",
+                        paddingLeft: "clamp(1.5rem, 3vw, 2.5rem)",
+                        paddingRight: "clamp(1.5rem, 3vw, 2.5rem)",
+                        cursor: "default",
+                        transition: "color 0.5s ease",
                       }}
                     >
-                      ✦
-                    </motion.span>
+                      {text}
+                    </span>
+                    {/* Elegant separator */}
+                    <span
+                      className="marquee-separator"
+                      style={{
+                        color: "hsl(34 58% 62%)",
+                        fontSize: "0.5rem",
+                        opacity: 0.6,
+                      }}
+                      aria-hidden
+                    >
+                      ◆
+                    </span>
                   </span>
                 ))}
-              </span>
+              </div>
             ))}
           </div>
         </div>
