@@ -52,7 +52,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(FAKE_USER);
       setIsAdmin(true);
       setLoading(false);
-      return;
+      // Subscribe but ignore all auth changes in dev mode
+      const { data: sub } = supabase.auth.onAuthStateChange(() => {});
+      return () => { sub.subscription.unsubscribe(); };
     }
 
     // Initial session
@@ -70,6 +72,7 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     // Live updates
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (cancelled) return;
+      if (sessionStorage.getItem("dev_admin_bypass") === "true") return;
       const u = session?.user ?? null;
       setUser(u);
       setIsAdmin(u ? await verifyAdmin(u.id) : false);
