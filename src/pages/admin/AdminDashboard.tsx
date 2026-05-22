@@ -22,11 +22,14 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [ordersRes, productsRes, inquiriesRes] = await Promise.all([
-        supabase.from("orders").select("id, order_number, customer_name, total, status, created_at").order("created_at", { ascending: false }),
-        supabase.from("products").select("id", { count: "exact", head: true }),
-        supabase.from("inquiries").select("id", { count: "exact", head: true }),
-      ]);
+      let ordersRes: any = { data: [] }, productsRes: any = { count: 0 }, inquiriesRes: any = { count: 0 };
+      try {
+        [ordersRes, productsRes, inquiriesRes] = await Promise.all([
+          supabase.from("orders").select("id, order_number, customer_name, total, status, created_at").order("created_at", { ascending: false }),
+          supabase.from("products").select("id", { count: "exact", head: true }),
+          supabase.from("inquiries").select("id", { count: "exact", head: true }),
+        ]);
+      } catch {}
 
       const orders = ordersRes.data ?? [];
       setOrderCount(orders.length);
@@ -54,7 +57,7 @@ const AdminDashboard = () => {
       setChartData(days);
       setLoading(false);
     };
-    load();
+    load().catch(() => setLoading(false));
   }, []);
 
   const kpis: KPI[] = [

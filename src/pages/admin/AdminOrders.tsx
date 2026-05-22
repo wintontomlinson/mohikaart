@@ -45,8 +45,10 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const load = async () => {
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    setOrders((data ?? []) as Order[]);
+    try {
+      const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      setOrders((data ?? []) as Order[]);
+    } catch {}
     setLoading(false);
   };
 

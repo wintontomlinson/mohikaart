@@ -34,8 +34,10 @@ const AdminInquiries = () => {
   const [selected, setSelected] = useState<Inquiry | null>(null);
 
   const load = async () => {
-    const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
-    setInquiries((data ?? []) as Inquiry[]);
+    try {
+      const { data } = await supabase.from("inquiries").select("*").order("created_at", { ascending: false });
+      setInquiries((data ?? []) as Inquiry[]);
+    } catch {}
     setLoading(false);
   };
 

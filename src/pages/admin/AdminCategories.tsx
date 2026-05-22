@@ -29,8 +29,10 @@ const AdminCategories = () => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const load = async () => {
-    const { data } = await supabase.from("categories").select("*").order("sort_order");
-    setCategories((data ?? []) as Category[]);
+    try {
+      const { data } = await supabase.from("categories").select("*").order("sort_order");
+      setCategories((data ?? []) as Category[]);
+    } catch {}
     setLoading(false);
   };
 
