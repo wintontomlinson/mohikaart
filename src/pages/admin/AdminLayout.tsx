@@ -140,8 +140,8 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
         </div>
       </div>
     );
-    if (!user) return <AdminLogin />;
-    if (!isAdmin) return <NotAuthorized />;
+    // Show login for both: no user OR user without admin access
+    if (!user || !isAdmin) return <AdminLogin />;
   }
 
   const currentPage = navItems.find((i) => pathname === i.to || (i.to !== "/admin" && pathname.startsWith(i.to)));
