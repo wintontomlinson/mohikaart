@@ -46,9 +46,9 @@ const AdminLogin = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground">Email</label>
-            <input type="email" autoComplete="email" autoFocus required value={email}
+            <input type="text" autoComplete="email" autoFocus required value={email}
               onChange={(e) => { setEmail(e.target.value); setErr(""); }}
-              placeholder="you@mohikaart.com"
+              placeholder="admin"
               className="w-full px-4 py-3 rounded-xl bg-white border border-[#e5e0d8] focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/20 outline-none text-sm transition-all" />
           </div>
           <div>
@@ -129,17 +129,20 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [pathname]);
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(36 42% 98%)" }}>
-      <div className="flex items-center gap-3 text-muted-foreground text-sm">
-        <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#c9a84c" }} />Loading…
-      </div>
-    </div>
-  );
-  if (!user) return <AdminLogin />;
-  // Dev bypass check — if sessionStorage says dev mode, always allow
+  // Dev bypass — skip ALL auth checks
   const devBypass = (() => { try { return sessionStorage.getItem("dev_admin_bypass") === "true"; } catch { return false; } })();
-  if (!isAdmin && !devBypass) return <NotAuthorized />;
+
+  if (!devBypass) {
+    if (loading) return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(36 42% 98%)" }}>
+        <div className="flex items-center gap-3 text-muted-foreground text-sm">
+          <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#c9a84c" }} />Loading…
+        </div>
+      </div>
+    );
+    if (!user) return <AdminLogin />;
+    if (!isAdmin) return <NotAuthorized />;
+  }
 
   const currentPage = navItems.find((i) => pathname === i.to || (i.to !== "/admin" && pathname.startsWith(i.to)));
 
