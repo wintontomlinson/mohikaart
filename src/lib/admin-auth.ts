@@ -71,10 +71,8 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     // Dev bypass: admin/admin → instant access, no network
     if (email.trim().toLowerCase() === DEV_EMAIL && password === DEV_PASS) {
       try { sessionStorage.setItem("dev_admin_bypass", "true"); } catch {}
-      devMode.current = true;
-      setUser(FAKE_USER);
-      setIsAdmin(true);
-      setLoading(false);
+      // Force reload so AdminShell picks up sessionStorage on mount
+      window.location.reload();
       return {};
     }
 
