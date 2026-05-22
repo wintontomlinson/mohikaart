@@ -6,7 +6,7 @@ import {
   X, Eye, EyeOff, ShieldAlert,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
-import logo from "@/assets/mohika-mark.png";
+import { Monogram } from "@/components/site/Logo";
 
 /* ─── Login ─── */
 const AdminLogin = () => {
@@ -34,7 +34,7 @@ const AdminLogin = () => {
       <form onSubmit={onSubmit} className="bg-white/80 backdrop-blur-2xl rounded-3xl p-10 w-full max-w-md shadow-2xl border border-white/60 relative z-10">
         <div className="flex items-center gap-3 mb-8">
           <div className="w-12 h-12 rounded-2xl bg-[#1a1208] flex items-center justify-center p-2">
-            <img src={logo} alt="Mohika Art" className="w-full h-full object-contain" />
+            <Monogram size={28} tone="background" />
           </div>
           <div>
             <div className="font-display text-2xl leading-none" style={{ color: "#1a1208" }}>Mohika <span className="italic" style={{ color: "#c9a84c" }}>Art</span></div>
@@ -149,8 +149,8 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
         <div className="m-3 flex-1 flex flex-col rounded-2xl bg-white/70 backdrop-blur-xl border border-[#e5e0d8]/60 shadow-[0_8px_40px_-12px_rgba(26,18,8,0.08)] overflow-hidden">
           {/* Logo */}
           <div className={`flex items-center gap-3 p-5 ${collapsed ? "justify-center px-3" : ""}`}>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center p-1.5 shrink-0" style={{ background: "linear-gradient(135deg, #1a1208, #2d2015)" }}>
-              <img src={logo} alt="Mohika Art" className="w-full h-full object-contain" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #1a1208, #2d2015)" }}>
+              <Monogram size={24} tone="background" />
             </div>
             {!collapsed && (
               <div>

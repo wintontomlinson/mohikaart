@@ -1,4 +1,9 @@
--- Seed categories (if not existing)
+-- ╔══════════════════════════════════════════════════════════════════╗
+-- ║  Mohika Art — Seed Data (Categories + Products)               ║
+-- ║  Run this in Supabase SQL Editor after creating tables         ║
+-- ╚══════════════════════════════════════════════════════════════════╝
+
+-- ── Categories ──────────────────────────────────────────────────────
 INSERT INTO categories (name, slug, description, image_url, sort_order) VALUES
   ('Name Keychains', 'name-keychains', 'Stunning resin keychains with your name embedded in gold foil', '/src-asset/cat-keychain.jpg', 1),
   ('Photo Frames', 'photo-frames', 'Handcrafted resin frames with dried flowers and gold accents', '/src-asset/cat-frame.jpg', 2),
@@ -9,7 +14,7 @@ INSERT INTO categories (name, slug, description, image_url, sort_order) VALUES
   ('Gift Hampers', 'gift-hampers', 'Curated collections of handcrafted resin pieces beautifully boxed', '/src-asset/cat-hamper.jpg', 7)
 ON CONFLICT (slug) DO NOTHING;
 
--- Seed products
+-- ── Products ────────────────────────────────────────────────────────
 INSERT INTO products (name, slug, short_description, description, price, original_price, category_slug, image_url, badge, featured, in_stock, sort_order) VALUES
   ('Personalized Name Keychain', 'personalized-name-keychain', 'Stunning resin keychain with gold foil name', 'A stunning resin keychain with your name or loved one''s name embedded in gold foil. Perfect everyday carry or thoughtful gift.', 499, 699, 'name-keychains', '/src-asset/cat-keychain.jpg', 'Bestseller', true, true, 1),
   ('Couple Photo Frame', 'couple-photo-frame', 'Resin frame with dried flowers and gold accents', 'Preserve your favorite couple moment in a handcrafted resin frame with dried flowers and gold accents.', 1299, 1799, 'photo-frames', '/src-asset/cat-frame.jpg', 'Popular', true, true, 2),
