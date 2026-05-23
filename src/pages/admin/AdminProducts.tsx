@@ -195,13 +195,13 @@ const AdminProducts = () => {
         <>
           {/* Bulk actions */}
           {selected.size > 0 && (
-            <div className="mb-4 p-3 rounded-xl bg-[#f8f5f0] border border-[#e5e0d8]/60 flex items-center justify-between flex-wrap gap-2">
-              <span className="text-sm font-medium" style={{ color: "#1a1208" }}>{selected.size} selected</span>
+            <div className="mb-4 p-3 rounded-xl bg-[#1a1208] border border-[#c9a84c]/30 flex items-center justify-between flex-wrap gap-2 sticky top-20 z-20 shadow-xl">
+              <span className="text-sm font-medium text-white">{selected.size} product{selected.size > 1 ? "s" : ""} selected</span>
               <div className="flex gap-2">
-                <button onClick={() => onBulkToggleStock(true)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-[#e5e0d8] bg-white hover:border-emerald-300 transition-colors">Enable</button>
-                <button onClick={() => onBulkToggleStock(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-[#e5e0d8] bg-white hover:border-amber-300 transition-colors">Disable</button>
-                <button onClick={onBulkDelete} className="px-3 py-1.5 rounded-lg text-[11px] font-medium border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors">Delete</button>
-                <button onClick={() => setSelected(new Set())} className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors">Clear</button>
+                <button onClick={() => onBulkToggleStock(true)} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-emerald-400/50 bg-emerald-500 text-white hover:bg-emerald-600 transition-colors">Mark In Stock</button>
+                <button onClick={() => onBulkToggleStock(false)} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-amber-400/50 bg-amber-500 text-white hover:bg-amber-600 transition-colors">Mark Out of Stock</button>
+                <button onClick={onBulkDelete} className="px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-red-400/50 bg-red-500 text-white hover:bg-red-600 transition-colors">Delete</button>
+                <button onClick={() => setSelected(new Set())} className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-white/70 hover:text-white transition-colors">Clear</button>
               </div>
             </div>
           )}
@@ -211,9 +211,9 @@ const AdminProducts = () => {
           return (
             <div key={p.id} className="group relative bg-white/70 backdrop-blur rounded-2xl border border-[#e5e0d8]/60 overflow-hidden hover:shadow-lg hover:border-[#c9a84c]/30 transition-all duration-300 hover:-translate-y-1">
               {/* Select checkbox */}
-              <div className="absolute top-2 left-2 z-10">
+              <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                 <input type="checkbox" checked={selected.has(p.id!)} onChange={() => toggleSelect(p.id!)}
-                  className="w-4 h-4 rounded border-[#e5e0d8] bg-white/90 text-[#c9a84c] focus:ring-[#c9a84c]/30 cursor-pointer opacity-0 group-hover:opacity-100 checked:opacity-100 transition-opacity" />
+                  className={`w-5 h-5 rounded border-2 border-[#e5e0d8] bg-white/95 text-[#c9a84c] focus:ring-[#c9a84c]/30 cursor-pointer transition-all shadow-sm ${selected.size > 0 ? "opacity-100" : "opacity-0 group-hover:opacity-100"} checked:opacity-100`} />
               </div>
               {/* Image */}
               <div className="relative aspect-square overflow-hidden">
