@@ -7,6 +7,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
 import { Monogram, Wordmark } from "@/components/site/Logo";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ── nav links ── */
 const links = [
@@ -18,17 +19,6 @@ const links = [
   { to: "/contact", label: "Contact" },
 ];
 
-const shopDropdownLinks = [
-  { to: "/shop", label: "All Products" },
-  { to: "/shop?category=keychain", label: "Name Keychains" },
-  { to: "/shop?category=frame", label: "Photo Frames" },
-  { to: "/shop?category=wedding", label: "Wedding Keepsakes" },
-  { to: "/shop?category=tray", label: "Resin Trays" },
-  { to: "/shop?category=coaster", label: "Coaster Sets" },
-  { to: "/shop?category=bookmark", label: "Bookmarks" },
-  { to: "/shop?category=hamper", label: "Gift Hampers" },
-];
-
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [scrollDir, setScrollDir] = useState<"up" | "down">("up");
@@ -37,6 +27,9 @@ const Navbar = () => {
   const [mobileShopOpen, setMobileShopOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [shopDropdownLinks, setShopDropdownLinks] = useState<{ to: string; label: string }[]>([
+    { to: "/shop", label: "All Products" },
+  ]);
   const shopRef = useRef<HTMLLIElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
@@ -65,6 +58,18 @@ const Navbar = () => {
     setMobileShopOpen(false);
     setSearchOpen(false);
   }, [pathname]);
+
+  /* fetch live categories from Supabase */
+  useEffect(() => {
+    supabase.from("categories").select("slug, name").order("sort_order").then(({ data }) => {
+      if (data && data.length > 0) {
+        setShopDropdownLinks([
+          { to: "/shop", label: "All Products" },
+          ...data.map((c: any) => ({ to: `/shop?category=${c.slug}`, label: c.name })),
+        ]);
+      }
+    });
+  }, []);
 
   /* close dropdowns on outside click */
   useEffect(() => {
@@ -186,7 +191,7 @@ const Navbar = () => {
                         >
                           <div className="px-2 pt-3 pb-2">
                             <div className="px-3 mb-2">
-                              <span className="text-[9px] uppercase tracking-[0.2em] font-semibold" style={{ color: "#c9a84c" }}>Categories</span>
+                              <span className="text-[9px] uppercase tracking-[0.2em] font-semibold" style={{ color: "#c9a84c" }}>Shop by Category</span>
                             </div>
                             {shopDropdownLinks.map((sl, i) => (
                               <motion.div
@@ -207,6 +212,11 @@ const Navbar = () => {
                                 </Link>
                               </motion.div>
                             ))}
+                            <div className="mt-2 pt-2 mx-3 border-t border-[#c9a84c]/10">
+                              <Link to="/shop" className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold py-1.5 hover:gap-2.5 transition-all duration-200" style={{ color: "#c9a84c" }}>
+                                Browse All <ArrowRight className="w-3 h-3" />
+                              </Link>
+                            </div>
                           </div>
                         </motion.div>
                       )}
