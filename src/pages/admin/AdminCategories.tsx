@@ -164,7 +164,7 @@ const AdminCategories = () => {
 
             {/* Form */}
             <div className="p-6 space-y-5">
-              <ImageUpload value={editing.image_url} onChange={(url) => setEditing({ ...editing, image_url: url })} label="Category Image" bucket="site-images" />
+              <ImageUpload value={editing.image_url} onChange={(url) => setEditing({ ...editing, image_url: url })} label="Category Image" bucket="site-images" hint="Recommended: 1200×800 px (3:2 ratio) · JPG/WebP · Lifestyle shots" />
 
               <div>
                 <label className="block text-[11px] uppercase tracking-widest mb-2 text-muted-foreground font-medium">Name</label>

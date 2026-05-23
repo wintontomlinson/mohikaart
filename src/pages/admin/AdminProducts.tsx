@@ -306,7 +306,7 @@ const AdminProducts = () => {
               </button>
             </div>
             <div className="p-6 space-y-5">
-              <ImageUpload value={editing.image_url} onChange={(url) => setEditing({ ...editing, image_url: url })} label="Main image" />
+              <ImageUpload value={editing.image_url} onChange={(url) => setEditing({ ...editing, image_url: url })} label="Main image" hint="Recommended: 1000×1000 px (square) · White/neutral background · JPG/WebP" />
 
               <div>
                 <label className="block text-[11px] uppercase tracking-widest mb-3 text-muted-foreground font-medium">Gallery</label>
