@@ -259,7 +259,7 @@ const AdminSettings = () => {
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p>• Use <strong>WebP</strong> for 30-50% smaller files</p>
                   <p>• <strong>Square</strong> crops work best for products</p>
-                  <p>• Natural lighting > flash</p>
+                  <p>• Natural lighting &gt; flash</p>
                   <p>• Compress before upload (tinypng.com)</p>
                   <p>• Supported: JPG, PNG, WebP, GIF, AVIF</p>
                 </div>
