@@ -21,11 +21,11 @@ const LoadingScreen = () => {
       return;
     }
 
-    const fadeTimer = setTimeout(() => setFadeOut(true), 800);
+    const fadeTimer = setTimeout(() => setFadeOut(true), 2000);
     const hideTimer = setTimeout(() => {
       setShow(false);
       sessionStorage.setItem(SEEN_KEY, "1");
-    }, 1300);
+    }, 2600);
     return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
   }, [show]);
 
@@ -56,10 +56,10 @@ const LoadingScreen = () => {
         </div>
       </div>
 
-      <div className="mt-10 w-48 h-0.5 rounded-full bg-border overflow-hidden">
+      <div className="mt-10 w-48 h-1 rounded-full bg-border overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-gold to-champagne rounded-full"
-          style={{ animation: "loading-progress 0.8s 0.1s ease-in-out forwards", width: "0%" }}
+          style={{ animation: "loading-progress 1.8s 0.2s ease-in-out forwards", width: "0%" }}
         />
       </div>
 
