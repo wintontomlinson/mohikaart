@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   fetchSetting, saveSetting, useInvalidateSetting,
   DEFAULT_HERO, DEFAULT_ANNOUNCEMENTS, DEFAULT_TESTIMONIALS, DEFAULT_COUPONS,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
 import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy } from "lucide-react";
