@@ -209,14 +209,14 @@ const AdminProducts = () => {
         {visible.map((p) => {
           const discount = getDiscount(p);
           return (
-            <div key={p.id} className="group relative bg-white/70 backdrop-blur rounded-2xl border border-[#e5e0d8]/60 overflow-hidden hover:shadow-lg hover:border-[#c9a84c]/30 transition-all duration-300 hover:-translate-y-1">
+            <div key={p.id} className={`group relative bg-white/70 backdrop-blur rounded-2xl border overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${selected.has(p.id!) ? "border-[#c9a84c] ring-2 ring-[#c9a84c]/30" : "border-[#e5e0d8]/60 hover:border-[#c9a84c]/30"}`}>
               {/* Select checkbox */}
               <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                 <input type="checkbox" checked={selected.has(p.id!)} onChange={() => toggleSelect(p.id!)}
                   className={`w-5 h-5 rounded border-2 border-[#e5e0d8] bg-white/95 text-[#c9a84c] focus:ring-[#c9a84c]/30 cursor-pointer transition-all shadow-sm ${selected.size > 0 ? "opacity-100" : "opacity-0 group-hover:opacity-100"} checked:opacity-100`} />
               </div>
-              {/* Image */}
-              <div className="relative aspect-square overflow-hidden">
+              {/* Image — click to select */}
+              <div className="relative aspect-square overflow-hidden cursor-pointer" onClick={() => toggleSelect(p.id!)}>
                 <img src={resolveImage(p.image_url)} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]" />
                 {/* Badge */}
                 {p.badge && (
