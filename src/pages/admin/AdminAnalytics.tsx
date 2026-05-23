@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { formatINR, resolveImage } from "@/lib/site";
+import { formatINR } from "@/lib/site";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, Legend,
 } from "recharts";
 import {
   TrendingUp, TrendingDown, IndianRupee, ShoppingCart, Package,
-  Users, Calendar, ArrowUpRight, Loader2,
+  Users,
 } from "lucide-react";
 import { KPISkeleton, ChartSkeleton } from "@/components/admin/Skeleton";
 

@@ -6,7 +6,7 @@ import {
   IndianRupee, ShoppingCart, Package, Mail, Plus, Tag,
   Settings, ArrowUpRight, TrendingUp, AlertTriangle,
   Clock, CheckCircle2, Truck, XCircle, Activity,
-  BarChart3, FileText, Megaphone,
+  BarChart3, FileText,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { KPISkeleton, ChartSkeleton, TableRowSkeleton } from "@/components/admin/Skeleton";
