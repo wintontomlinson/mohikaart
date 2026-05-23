@@ -60,15 +60,17 @@ const AdminProducts = () => {
   }, [search]);
 
   const load = async () => {
-    const { data } = await supabase.from("products").select("*").order("sort_order");
-    setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [] })) as Product[]);
+    try {
+      const { data } = await supabase.from("products").select("*").order("sort_order");
+      setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [] })) as Product[]);
+    } catch {}
     setLoading(false);
     setSelected(new Set());
   };
 
   useEffect(() => {
     load();
-    supabase.from("categories").select("slug,name").order("sort_order").then(({ data }) => setCats((data ?? []) as any));
+    supabase.from("categories").select("slug,name").order("sort_order").then(({ data }) => setCats((data ?? []) as any)).catch(() => {});
   }, []);
 
   const onSave = async () => {

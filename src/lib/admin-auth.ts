@@ -1,4 +1,4 @@
-import { createContext, createElement, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, createElement, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -12,63 +12,86 @@ type AdminAuthCtx = {
 
 const Ctx = createContext<AdminAuthCtx | null>(null);
 
-/**
- * Provider that subscribes to Supabase Auth and verifies the current
- * user is in `public.admin_users`. Wrap the admin tree with it.
- */
-export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser]       = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+// ── Dev bypass credentials ──
+const DEV_EMAIL = "admin";
+const DEV_PASS = "admin";
+const FAKE_USER = { id: "dev-admin", email: "admin@mohikaart.com" } as unknown as User;
 
-  // Verify admin status against admin_users via RLS (admin_users has a self-read policy)
-  const verifyAdmin = async (uid: string | undefined) => {
-    if (!uid) return false;
-    const { data, error } = await supabase
-      .from("admin_users")
-      .select("id")
-      .eq("id", uid)
-      .maybeSingle();
-    if (error) return false;
-    return !!data;
-  };
+const isDevBypassed = () => {
+  try { return sessionStorage.getItem("dev_admin_bypass") === "true"; } catch { return false; }
+};
+
+export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(isDevBypassed() ? FAKE_USER : null);
+  const [isAdmin, setIsAdmin] = useState(isDevBypassed());
+  const [loading, setLoading] = useState(!isDevBypassed());
+  const devMode = useRef(isDevBypassed());
 
   useEffect(() => {
+    // If dev bypass is active, don't touch Supabase at all
+    if (devMode.current) return;
+
     let cancelled = false;
 
-    // Initial session
     supabase.auth.getSession().then(async ({ data }) => {
       if (cancelled) return;
       const u = data.session?.user ?? null;
       setUser(u);
-      setIsAdmin(u ? await verifyAdmin(u.id) : false);
+      if (u) {
+        try {
+          const { data: row } = await supabase.from("admin_users").select("id").eq("id", u.id).maybeSingle();
+          setIsAdmin(!!row);
+        } catch { setIsAdmin(false); }
+      } else {
+        setIsAdmin(false);
+      }
       setLoading(false);
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
     });
 
-    // Live updates
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (cancelled) return;
+      if (cancelled || devMode.current) return;
       const u = session?.user ?? null;
       setUser(u);
-      setIsAdmin(u ? await verifyAdmin(u.id) : false);
+      if (u) {
+        try {
+          const { data: row } = await supabase.from("admin_users").select("id").eq("id", u.id).maybeSingle();
+          setIsAdmin(!!row);
+        } catch { setIsAdmin(false); }
+      } else {
+        setIsAdmin(false);
+      }
     });
-    return () => {
-      cancelled = true;
-      sub.subscription.unsubscribe();
-    };
+
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    });
-    if (error) return { error: error.message };
-    return {};
+    // Dev bypass: admin/admin → instant access, no network
+    if (email.trim().toLowerCase() === DEV_EMAIL && password === DEV_PASS) {
+      try { sessionStorage.setItem("dev_admin_bypass", "true"); } catch {}
+      // Force reload so AdminShell picks up sessionStorage on mount
+      window.location.reload();
+      return {};
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (error) return { error: error.message };
+      return {};
+    } catch (err: any) {
+      return { error: err?.message || "Network error. Use admin/admin for offline access." };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try { sessionStorage.removeItem("dev_admin_bypass"); } catch {}
+    devMode.current = false;
+    try { await supabase.auth.signOut(); } catch {}
     setUser(null);
     setIsAdmin(false);
   };

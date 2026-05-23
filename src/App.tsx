@@ -28,20 +28,13 @@ const FAQPage        = lazy(() => import("./pages/FAQPage"));
 const ShippingPage   = lazy(() => import("./pages/ShippingPage"));
 
 // Admin → entirely lazy so storefront visitors never download recharts
-const AdminLayout         = lazy(() => import("./pages/admin/AdminLayout"));
-const AdminDashboard      = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminAnalytics      = lazy(() => import("./pages/admin/AdminAnalytics"));
-const AdminProducts       = lazy(() => import("./pages/admin/AdminProducts"));
-const AdminCategories     = lazy(() => import("./pages/admin/AdminCategories"));
-const AdminOrders         = lazy(() => import("./pages/admin/AdminOrders"));
-const AdminImages         = lazy(() => import("./pages/admin/AdminImages"));
-const AdminSettings       = lazy(() => import("./pages/admin/AdminSettings"));
-const AdminInquiries      = lazy(() => import("./pages/admin/AdminInquiries"));
-const AdminHero           = lazy(() => import("./pages/admin/AdminHero"));
-const AdminAnnouncements  = lazy(() => import("./pages/admin/AdminAnnouncements"));
-const AdminTestimonials   = lazy(() => import("./pages/admin/AdminTestimonials"));
-const AdminCoupons        = lazy(() => import("./pages/admin/AdminCoupons"));
-const AdminUsers          = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminLayout     = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminDashboard  = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminProducts   = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
+const AdminOrders     = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminInquiries  = lazy(() => import("./pages/admin/AdminInquiries"));
+const AdminSettings   = lazy(() => import("./pages/admin/AdminSettings"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,17 +85,10 @@ const App = () => (
             {/* Admin */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="categories" element={<AdminCategories />} />
               <Route path="orders" element={<AdminOrders />} />
-              <Route path="images" element={<AdminImages />} />
               <Route path="inquiries" element={<AdminInquiries />} />
-              <Route path="hero" element={<AdminHero />} />
-              <Route path="announcements" element={<AdminAnnouncements />} />
-              <Route path="testimonials" element={<AdminTestimonials />} />
-              <Route path="coupons" element={<AdminCoupons />} />
-              <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
 
