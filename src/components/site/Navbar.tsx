@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 /* ── nav links ── */
 const links = [
   { to: "/", label: "Home" },
-  { to: "/shop", label: "Shop" },
+  { to: "/shop", label: "Shop", hasDropdown: true },
   { to: "/custom-order", label: "Custom Order" },
   { to: "/about", label: "About" },
   { to: "/gallery", label: "Gallery" },
