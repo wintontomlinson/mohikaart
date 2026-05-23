@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 /* ── nav links ── */
 const links = [
   { to: "/", label: "Home" },
-  { to: "/shop", label: "Shop", hasDropdown: true },
+  { to: "/shop", label: "Shop" },
   { to: "/custom-order", label: "Custom Order" },
   { to: "/about", label: "About" },
   { to: "/gallery", label: "Gallery" },
@@ -142,10 +142,12 @@ const Navbar = () => {
 
               if (isShop) {
                 return (
-                  <li key={`${l.to}-${idx}`} className="relative" ref={shopRef}>
+                  <li key={`${l.to}-${idx}`} className="relative" ref={shopRef}
+                    onMouseEnter={() => setShopOpen(true)}
+                    onMouseLeave={() => setShopOpen(false)}
+                  >
                     <Link
                       to="/shop"
-                      onMouseEnter={() => setShopOpen(true)}
                       className="group relative px-[14px] py-2.5 inline-flex flex-col items-center"
                     >
                       <span
@@ -186,8 +188,6 @@ const Navbar = () => {
                             border: "1px solid rgba(201,168,76,0.15)",
                             boxShadow: "0 24px 80px -16px rgba(26,18,8,0.2), 0 0 0 1px rgba(201,168,76,0.08)",
                           }}
-                          onMouseEnter={() => setShopOpen(true)}
-                          onMouseLeave={() => setShopOpen(false)}
                         >
                           <div className="px-2 pt-3 pb-2">
                             <div className="px-3 mb-2">
