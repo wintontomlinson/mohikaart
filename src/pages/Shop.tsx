@@ -124,15 +124,14 @@ const Shop = () => {
       {/* Sticky Filter Bar */}
       <div className="sticky top-0 z-40" style={{ background: "rgba(253,249,240,0.97)", backdropFilter: "blur(20px) saturate(180%)", boxShadow: "0 1px 0 rgba(26,18,8,0.06)" }}>
         <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-3">
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
             {allCategories.map((c) => {
               const isActive = activeCategory === c.slug;
               return (
-                <button key={c.slug} onClick={() => setActiveCategory(c.slug)} className="shrink-0 transition-all duration-300 hover:scale-[1.03]"
-                  style={{ padding: "8px 18px", borderRadius: 12, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600,
-                    background: isActive ? "linear-gradient(135deg, #1a1208, #2d2015)" : "rgba(255,255,255,0.7)", color: isActive ? "#c9a84c" : "rgba(26,18,8,0.55)",
-                    border: `1px solid ${isActive ? "#c9a84c" : "rgba(26,18,8,0.08)"}`, whiteSpace: "nowrap",
-                    boxShadow: isActive ? "0 4px 12px -2px rgba(201,168,76,0.3)" : "0 1px 3px rgba(26,18,8,0.04)" }}>
+                <button key={c.slug} onClick={() => setActiveCategory(c.slug)} className="shrink-0 transition-all duration-300"
+                  style={{ padding: "6px 16px", borderRadius: 9999, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 600,
+                    background: isActive ? "#1a1208" : "transparent", color: isActive ? "#fdf9f0" : "rgba(26,18,8,0.5)",
+                    border: `1px solid ${isActive ? "#1a1208" : "rgba(26,18,8,0.1)"}`, whiteSpace: "nowrap" }}>
                   {c.name}
                 </button>
               );
@@ -143,12 +142,12 @@ const Shop = () => {
               {filtered.length} {filtered.length === 1 ? "product" : "products"}
             </span>
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
-              className="text-[10px] uppercase tracking-[0.1em] font-semibold outline-none cursor-pointer appearance-none pr-7 bg-no-repeat bg-[right_8px_center] bg-[length:12px]"
-              style={{ padding: "8px 28px 8px 14px", borderRadius: 12, border: "1px solid rgba(201,168,76,0.25)", background: "rgba(255,255,255,0.95)", color: "#1a1208", boxShadow: "0 2px 8px -2px rgba(26,18,8,0.06)", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c9a84c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")" }}>
+              className="text-[10px] uppercase tracking-[0.1em] font-medium outline-none cursor-pointer"
+              style={{ padding: "6px 12px", borderRadius: 9999, border: "1px solid rgba(26,18,8,0.08)", background: "rgba(255,255,255,0.8)", color: "#1a1208" }}>
               <option value="featured">Featured</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="newest">Newest First</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="newest">Newest</option>
               <option value="bestselling">Best Selling</option>
             </select>
           </div>
