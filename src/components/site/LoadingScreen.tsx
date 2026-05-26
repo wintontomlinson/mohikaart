@@ -66,10 +66,10 @@ const LoadingScreen = () => {
       }
     };
 
-    // Minimum display time of 1.8s (so the animation looks good)
-    // then check if hero is loaded, or remove after max 3.5s
-    const minTimer = setTimeout(waitForHero, 1800);
-    const maxTimer = setTimeout(removeSplash, 3500);
+    // Minimum display time of 2.8s (so the counter reaches 100%)
+    // then check if hero is loaded, or remove after max 4s
+    const minTimer = setTimeout(waitForHero, 2800);
+    const maxTimer = setTimeout(removeSplash, 4000);
 
     return () => {
       clearTimeout(minTimer);
