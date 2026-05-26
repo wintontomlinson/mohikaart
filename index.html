@@ -16,10 +16,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Fonts: non-blocking with display=swap -->
+    <!-- Fonts: non-blocking -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
 
-    <!-- Preload hero image for instant display -->
+    <!-- Preload hero image -->
     <link rel="preload" as="image" href="/src/assets/hero-resin-tray.jpg" fetchpriority="high" />
 
     <meta property="og:title" content="Mohika Art - Customized Resin Crafts & Gifts" />
@@ -35,6 +35,37 @@
   </head>
 
   <body>
+    <!-- ═══ LOADING SCREEN ═══ -->
+    <div id="splash-loader" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fdf9f0;transition:opacity 0.5s ease,transform 0.5s ease">
+      <style>
+        @keyframes s-pop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+        @keyframes s-glow{0%,100%{box-shadow:0 8px 30px -8px rgba(201,150,74,0.25)}50%{box-shadow:0 14px 50px -6px rgba(201,150,74,0.45)}}
+        @keyframes s-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        #splash-loader.done{opacity:0;transform:scale(1.03);pointer-events:none}
+      </style>
+      <!-- Logo -->
+      <div style="width:110px;height:110px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center;animation:s-pop 0.4s ease forwards,s-glow 2s 0.4s ease-in-out infinite;position:relative;overflow:hidden">
+        <img src="/mohika-mark.png" alt="Mohika Art" width="80" height="80" style="object-fit:contain;animation:s-pulse 2.5s 0.5s ease-in-out infinite" />
+        <div style="position:absolute;inset:0;border-radius:26px;border:2px solid rgba(201,150,74,0.3);pointer-events:none"></div>
+      </div>
+      <!-- Brand -->
+      <div style="margin-top:20px;text-align:center;animation:s-pop 0.35s 0.15s ease forwards;opacity:0">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:1.6rem;font-weight:300;color:#8B6914">Mohika Art</div>
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:0.4em;color:#8a7a60;margin-top:6px;font-family:system-ui,sans-serif">Customized Resin Crafts</div>
+      </div>
+      <!-- Counter -->
+      <div id="s-pct" style="margin-top:22px;font-family:system-ui,sans-serif;font-size:24px;font-weight:700;color:#8B6914;animation:s-pop 0.3s 0.25s ease forwards;opacity:0">0%</div>
+      <!-- Progress bar -->
+      <div style="margin-top:10px;width:160px;height:5px;border-radius:99px;background:#ede5d8;overflow:hidden;animation:s-pop 0.3s 0.3s ease forwards;opacity:0">
+        <div id="s-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#C9964A,#d4a95f);border-radius:99px;transition:width 0.05s linear"></div>
+      </div>
+    </div>
+
+    <!-- Counter script runs IMMEDIATELY — no CSP issues, outside any blocked context -->
+    <script>
+    !function(){var e=document.getElementById("s-pct"),b=document.getElementById("s-bar");if(!e)return;var s=performance.now(),d=1500;!function t(n){var p=Math.min(100,Math.round((n-s)/d*100));if(p<0)p=0;e.textContent=p+"%";b.style.width=p+"%";if(p<100)requestAnimationFrame(t)}(s)}();
+    </script>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

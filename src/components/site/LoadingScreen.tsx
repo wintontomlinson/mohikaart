@@ -1,7 +1,24 @@
+import { useEffect } from "react";
+
 /**
- * LoadingScreen — removed. No splash/loader anymore.
- * Site opens instantly with CSS transitions on the content itself.
+ * LoadingScreen — keeps HTML splash visible until counter hits 100% (1.5s),
+ * then fades it out smoothly. Shows on EVERY page load.
  */
-const LoadingScreen = () => null;
+const LoadingScreen = () => {
+  useEffect(() => {
+    const splash = document.getElementById("splash-loader");
+    if (!splash) return;
+
+    // Wait for counter to finish (1.5s) + tiny buffer, then fade out
+    const timer = setTimeout(() => {
+      splash.classList.add("done");
+      setTimeout(() => { try { splash.remove(); } catch (e) {} }, 500);
+    }, 1600);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  return null;
+};
 
 export default LoadingScreen;
