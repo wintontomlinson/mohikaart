@@ -1,5 +1,4 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 
@@ -46,24 +45,16 @@ const FEATURED = [
  * with a cinematic split-layout storytelling section.
  */
 const FeaturedShowcase = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "8%"]);
-
   return (
     <section
-      ref={sectionRef}
       className="relative py-20 md:py-28 overflow-hidden"
       style={{ background: "#fdf9f0" }}
     >
       {/* Ambient background glow */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <motion.div
+        <div
           className="absolute top-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[140px]"
-          style={{ background: "hsl(34 58% 82%/0.08)", y: bgY }}
+          style={{ background: "hsl(34 58% 82%/0.08)" }}
         />
         <div
           className="absolute bottom-0 left-1/3 w-[400px] h-[400px] rounded-full blur-[100px]"
@@ -135,6 +126,7 @@ const FeaturedShowcase = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7, delay: i * 0.12, ease: EASE }}
+              whileHover={{ y: -8 }}
               className={`group relative ${i === 0 ? "col-span-2 row-span-2" : ""}`}
             >
               <Link

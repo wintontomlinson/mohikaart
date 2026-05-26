@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { ArrowRight, Award, Heart, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -16,11 +16,6 @@ const stats = [
 
 const About = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const y1     = useTransform(scrollYProgress, [0, 1], [55, -55]);
-  const y2     = useTransform(scrollYProgress, [0, 1], [75, -35]);
-  const y3     = useTransform(scrollYProgress, [0, 1], [30, -45]);
-  const rotate = useTransform(scrollYProgress, [0, 1], [-2, 2]);
 
   const [img1, setImg1] = useState(pouringFallback);
   const [img2, setImg2] = useState(workspaceFallback);
@@ -55,11 +50,10 @@ const About = () => {
 
           {/* Main large image */}
           <motion.div
-            style={{ y: y1, rotateZ: rotate }}
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 1.1 }}
+            transition={{ duration: 0.7 }}
             className="absolute top-0 left-0 w-[72%] h-[72%] rounded-[2.2rem] overflow-hidden shadow-luxe"
           >
             <img src={img1} alt="Artisan pouring resin" loading="lazy" className="w-full h-full object-cover" />
@@ -73,11 +67,10 @@ const About = () => {
 
           {/* Secondary bottom-right image */}
           <motion.div
-            style={{ y: y2 }}
-            initial={{ opacity: 0, y: 60 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 1.1, delay: 0.18 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
             className="absolute bottom-0 right-0 w-[60%] h-[58%] rounded-[2.2rem] overflow-hidden shadow-card border-4 border-background"
           >
             <img src={img2} alt="Resin studio workspace" loading="lazy" className="w-full h-full object-cover" />
@@ -86,11 +79,10 @@ const About = () => {
 
           {/* Tiny accent image */}
           <motion.div
-            style={{ y: y3 }}
-            initial={{ opacity: 0, scale: 0.85 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.9, delay: 0.35 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             className="absolute top-[36%] right-0 w-[28%] h-[26%] rounded-[1.6rem] overflow-hidden shadow-soft border-2 border-background hidden md:block"
           >
             <img src={img3} alt="Resin flatlay" loading="lazy" className="w-full h-full object-cover" />
@@ -143,10 +135,10 @@ const About = () => {
         {/* ── Text Content ── */}
         <div className="lg:col-span-6">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.85 }}
+            transition={{ duration: 0.7 }}
           >
             <div className="eyebrow mb-5">Our Story</div>
 

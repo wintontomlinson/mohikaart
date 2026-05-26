@@ -68,7 +68,7 @@ const Testimonials = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: (i % REVIEWS.length) * 0.08 }}
-                className="shrink-0 w-[300px] sm:w-[340px] p-6 rounded-2xl"
+                className="shrink-0 w-[300px] sm:w-[340px] p-6 rounded-2xl testimonial-card-hover"
                 style={{ background: "#fff", border: "1px solid rgba(26,18,8,0.06)", boxShadow: "0 4px 16px -6px rgba(26,18,8,0.08)" }}
               >
                 {/* Stars */}
