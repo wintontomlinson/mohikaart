@@ -131,13 +131,19 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [pathname]);
 
-  // AUTH DISABLED — always show admin panel
-  // To re-enable auth later, uncomment the block below
-  // const devBypass = (() => { try { return sessionStorage.getItem("dev_admin_bypass") === "true"; } catch { return false; } })();
-  // if (!devBypass) {
-  //   if (loading) return <LoadingScreen />;
-  //   if (!user || !isAdmin) return <AdminLogin />;
-  // }
+  // AUTH ENABLED — protect admin panel
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "hsl(36 42% 97%)" }}>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          Verifying access…
+        </div>
+      </div>
+    );
+  }
+  if (!user) return <AdminLogin />;
+  if (!isAdmin) return <NotAuthorized />;
 
   const currentPage = navItems.find((i) => pathname === i.to || (i.to !== "/admin" && pathname.startsWith(i.to)));
 

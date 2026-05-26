@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoreSettings } from "@/lib/settings";
 import { EMAIL_RE, PHONE_RE, PINCODE_RE, LIMITS, clamp } from "@/lib/validation";
+import { canSubmit } from "@/lib/throttle";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -108,6 +109,10 @@ const CheckoutPage = () => {
 
   const onWhatsApp = async () => {
     if (!validate()) return;
+    if (!canSubmit("checkout", 8000)) {
+      toast.error("Please wait a few seconds before trying again");
+      return;
+    }
     setProcessing(true);
     try {
       const order = await saveOrder("whatsapp");
@@ -133,6 +138,10 @@ const CheckoutPage = () => {
 
   const onCOD = async () => {
     if (!validate()) return;
+    if (!canSubmit("checkout", 8000)) {
+      toast.error("Please wait a few seconds before trying again");
+      return;
+    }
     setProcessing(true);
     try {
       const order = await saveOrder("cod");
@@ -149,6 +158,10 @@ const CheckoutPage = () => {
 
   const onRazorpay = async () => {
     if (!validate()) return;
+    if (!canSubmit("checkout", 8000)) {
+      toast.error("Please wait a few seconds before trying again");
+      return;
+    }
     if (!razorpayKeyId) {
       toast.error("Online payments are not configured yet. Please order via WhatsApp.");
       return;

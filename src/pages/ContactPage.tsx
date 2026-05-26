@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import { ChevronRight, ChevronDown, MapPin, Phone, Mail, Clock, Instagram, MessageCircle, ArrowRight, CheckCircle, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useStoreSettings } from "@/lib/settings";
+import { supabase } from "@/integrations/supabase/client";
+import { EMAIL_RE, LIMITS, clamp } from "@/lib/validation";
+import { canSubmit } from "@/lib/throttle";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -24,17 +27,48 @@ const ContactPage = () => {
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  const [submitting, setSubmitting] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       toast.error("Please fill in required fields");
       return;
     }
-    setSubmitted(true);
+    if (!EMAIL_RE.test(form.email.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (form.message.trim().length < 10) {
+      toast.error("Message is too short");
+      return;
+    }
+    if (!canSubmit("contact", 10000)) {
+      toast.error("Please wait a few seconds before sending again");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("inquiries").insert({
+        name:    clamp(form.name, LIMITS.name),
+        email:   clamp(form.email, LIMITS.email).toLowerCase(),
+        phone:   clamp(form.phone, LIMITS.phone) || null,
+        product: clamp(form.subject, LIMITS.short) || null,
+        idea:    clamp(form.message, LIMITS.idea),
+        status:  "new",
+      });
+      if (error) throw error;
+      setSubmitted(true);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to send message. Please try WhatsApp instead.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass = "w-full px-4 py-3 rounded-xl bg-white text-sm outline-none transition-all duration-300 border border-[rgba(26,18,8,0.1)] focus:border-[#c9a84c] focus:ring-2 focus:ring-[rgba(201,168,76,0.15)] placeholder:text-[rgba(26,18,8,0.35)]";
@@ -226,12 +260,13 @@ const ContactPage = () => {
                   </div>
                   <button
                     type="submit"
-                    className="group relative w-full overflow-hidden flex items-center justify-center gap-2 py-3.5 rounded-full text-[11px] tracking-[0.12em] uppercase font-semibold transition-all duration-300"
+                    disabled={submitting}
+                    className="group relative w-full overflow-hidden flex items-center justify-center gap-2 py-3.5 rounded-full text-[11px] tracking-[0.12em] uppercase font-semibold transition-all duration-300 disabled:opacity-60"
                     style={{ background: "#1a1208", color: "#fdf9f0" }}
                   >
                     <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)" }} />
                     <Send className="w-4 h-4 relative z-10" />
-                    <span className="relative z-10">Send Message</span>
+                    <span className="relative z-10">{submitting ? "Sending…" : "Send Message"}</span>
                     <ArrowRight className="w-4 h-4 relative z-10 transition-transform group-hover:translate-x-1" />
                   </button>
                 </motion.form>

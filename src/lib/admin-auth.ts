@@ -12,25 +12,12 @@ type AdminAuthCtx = {
 
 const Ctx = createContext<AdminAuthCtx | null>(null);
 
-// ── Dev bypass credentials ──
-const DEV_EMAIL = "admin";
-const DEV_PASS = "admin";
-const FAKE_USER = { id: "dev-admin", email: "admin@mohikaart.com" } as unknown as User;
-
-const isDevBypassed = () => {
-  try { return sessionStorage.getItem("dev_admin_bypass") === "true"; } catch { return false; }
-};
-
 export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(isDevBypassed() ? FAKE_USER : null);
-  const [isAdmin, setIsAdmin] = useState(isDevBypassed());
-  const [loading, setLoading] = useState(!isDevBypassed());
-  const devMode = useRef(isDevBypassed());
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If dev bypass is active, don't touch Supabase at all
-    if (devMode.current) return;
-
     let cancelled = false;
 
     supabase.auth.getSession().then(async ({ data }) => {
@@ -51,7 +38,7 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (cancelled || devMode.current) return;
+      if (cancelled) return;
       const u = session?.user ?? null;
       setUser(u);
       if (u) {
@@ -68,14 +55,6 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    // Dev bypass: admin/admin → instant access, no network
-    if (email.trim().toLowerCase() === DEV_EMAIL && password === DEV_PASS) {
-      try { sessionStorage.setItem("dev_admin_bypass", "true"); } catch {}
-      // Force reload so AdminShell picks up sessionStorage on mount
-      window.location.reload();
-      return {};
-    }
-
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
@@ -84,13 +63,11 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) return { error: error.message };
       return {};
     } catch (err: any) {
-      return { error: err?.message || "Network error. Use admin/admin for offline access." };
+      return { error: err?.message || "Network error. Please try again." };
     }
   };
 
   const signOut = async () => {
-    try { sessionStorage.removeItem("dev_admin_bypass"); } catch {}
-    devMode.current = false;
     try { await supabase.auth.signOut(); } catch {}
     setUser(null);
     setIsAdmin(false);
