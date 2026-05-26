@@ -37,6 +37,8 @@ const AdminInquiries  = lazy(() => import("./pages/admin/AdminInquiries"));
 const AdminCMS        = lazy(() => import("./pages/admin/AdminCMS"));
 const AdminAnalytics  = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminSettings   = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminCustomers  = lazy(() => import("./pages/admin/AdminCustomers"));
+const AdminActivityLog = lazy(() => import("./pages/admin/AdminActivityLog"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,8 +93,10 @@ const App = () => (
               <Route path="categories" element={<AdminCategories />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="inquiries" element={<AdminInquiries />} />
+              <Route path="customers" element={<AdminCustomers />} />
               <Route path="cms" element={<AdminCMS />} />
               <Route path="analytics" element={<AdminAnalytics />} />
+              <Route path="activity" element={<AdminActivityLog />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
 
