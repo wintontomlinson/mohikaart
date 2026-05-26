@@ -5,7 +5,14 @@ import {
   ShoppingCart, Tag, Settings, Mail,
   X, Eye, EyeOff, ShieldAlert, BarChart3, FileText,
 } from "lucide-react";
-import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
+// Auth disabled — using inline mock instead of Supabase-dependent provider
+const useAdminAuth = () => ({
+  user: null,
+  isAdmin: true,
+  loading: false,
+  signIn: async () => ({}),
+  signOut: async () => {},
+});
 import { Monogram } from "@/components/site/Logo";
 
 /* ─── Login ─── */
@@ -250,9 +257,7 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
 };
 
 const AdminLayout = () => (
-  <AdminAuthProvider>
-    <AdminShell />
-  </AdminAuthProvider>
+  <AdminShell />
 );
 
 export default AdminLayout;
