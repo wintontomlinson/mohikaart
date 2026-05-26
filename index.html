@@ -17,6 +17,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+    <!-- Preload critical hero image for faster LCP -->
+    <link rel="preload" as="image" href="/src/assets/hero-resin-tray.jpg" fetchpriority="high" />
+
     <meta property="og:title" content="Mohika Art - Customized Resin Crafts & Gifts" />
     <meta property="og:description" content="Turn memories into timeless art. Premium handmade resin keepsakes, personalized for every occasion." />
     <meta property="og:type" content="website" />
@@ -53,6 +56,65 @@
   </head>
 
   <body>
+    <!-- ═══ INSTANT LOADING SCREEN (shows before JS bundle loads) ═══ -->
+    <div id="splash-loader" style="
+      position: fixed; inset: 0; z-index: 99999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%);
+      transition: opacity 0.5s ease;
+    ">
+      <style>
+        @keyframes splash-scale-in {
+          from { transform: scale(0.7); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes splash-progress {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        @keyframes splash-blob {
+          0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: scale(1); }
+          50% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 60%; transform: scale(1.05); }
+        }
+        @keyframes splash-glow {
+          0%, 100% { box-shadow: 0 0 0 0 hsla(34, 58%, 52%, 0.3); }
+          50% { box-shadow: 0 0 20px 4px hsla(34, 58%, 52%, 0.15); }
+        }
+        #splash-loader.fade-out { opacity: 0; pointer-events: none; }
+      </style>
+      <!-- Background blobs -->
+      <div style="position:absolute;top:25%;left:25%;width:320px;height:320px;border-radius:50%;background:hsla(348,55%,90%,0.3);filter:blur(80px);animation:splash-blob 8s ease-in-out infinite;"></div>
+      <div style="position:absolute;bottom:25%;right:25%;width:384px;height:384px;border-radius:50%;background:hsla(38,65%,91%,0.3);filter:blur(80px);animation:splash-blob 10s ease-in-out infinite 2s;"></div>
+      <!-- Logo container -->
+      <div style="
+        width: 96px; height: 96px; border-radius: 24px;
+        background: white; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 20px 60px -15px hsla(348,28%,28%,0.2);
+        animation: splash-scale-in 0.6s ease forwards, splash-glow 2s ease-in-out infinite;
+        position: relative;
+      ">
+        <img src="/favicon.png" alt="" width="64" height="64" style="object-fit:contain;" />
+        <div style="position:absolute;inset:0;border-radius:24px;border:2px solid hsla(34,58%,52%,0.4);"></div>
+      </div>
+      <!-- Brand text -->
+      <div style="
+        margin-top: 32px; text-align: center;
+        animation: splash-scale-in 0.6s 0.3s ease forwards;
+        opacity: 0;
+      ">
+        <div style="font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 300; background: linear-gradient(118deg, hsl(34 52% 42%), hsl(38 72% 62%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+          Mohika Art
+        </div>
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5em; color: hsl(25 10% 50%); margin-top: 8px;">
+          Customized Resin Crafts
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div style="margin-top: 40px; width: 192px; height: 4px; border-radius: 9999px; background: hsl(34 28% 90%); overflow: hidden;">
+        <div style="height: 100%; background: linear-gradient(90deg, hsl(34 58% 52%), hsl(38 65% 68%)); border-radius: 9999px; animation: splash-progress 2s 0.2s ease-in-out forwards; width: 0%;"></div>
+      </div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

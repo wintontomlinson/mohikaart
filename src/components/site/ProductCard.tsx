@@ -65,8 +65,11 @@ export const ProductCard = ({ p, index = 0 }: { p: Product; index?: number }) =>
             src={resolveImage(p.image_url)}
             alt={p.name}
             loading="lazy"
+            decoding="async"
+            width={400}
+            height={400}
             className="w-full h-full object-cover transition-transform group-hover:scale-110"
-            style={{ transitionDuration: "1500ms" }}
+            style={{ transitionDuration: "1500ms", backgroundColor: "hsl(36 30% 94%)" }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 

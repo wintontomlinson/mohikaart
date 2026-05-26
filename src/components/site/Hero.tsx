@@ -474,6 +474,9 @@ const Hero = () => {
                   className="h-full w-full object-cover"
                   fetchPriority="high"
                   decoding="async"
+                  width={800}
+                  height={800}
+                  style={{ backgroundColor: "hsl(36 30% 92%)" }}
                 />
               </motion.div>
 
@@ -557,8 +560,10 @@ const Hero = () => {
                     src={bookmark}
                     alt="Floral resin bookmark"
                     loading="lazy"
+                    width={200}
+                    height={140}
                     className="w-full rounded-xl object-cover"
-                    style={{ height: "clamp(82px, 9vw, 118px)" }}
+                    style={{ height: "clamp(82px, 9vw, 118px)", backgroundColor: "hsl(36 30% 94%)" }}
                   />
                   <div className="px-1.5 pb-1.5 pt-2">
                     <div
@@ -597,8 +602,10 @@ const Hero = () => {
                     src={keychain}
                     alt="Personalised name keychain"
                     loading="lazy"
+                    width={200}
+                    height={150}
                     className="w-full rounded-xl object-cover"
-                    style={{ height: "clamp(88px, 10vw, 128px)" }}
+                    style={{ height: "clamp(88px, 10vw, 128px)", backgroundColor: "hsl(36 30% 94%)" }}
                   />
                   <div className="px-1.5 pb-1.5 pt-2">
                     <div

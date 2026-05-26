@@ -1,76 +1,84 @@
 import { useEffect, useState } from "react";
-import mark from "@/assets/mohika-mark.png";
 
 const SEEN_KEY = "mohika.loadingseen.v1";
 
+/**
+ * LoadingScreen now works with the inline HTML splash in index.html.
+ * On first session visit it keeps the HTML splash visible until critical
+ * images are loaded (or a max timeout fires), then fades it out.
+ * On subsequent visits (same session), it instantly removes the splash.
+ */
 const LoadingScreen = () => {
-  // Only show the loader on the first visit of the browser session.
-  const initialShow = typeof window !== "undefined" && !sessionStorage.getItem(SEEN_KEY);
-  const [show, setShow] = useState(initialShow);
-  const [fadeOut, setFadeOut] = useState(false);
+  const isFirstVisit =
+    typeof window !== "undefined" && !sessionStorage.getItem(SEEN_KEY);
+  const [removed, setRemoved] = useState(!isFirstVisit);
 
   useEffect(() => {
-    if (!show) return;
-    // Respect prefers-reduced-motion: skip the loader entirely.
-    const prefersReduced = typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefersReduced) {
-      setShow(false);
-      sessionStorage.setItem(SEEN_KEY, "1");
+    const splash = document.getElementById("splash-loader");
+    if (!splash) {
+      setRemoved(true);
       return;
     }
 
-    const fadeTimer = setTimeout(() => setFadeOut(true), 2000);
-    const hideTimer = setTimeout(() => {
-      setShow(false);
+    // If not first visit, remove immediately
+    if (!isFirstVisit) {
+      splash.remove();
+      setRemoved(true);
+      return;
+    }
+
+    // Respect prefers-reduced-motion
+    const prefersReduced =
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      splash.remove();
       sessionStorage.setItem(SEEN_KEY, "1");
-    }, 2600);
-    return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
-  }, [show]);
+      setRemoved(true);
+      return;
+    }
 
-  if (!show) return null;
+    // Wait for critical hero image to load, or max 3s
+    const removeSplash = () => {
+      splash.classList.add("fade-out");
+      setTimeout(() => {
+        splash.remove();
+        setRemoved(true);
+      }, 550);
+      sessionStorage.setItem(SEEN_KEY, "1");
+    };
 
-  return (
-    <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background transition-opacity duration-500"
-      style={{ opacity: fadeOut ? 0 : 1, pointerEvents: fadeOut ? "none" : "auto" }}
-      aria-hidden="true"
-    >
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-blush/30 blur-3xl blob-morph" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-champagne/30 blur-3xl blob-morph" />
-      </div>
+    // Find hero image and wait for it
+    const waitForHero = () => {
+      const heroImg = document.querySelector(
+        'img[fetchpriority="high"]'
+      ) as HTMLImageElement | null;
 
-      <div className="relative w-24 h-24 rounded-3xl bg-card flex items-center justify-center shadow-luxe animate-scale-in">
-        <img src={mark} alt="" className="w-16 h-16 object-contain" />
-        <div className="absolute inset-0 rounded-3xl border-2 border-gold/50 glow-pulse" />
-      </div>
+      if (heroImg && heroImg.complete) {
+        // Already loaded
+        setTimeout(removeSplash, 300);
+        return;
+      }
 
-      <div className="mt-8 text-center animate-scale-in" style={{ animationDelay: "0.3s", opacity: 0, animationFillMode: "forwards" }}>
-        <div className="font-display text-3xl text-gold-grad" style={{ fontWeight: 300 }}>
-          Mohika Art
-        </div>
-        <div className="text-[10px] uppercase tracking-[0.5em] text-muted-foreground mt-2">
-          Customized Resin Crafts
-        </div>
-      </div>
+      if (heroImg) {
+        heroImg.addEventListener("load", () => setTimeout(removeSplash, 200), {
+          once: true,
+        });
+      }
+    };
 
-      <div className="mt-10 w-48 h-1 rounded-full bg-border overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-gold to-champagne rounded-full"
-          style={{ animation: "loading-progress 1.8s 0.2s ease-in-out forwards", width: "0%" }}
-        />
-      </div>
+    // Minimum display time of 1.8s (so the animation looks good)
+    // then check if hero is loaded, or remove after max 3.5s
+    const minTimer = setTimeout(waitForHero, 1800);
+    const maxTimer = setTimeout(removeSplash, 3500);
 
-      <style>{`
-        @keyframes loading-progress {
-          from { width: 0%; }
-          to { width: 100%; }
-        }
-      `}</style>
-    </div>
-  );
+    return () => {
+      clearTimeout(minTimer);
+      clearTimeout(maxTimer);
+    };
+  }, [isFirstVisit]);
+
+  // This component doesn't render anything — the splash is in index.html
+  return null;
 };
 
 export default LoadingScreen;

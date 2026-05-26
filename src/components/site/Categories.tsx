@@ -150,7 +150,11 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
                       src={resolveImage(c.image_url)}
                       alt={c.name}
                       loading="lazy"
+                      decoding="async"
+                      width={400}
+                      height={400}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+                      style={{ backgroundColor: "hsl(36 30% 94%)" }}
                     />
                     <div
                       aria-hidden
