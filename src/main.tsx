@@ -175,8 +175,13 @@ class ErrorBoundary extends React.Component<
 }
 
 // Remove splash loader regardless of which route loads
-import { removeSplash } from "./components/site/LoadingScreen";
-removeSplash();
+const splash = document.getElementById("splash-loader");
+if (splash) {
+  setTimeout(() => {
+    splash.classList.add("done");
+    setTimeout(() => { try { splash.remove(); } catch(e) {} }, 500);
+  }, 1600);
+}
 
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
