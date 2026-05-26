@@ -38,7 +38,6 @@ const AdminCMS        = lazy(() => import("./pages/admin/AdminCMS"));
 const AdminAnalytics  = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminSettings   = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminCustomers  = lazy(() => import("./pages/admin/AdminCustomers"));
-const AdminBulkImport = lazy(() => import("./pages/admin/AdminBulkImport"));
 const AdminActivityLog = lazy(() => import("./pages/admin/AdminActivityLog"));
 
 const queryClient = new QueryClient({
@@ -97,7 +96,6 @@ const App = () => (
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="cms" element={<AdminCMS />} />
               <Route path="analytics" element={<AdminAnalytics />} />
-              <Route path="bulk" element={<AdminBulkImport />} />
               <Route path="activity" element={<AdminActivityLog />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>

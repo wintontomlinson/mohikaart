@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
-import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, AlertTriangle } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, Download, Upload, FileSpreadsheet, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
@@ -22,14 +22,13 @@ type Product = {
   badge: string | null;
   featured: boolean;
   in_stock: boolean;
-  stock_qty: number;
   sort_order: number;
 };
 
 const empty: Product = {
   name: "", slug: "", short_description: "", description: "",
   price: 0, original_price: null, category_slug: null, image_url: null,
-  gallery: [], badge: null, featured: false, in_stock: true, stock_qty: 0, sort_order: 0,
+  gallery: [], badge: null, featured: false, in_stock: true, sort_order: 0,
 };
 
 const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -63,7 +62,7 @@ const AdminProducts = () => {
   const load = async () => {
     try {
       const { data } = await supabase.from("products").select("*").order("sort_order");
-      setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [], stock_qty: p.stock_qty ?? 0 })) as Product[]);
+      setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [] })) as Product[]);
     } catch {}
     setLoading(false);
     setSelected(new Set());
@@ -181,29 +180,8 @@ const AdminProducts = () => {
         </div>
       </div>
 
-      {/* Low Stock Alert */}
-      {!loading && products.filter((p) => (p.stock_qty ?? 0) <= 5 && p.in_stock).length > 0 && (
-        <div className="mb-6 bg-amber-50/80 backdrop-blur-xl rounded-2xl border border-amber-200/60 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <h3 className="text-xs uppercase tracking-wider font-semibold text-amber-700">Low Stock Alert</h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {products
-              .filter((p) => (p.stock_qty ?? 0) <= 5 && p.in_stock)
-              .map((p) => (
-                <div key={p.id} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-amber-200 text-xs">
-                  <span className="font-medium" style={{ color: "#1a1208" }}>{p.name}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                    (p.stock_qty ?? 0) <= 0 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
-                  }`}>
-                    {(p.stock_qty ?? 0) <= 0 ? "Out of Stock" : `${p.stock_qty} left`}
-                  </span>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
+      {/* Import/Export Section */}
+      <ImportExportSection products={products} onImported={load} />
 
       {/* Product Grid — SAME STYLE AS FRONTEND */}
       {loading ? (
@@ -258,18 +236,6 @@ const AdminProducts = () => {
                 {!p.in_stock && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <span className="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold" style={{ color: "#1a1208" }}>Out of Stock</span>
-                  </div>
-                )}
-                {/* Stock qty badge */}
-                {p.in_stock && (
-                  <div className={`absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-bold ${
-                    (p.stock_qty ?? 0) <= 0
-                      ? "bg-red-500 text-white"
-                      : (p.stock_qty ?? 0) <= 5
-                      ? "bg-amber-500 text-white"
-                      : "bg-emerald-500/90 text-white"
-                  }`}>
-                    {(p.stock_qty ?? 0) <= 0 ? "0 qty" : `${p.stock_qty} qty`}
                   </div>
                 )}
                 {/* Hover actions */}
@@ -373,9 +339,6 @@ const AdminProducts = () => {
                 <Field label="Sort Order"><input type="number" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} className={inp} /></Field>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="Stock Quantity"><input type="number" value={editing.stock_qty ?? 0} onChange={(e) => setEditing({ ...editing, stock_qty: Number(e.target.value) })} className={inp} placeholder="0" /></Field>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-4">
                 <Field label="Category"><select value={editing.category_slug ?? ""} onChange={(e) => setEditing({ ...editing, category_slug: e.target.value || null })} className={inp}>
                   <option value="">None</option>{cats.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
                 </select></Field>
@@ -432,6 +395,113 @@ const GalleryUpload = ({ onUploaded }: { onUploaded: (url: string) => void }) =>
       <span className="text-[9px] text-muted-foreground/50">{busy ? "…" : "Add"}</span>
       <input type="file" accept="image/*" onChange={onFile} className="hidden" disabled={busy} />
     </label>
+  );
+};
+
+/* ── Import/Export Section ── */
+const CSV_HEADERS = ["name", "slug", "price", "original_price", "category_slug", "badge", "featured", "in_stock", "sort_order"];
+
+const ImportExportSection = ({ products, onImported }: { products: Product[]; onImported: () => void }) => {
+  const [open, setOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<any[] | null>(null);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const exportCSV = () => {
+    const rows = products.map((p) => [
+      p.name, p.slug, p.price, p.original_price ?? "", p.category_slug ?? "",
+      p.badge ?? "", p.featured ? "true" : "false", p.in_stock ? "true" : "false", p.sort_order,
+    ]);
+    const csv = [CSV_HEADERS, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `products-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    toast.success(`Exported ${products.length} products`);
+  };
+
+  const parseCSV = (text: string) => {
+    const lines = text.trim().split("\n");
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, "").toLowerCase());
+    return lines.slice(1).map((line) => {
+      const vals: string[] = []; let cur = ""; let inQ = false;
+      for (let i = 0; i < line.length; i++) { const c = line[i]; if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; } else if (c === "," && !inQ) { vals.push(cur.trim()); cur = ""; } else cur += c; }
+      vals.push(cur.trim());
+      const row: any = {}; headers.forEach((h, i) => { row[h] = vals[i]?.replace(/^"|"$/g, "") ?? ""; });
+      return { name: row.name || "", slug: row.slug || "", price: parseFloat(row.price) || 0, original_price: row.original_price ? parseFloat(row.original_price) : null, category_slug: row.category_slug || null, badge: row.badge || null, featured: row.featured === "true", in_stock: row.in_stock !== "false", sort_order: parseInt(row.sort_order) || 0 };
+    });
+  };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => { try { const rows = parseCSV(ev.target?.result as string); setPreviewData(rows); toast.success(`Parsed ${rows.length} rows`); } catch { toast.error("Failed to parse CSV"); } };
+    reader.readAsText(file); e.target.value = "";
+  };
+
+  const doImport = async () => {
+    if (!previewData) return;
+    setImporting(true);
+    const slugs = new Set(products.map((p) => p.slug));
+    let created = 0, updated = 0, errors = 0;
+    for (const row of previewData) {
+      if (!row.name || !row.slug) { errors++; continue; }
+      const payload = { name: row.name, slug: row.slug, price: row.price, original_price: row.original_price, category_slug: row.category_slug, badge: row.badge, featured: row.featured, in_stock: row.in_stock, sort_order: row.sort_order };
+      const { error } = slugs.has(row.slug) ? await supabase.from("products").update(payload).eq("slug", row.slug) : await supabase.from("products").insert(payload);
+      if (error) errors++; else { slugs.has(row.slug) ? updated++ : created++; slugs.add(row.slug); }
+    }
+    setImporting(false); setPreviewData(null);
+    toast.success(`Done: ${created} created, ${updated} updated${errors ? `, ${errors} errors` : ""}`);
+    onImported();
+  };
+
+  return (
+    <div className="mb-6">
+      <button onClick={() => setOpen(!open)} className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#e5e0d8] bg-white/70 text-xs font-medium hover:bg-[#f5f0e8] transition-colors" style={{ color: "#1a1208" }}>
+        <FileSpreadsheet className="w-3.5 h-3.5" style={{ color: "#c9a84c" }} />
+        Import / Export CSV
+        {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {open && (
+        <div className="mt-3 bg-white/70 backdrop-blur-xl rounded-2xl border border-[#e5e0d8]/60 p-5">
+          <div className="flex flex-wrap gap-3 items-center">
+            <button onClick={exportCSV} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors">
+              <Download className="w-3.5 h-3.5" /> Export {products.length} Products
+            </button>
+            <button onClick={() => fileRef.current?.click()} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+              <Upload className="w-3.5 h-3.5" /> Import CSV
+            </button>
+            <input ref={fileRef} type="file" accept=".csv" onChange={handleFile} className="hidden" />
+            <span className="text-[10px] text-muted-foreground">Columns: {CSV_HEADERS.join(", ")}</span>
+          </div>
+          {previewData && (
+            <div className="mt-4 border border-[#e5e0d8]/40 rounded-xl overflow-hidden">
+              <div className="p-3 bg-[#f8f5f0] flex items-center justify-between border-b border-[#e5e0d8]/40">
+                <span className="text-xs font-medium">{previewData.length} rows ready</span>
+                <div className="flex gap-2">
+                  <button onClick={() => setPreviewData(null)} className="px-3 py-1 rounded-lg text-[10px] border border-[#e5e0d8] hover:bg-white transition-colors">Cancel</button>
+                  <button onClick={doImport} disabled={importing} className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[10px] font-semibold text-white disabled:opacity-50" style={{ background: "#1a1208" }}>
+                    {importing ? <Loader2 className="w-3 h-3 animate-spin" /> : null} {importing ? "Importing…" : "Confirm Import"}
+                  </button>
+                </div>
+              </div>
+              <div className="max-h-48 overflow-auto text-[11px]">
+                <table className="w-full">
+                  <thead><tr className="border-b border-[#e5e0d8]/30">{CSV_HEADERS.map((h) => <th key={h} className="px-2 py-1.5 text-left text-[9px] uppercase tracking-wider text-muted-foreground">{h}</th>)}<th className="px-2 py-1.5 text-[9px]">Action</th></tr></thead>
+                  <tbody>{previewData.slice(0, 20).map((r, i) => {
+                    const exists = products.some((p) => p.slug === r.slug);
+                    return <tr key={i} className="border-b border-[#e5e0d8]/20"><td className="px-2 py-1">{r.name}</td><td className="px-2 py-1">{r.slug}</td><td className="px-2 py-1">{r.price}</td><td className="px-2 py-1">{r.original_price ?? "—"}</td><td className="px-2 py-1">{r.category_slug ?? "—"}</td><td className="px-2 py-1">{r.badge ?? "—"}</td><td className="px-2 py-1">{r.featured?"Y":"N"}</td><td className="px-2 py-1">{r.in_stock?"Y":"N"}</td><td className="px-2 py-1">{r.sort_order}</td><td className="px-2 py-1"><span className={`px-1.5 py-0.5 rounded text-[8px] font-bold ${exists ? "bg-blue-100 text-blue-700" : "bg-emerald-100 text-emerald-700"}`}>{exists ? "Update" : "New"}</span></td></tr>;
+                  })}</tbody>
+                </table>
+                {previewData.length > 20 && <div className="px-2 py-2 text-center text-[10px] text-muted-foreground">+{previewData.length - 20} more rows</div>}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 

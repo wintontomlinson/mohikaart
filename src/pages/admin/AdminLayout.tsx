@@ -4,7 +4,7 @@ import {
   LogOut, Package, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail,
   X, Eye, EyeOff, ShieldAlert, BarChart3, FileText,
-  Users, Upload, Activity,
+  Users, Activity,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import { Monogram } from "@/components/site/Logo";
@@ -112,7 +112,6 @@ const navItems = [
   { to: "/admin/customers", icon: Users, label: "Customers" },
   { to: "/admin/cms", icon: FileText, label: "Content" },
   { to: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-  { to: "/admin/bulk", icon: Upload, label: "Import/Export" },
   { to: "/admin/activity", icon: Activity, label: "Activity" },
   { to: "/admin/settings", icon: Settings, label: "Settings" },
 ];
