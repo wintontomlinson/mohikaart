@@ -1,9 +1,10 @@
-import { motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { motion, useMotionValue, useSpring, useTransform, useScroll } from "framer-motion";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
+import { LUXURY_EASE, SPRING_SMOOTH, Magnetic, staggerContainer } from "@/lib/animations";
 import catWedding from "@/assets/cat-wedding.jpg";
 import catTray from "@/assets/cat-tray.jpg";
 import catCouple from "@/assets/cat-couple.jpg";
@@ -22,43 +23,82 @@ const FALLBACK_CATEGORIES: Cat[] = [
   { id: "fb-hampers", name: "Gift Hampers", slug: "gift-hampers", image_url: catHamper },
 ];
 
-/* ── Simple 3D tilt on hover (no external dependency) ── */
+/* ── Premium 3D tilt on hover with framer-motion spring physics ── */
 function TiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const glareOpacity = useMotionValue(0);
+  const glareX = useMotionValue(50);
+  const glareY = useMotionValue(50);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), SPRING_SMOOTH);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-12, 12]), SPRING_SMOOTH);
+  const scale = useSpring(1, SPRING_SMOOTH);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || window.matchMedia("(pointer: coarse)").matches) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    cardRef.current.style.transform = `perspective(800px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) scale3d(1.03,1.03,1.03)`;
-  };
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    x.set(px);
+    y.set(py);
+    glareX.set((px + 0.5) * 100);
+    glareY.set((py + 0.5) * 100);
+    glareOpacity.set(0.2);
+    scale.set(1.04);
+  }, [x, y, glareX, glareY, glareOpacity, scale]);
 
-  const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    cardRef.current.style.transform = "perspective(800px) rotateY(0deg) rotateX(0deg) scale3d(1,1,1)";
-  };
+  const handleMouseLeave = useCallback(() => {
+    x.set(0);
+    y.set(0);
+    glareOpacity.set(0);
+    scale.set(1);
+  }, [x, y, glareOpacity, scale]);
 
   return (
-    <div
+    <motion.div
       ref={cardRef}
       className={className}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)", transformStyle: "preserve-3d" }}
+      style={{
+        rotateX,
+        rotateY,
+        scale,
+        transformStyle: "preserve-3d",
+        perspective: "900px",
+      }}
     >
       {children}
-      {/* Glare overlay */}
-      <div
-        className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-[0.15] transition-opacity duration-500"
-        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 60%)" }}
+      {/* Reflective glare overlay */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl pointer-events-none z-10"
+        style={{
+          opacity: glareOpacity,
+          background: useTransform(
+            [glareX, glareY],
+            ([gx, gy]) => `radial-gradient(ellipse at ${gx}% ${gy}%, rgba(255,255,255,0.45) 0%, transparent 60%)`
+          ),
+        }}
       />
-    </div>
+      {/* Gold border glow on hover */}
+      <motion.div
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        style={{
+          opacity: useTransform(scale, [1, 1.04], [0, 1]),
+          boxShadow: "inset 0 0 0 1.5px rgba(201,150,74,0.2), 0 20px 50px -15px rgba(201,150,74,0.12)",
+        }}
+      />
+    </motion.div>
   );
 }
 
 const Categories = ({ heading = true }: { heading?: boolean }) => {
   const [cats, setCats] = useState<Cat[]>([]);
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+  const sectionScale = useTransform(scrollYProgress, [0, 0.3], [0.94, 1]);
 
   useEffect(() => {
     supabase
@@ -71,15 +111,16 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
   const display = cats.length > 0 ? cats : FALLBACK_CATEGORIES;
 
   return (
-    <section className="py-14 md:py-18">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
+    <section ref={sectionRef} className="py-14 md:py-18" style={{ perspective: "1200px" }}>
+      <motion.div style={{ scale: sectionScale }} className="max-w-[1280px] mx-auto px-6 lg:px-8">
         {heading && (
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-12">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30, rotateX: 8 }}
+              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.9, ease: LUXURY_EASE }}
+              style={{ perspective: "800px" }}
             >
               <p
                 className="font-semibold uppercase mb-3"
@@ -98,50 +139,66 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
                 }}
               >
                 Curated{" "}
-                <em className="font-serif italic" style={{ color: "#C9964A", fontWeight: 400 }}>
+                <em className="font-serif italic shimmer-text" style={{ fontWeight: 400 }}>
                   collections.
                 </em>
               </h2>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: 30, filter: "blur(4px)" }}
+              whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.8, delay: 0.1, ease: LUXURY_EASE }}
             >
-              <Link
-                to="/categories"
-                className="inline-flex items-center gap-2 transition-colors"
-                style={{
-                  fontSize: "12px",
-                  letterSpacing: "0.12em",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  color: "#3D2B1F",
-                  paddingBottom: "4px",
-                  borderBottom: "1px solid #C9964A",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#3D2B1F")}
-              >
-                Shop All Categories
-                <ArrowUpRight style={{ width: 14, height: 14 }} />
-              </Link>
+              <Magnetic strength={0.2}>
+                <Link
+                  to="/categories"
+                  className="inline-flex items-center gap-2 transition-colors"
+                  style={{
+                    fontSize: "12px",
+                    letterSpacing: "0.12em",
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    color: "#3D2B1F",
+                    paddingBottom: "4px",
+                    borderBottom: "1px solid #C9964A",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#C9964A")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#3D2B1F")}
+                >
+                  Shop All Categories
+                  <ArrowUpRight style={{ width: 14, height: 14 }} />
+                </Link>
+              </Magnetic>
             </motion.div>
           </div>
         )}
 
-        {/* 3x2 grid, centered */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 lg:gap-5 max-w-[960px] mx-auto">
+        {/* 3x2 grid, centered — staggered 3D reveal */}
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 lg:gap-5 max-w-[960px] mx-auto"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+          variants={staggerContainer}
+        >
           {display.slice(0, 6).map((c, i) => (
             <motion.div
               key={c.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: (i % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              variants={{
+                hidden: { opacity: 0, y: 40, scale: 0.9, rotateX: 12, filter: "blur(5px)" },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  rotateX: 0,
+                  filter: "blur(0px)",
+                  transition: { duration: 0.8, delay: (i % 3) * 0.1, ease: LUXURY_EASE },
+                },
+              }}
               className="group relative"
+              style={{ perspective: "1000px" }}
             >
               <TiltCard className="relative overflow-hidden rounded-2xl bg-white border border-[#e5e0d8]">
                 <Link to={`/category/${c.slug}`} className="block">
@@ -153,7 +210,7 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
                       decoding="async"
                       width={400}
                       height={400}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+                      className="w-full h-full object-cover transition-all duration-[1.2s] group-hover:scale-[1.1] group-hover:brightness-[1.04]"
                       style={{ backgroundColor: "hsl(36 30% 94%)" }}
                     />
                     <div
@@ -196,8 +253,8 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
               </TiltCard>
             </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

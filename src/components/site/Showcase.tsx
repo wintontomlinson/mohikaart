@@ -1,9 +1,10 @@
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Star, Heart, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
+import { LUXURY_EASE, SPRING_SMOOTH, staggerContainer, Magnetic } from "@/lib/animations";
 
 import catKeychain from "@/assets/cat-keychain.jpg";
 import catFrame from "@/assets/cat-frame.jpg";
@@ -31,6 +32,69 @@ const BADGE_STYLES: Record<string, { bg: string; color: string }> = {
   POPULAR: { bg: "#f5e6f0", color: "#1a1208" },
   PREMIUM: { bg: "#2d2015", color: "#c9a84c" },
 };
+
+/* ── 3D Tilt Product Card ── */
+function ProductTilt3D({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const glareOpacity = useMotionValue(0);
+  const glareX = useMotionValue(50);
+  const glareY = useMotionValue(50);
+
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), SPRING_SMOOTH);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), SPRING_SMOOTH);
+  const scale = useSpring(1, SPRING_SMOOTH);
+
+  const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect || window.matchMedia("(pointer: coarse)").matches) return;
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    x.set(px);
+    y.set(py);
+    glareX.set((px + 0.5) * 100);
+    glareY.set((py + 0.5) * 100);
+    glareOpacity.set(0.18);
+    scale.set(1.03);
+  }, [x, y, glareX, glareY, glareOpacity, scale]);
+
+  const handleLeave = useCallback(() => {
+    x.set(0);
+    y.set(0);
+    glareOpacity.set(0);
+    scale.set(1);
+  }, [x, y, glareOpacity, scale]);
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      style={{
+        rotateX,
+        rotateY,
+        scale,
+        transformStyle: "preserve-3d",
+        perspective: "900px",
+      }}
+      className={`relative ${className}`}
+    >
+      {children}
+      {/* Reflective glare */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-2xl z-20"
+        style={{
+          opacity: glareOpacity,
+          background: useTransform(
+            [glareX, glareY],
+            ([gx, gy]) => `radial-gradient(ellipse at ${gx}% ${gy}%, rgba(255,255,255,0.4) 0%, transparent 65%)`
+          ),
+        }}
+      />
+    </motion.div>
+  );
+}
 
 function formatINR(n: number) {
   return "₹" + n.toLocaleString("en-IN");
@@ -62,54 +126,68 @@ const Showcase = () => {
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-12">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 30, rotateX: 8 }}
+            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.9, ease: LUXURY_EASE }}
+            style={{ perspective: "800px" }}
           >
             <p className="font-semibold uppercase mb-3" style={{ fontSize: "11px", color: "#c9a84c", letterSpacing: "0.25em" }}>
               Best Sellers
             </p>
             <h2 className="font-display" style={{ fontWeight: 400, fontSize: "clamp(1.85rem, 3.8vw, 2.6rem)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "#1a1208" }}>
               Loved by{" "}
-              <em className="font-serif italic" style={{ color: "#c9a84c", fontWeight: 400 }}>everyone.</em>
+              <em className="font-serif italic shimmer-text" style={{ fontWeight: 400 }}>everyone.</em>
             </h2>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: 30, filter: "blur(4px)" }}
+            whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, delay: 0.15, ease: LUXURY_EASE }}
           >
-            <Link
-              to="/shop"
-              className="inline-flex items-center gap-2 text-[12px] tracking-[0.12em] uppercase font-semibold transition-colors hover:text-[#c9a84c]"
-              style={{ color: "#1a1208", paddingBottom: "4px", borderBottom: "1px solid #c9a84c" }}
-            >
-              View All Products
-              <ArrowRight style={{ width: 14, height: 14 }} />
-            </Link>
+            <Magnetic strength={0.2}>
+              <Link
+                to="/shop"
+                className="inline-flex items-center gap-2 text-[12px] tracking-[0.12em] uppercase font-semibold transition-colors hover:text-[#c9a84c]"
+                style={{ color: "#1a1208", paddingBottom: "4px", borderBottom: "1px solid #c9a84c" }}
+              >
+                View All Products
+                <ArrowRight style={{ width: 14, height: 14 }} />
+              </Link>
+            </Magnetic>
           </motion.div>
         </div>
 
-        {/* Product grid — premium luxury cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
+        {/* Product grid — premium luxury 3D cards */}
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+          variants={staggerContainer}
+        >
           {PRODUCTS.map((p, i) => (
             <motion.div
               key={p.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="group cursor-pointer"
-              style={{ transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s cubic-bezier(0.22,1,0.36,1)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-10px) scale(1.01)"; e.currentTarget.style.boxShadow = "0 28px 56px -16px rgba(26,18,8,0.16), 0 0 0 1px rgba(201,168,76,0.06)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0) scale(1)"; e.currentTarget.style.boxShadow = "0 4px 12px -6px rgba(26,18,8,0.06)"; }}
+              variants={{
+                hidden: { opacity: 0, y: 50, scale: 0.9, rotateX: 12, filter: "blur(6px)" },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  rotateX: 0,
+                  filter: "blur(0px)",
+                  transition: { duration: 0.8, delay: i * 0.08, ease: LUXURY_EASE },
+                },
+              }}
+              style={{ perspective: "1000px" }}
             >
+              <ProductTilt3D className="group cursor-pointer">
               {/* Image */}
-              <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1", boxShadow: "0 4px 12px -6px rgba(26,18,8,0.06)" }}>
-                <img src={p.image} alt={p.name} loading="lazy" decoding="async" width={400} height={400} className="w-full h-full object-cover transition-all duration-[1s] ease-out group-hover:scale-[1.08] group-hover:brightness-[1.02]" style={{ backgroundColor: "hsl(36 30% 94%)" }} />
+              <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1", boxShadow: "0 4px 12px -6px rgba(26,18,8,0.06)", transition: "box-shadow 0.6s cubic-bezier(0.22,1,0.36,1)" }}>
+                <img src={p.image} alt={p.name} loading="lazy" decoding="async" width={400} height={400} className="w-full h-full object-cover transition-all duration-[1.2s] ease-out group-hover:scale-[1.1] group-hover:brightness-[1.03]" style={{ backgroundColor: "hsl(36 30% 94%)" }} />
 
                 {/* Glassmorphism overlay on hover */}
                 <div
@@ -146,6 +224,9 @@ const Showcase = () => {
                     <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Add to Cart
                   </button>
                 </div>
+
+                {/* Animated border glow on hover */}
+                <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ boxShadow: "inset 0 0 0 1.5px rgba(201,150,74,0.25), 0 20px 50px -15px rgba(201,150,74,0.12)" }} />
               </div>
 
               {/* Card body */}
@@ -167,9 +248,10 @@ const Showcase = () => {
                   <span className="text-[10px] sm:text-xs line-through" style={{ color: "rgba(26,18,8,0.4)" }}>{formatINR(p.mrp)}</span>
                 </div>
               </div>
+              </ProductTilt3D>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

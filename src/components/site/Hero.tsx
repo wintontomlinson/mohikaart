@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useReducedMotion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles, Star, Package2, Truck, ChevronRight, Instagram, Heart, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import { safePath } from "@/lib/validation";
 import { useHeroContent } from "@/lib/cms";
+import { Magnetic, LUXURY_EASE, SPRING_SMOOTH } from "@/lib/animations";
 import heroFallback from "@/assets/hero-resin-tray.jpg";
 import keychain from "@/assets/cat-keychain.jpg";
 import bookmark from "@/assets/cat-bookmark.jpg";
@@ -63,8 +64,11 @@ const Hero = () => {
   const reduceMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const yRight = useTransform(scrollYProgress, [0, 1], [0, -30]);
-  const yImage = useTransform(scrollYProgress, [0, 1], [0, 50]);
+  const yRight = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const yImage = useTransform(scrollYProgress, [0, 1], [0, 80]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.96]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0.7]);
+  const rotateXScroll = useTransform(scrollYProgress, [0, 0.3], [0, 3]);
 
   useEffect(() => {
     supabase
@@ -166,9 +170,10 @@ const Hero = () => {
 
         {/* ══ LEFT (45%) ══ */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, y: 40, rotateX: 8 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+          style={{ scale: heroScale, opacity: heroOpacity, transformStyle: "preserve-3d", perspective: "1200px" }}
           className="flex w-full flex-col justify-center pb-6 md:w-[45%] md:pb-0 md:pr-10 lg:pr-16 xl:pr-20"
         >
           {/* Eyebrow breadcrumb */}
@@ -220,11 +225,11 @@ const Hero = () => {
           </motion.div>
 
           {/* ── HEADLINE ── */}
-          <div className="overflow-hidden">
+          <div className="overflow-hidden" style={{ perspective: "1000px" }}>
             <motion.h1
-              initial={{ opacity: 0, y: 36 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.05, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 50, rotateX: 15, transformOrigin: "bottom center" }}
+              animate={{ opacity: 1, y: 0, rotateX: 0 }}
+              transition={{ duration: 1.2, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
               className="font-display"
               style={{
                 fontWeight: 300,
@@ -293,14 +298,15 @@ const Hero = () => {
 
           {/* ── CTA BUTTONS ── */}
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.9, delay: 0.5 }}
             className="mt-9 flex flex-wrap items-center gap-3"
           >
-            <Link
-              to={ctaPrimary}
-              className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full"
+            <Magnetic strength={0.15}>
+              <Link
+                to={ctaPrimary}
+                className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full"
               style={{
                 padding: "0.92rem 2.3rem",
                 fontSize: "0.78rem",
@@ -331,7 +337,9 @@ const Hero = () => {
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
               </span>
             </Link>
+            </Magnetic>
 
+            <Magnetic strength={0.12}>
             <Link
               to={ctaSecondary}
               className="group inline-flex items-center gap-2 rounded-full transition-all duration-400"
@@ -362,6 +370,7 @@ const Hero = () => {
             >
               {content.cta_secondary_label}
             </Link>
+            </Magnetic>
           </motion.div>
 
           {/* ── STATS ROW ── */}
@@ -427,8 +436,8 @@ const Hero = () => {
         </motion.div>
 
         {/* ══ RIGHT (55%) ══ */}
-        <div className="relative w-full md:w-[55%]" style={{ height: "clamp(380px, 56vh, 620px)" }}>
-          <motion.div style={{ y: yRight }} className="absolute inset-0">
+        <div className="relative w-full md:w-[55%]" style={{ height: "clamp(380px, 56vh, 620px)", perspective: "1200px" }}>
+          <motion.div style={{ y: yRight, rotateX: rotateXScroll }} className="absolute inset-0" >
 
             {/* ── MAIN HERO IMAGE ── */}
             <TiltCard
@@ -438,7 +447,8 @@ const Hero = () => {
                 boxShadow:
                   "0 60px 140px -40px hsl(348 28% 28%/0.32), " +
                   "0 0 0 1px hsl(36 38% 88%/0.5), " +
-                  "inset 0 1px 0 hsl(36 50% 100%/0.65)",
+                  "inset 0 1px 0 hsl(36 50% 100%/0.65)," +
+                  "0 0 80px -20px hsl(34 58% 52%/0.15)",
               }}
             >
               <motion.div className="absolute inset-0 scale-[1.08]" style={{ y: yImage }}>
