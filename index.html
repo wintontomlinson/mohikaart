@@ -28,126 +28,72 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="robots" content="index, follow" />
 
-    <!-- ────────────────────────────────────────────────────────────
-         Browser-side security hardening (defense in depth)
-         The real authority lives in Supabase RLS + create_order RPC,
-         but these meta-tags drastically reduce the blast radius of
-         any front-end XSS or content-injection mistakes.
-         ──────────────────────────────────────────────────────────── -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
     <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), browsing-topics=(), interest-cohort=(), payment=(self https://checkout.razorpay.com)" />
-    <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self';
-      base-uri 'self';
-      object-src 'none';
-      frame-ancestors 'self';
-      form-action 'self' https://wa.me https://api.whatsapp.com;
-      img-src 'self' data: blob: https:;
-      font-src 'self' data: https://fonts.gstatic.com;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      script-src 'self' 'unsafe-inline' https://checkout.razorpay.com;
-      connect-src 'self' https: wss:;
-      frame-src https://checkout.razorpay.com https://api.razorpay.com https://*.razorpay.com;
-      worker-src 'self' blob:;
-      upgrade-insecure-requests;
-    " />
   </head>
 
   <body>
-    <!-- ═══ INSTANT LOADING SCREEN (shows before JS bundle loads) ═══ -->
-    <div id="splash-loader" style="
-      position: fixed; inset: 0; z-index: 99999;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%);
-      transition: opacity 0.6s ease;
-    ">
+    <!-- ═══ INSTANT LOADING SCREEN ═══ -->
+    <div id="splash-loader" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(168deg,hsl(36 42% 99%) 0%,hsl(35 32% 96%) 100%);transition:opacity 0.6s ease;">
       <style>
-        @keyframes splash-scale-in {
-          from { transform: scale(0.6); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-        @keyframes splash-blob {
-          0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: scale(1); }
-          50% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 60%; transform: scale(1.05); }
-        }
-        @keyframes splash-glow {
-          0%, 100% { box-shadow: 0 8px 32px -8px hsla(34, 58%, 52%, 0.25); }
-          50% { box-shadow: 0 12px 48px -6px hsla(34, 58%, 52%, 0.4); }
-        }
-        @keyframes splash-pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.04); }
-        }
-        #splash-loader.fade-out { opacity: 0; pointer-events: none; }
+        @keyframes splash-in{from{transform:scale(0.6);opacity:0}to{transform:scale(1);opacity:1}}
+        @keyframes splash-blob{0%,100%{border-radius:40% 60% 70% 30%/40% 50% 60% 50%;transform:scale(1)}50%{border-radius:60% 40% 30% 70%/50% 60% 40% 60%;transform:scale(1.05)}}
+        @keyframes splash-glow{0%,100%{box-shadow:0 8px 32px -8px hsla(34,58%,52%,0.25)}50%{box-shadow:0 12px 48px -6px hsla(34,58%,52%,0.4)}}
+        @keyframes splash-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+        @keyframes splash-fill{from{width:0%}to{width:100%}}
+        #splash-loader.fade-out{opacity:0;pointer-events:none}
       </style>
-      <!-- Background blobs -->
-      <div style="position:absolute;top:20%;left:20%;width:360px;height:360px;border-radius:50%;background:hsla(348,55%,90%,0.25);filter:blur(90px);animation:splash-blob 8s ease-in-out infinite;"></div>
-      <div style="position:absolute;bottom:20%;right:20%;width:400px;height:400px;border-radius:50%;background:hsla(38,65%,91%,0.25);filter:blur(90px);animation:splash-blob 10s ease-in-out infinite 2s;"></div>
 
-      <!-- Logo container — uses high-res brand mark -->
-      <div style="
-        width: 120px; height: 120px; border-radius: 28px;
-        background: white; display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 20px 60px -15px hsla(348,28%,28%,0.2);
-        animation: splash-scale-in 0.5s ease forwards, splash-glow 2.5s 0.5s ease-in-out infinite;
-        position: relative;
-        overflow: hidden;
-      ">
-        <img src="/mohika-mark.png" alt="Mohika Art" width="88" height="88" style="object-fit:contain; animation: splash-pulse 3s 1s ease-in-out infinite;" />
-        <div style="position:absolute;inset:0;border-radius:28px;border:2px solid hsla(34,58%,52%,0.35);pointer-events:none;"></div>
+      <!-- Background blobs -->
+      <div style="position:absolute;top:20%;left:20%;width:360px;height:360px;border-radius:50%;background:hsla(348,55%,90%,0.25);filter:blur(90px);animation:splash-blob 8s ease-in-out infinite"></div>
+      <div style="position:absolute;bottom:20%;right:20%;width:400px;height:400px;border-radius:50%;background:hsla(38,65%,91%,0.25);filter:blur(90px);animation:splash-blob 10s ease-in-out infinite 2s"></div>
+
+      <!-- Logo -->
+      <div style="width:120px;height:120px;border-radius:28px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px -15px hsla(348,28%,28%,0.2);animation:splash-in 0.5s ease forwards,splash-glow 2.5s 0.5s ease-in-out infinite;position:relative;overflow:hidden">
+        <img src="/mohika-mark.png" alt="Mohika Art" width="88" height="88" style="object-fit:contain;animation:splash-pulse 3s 1s ease-in-out infinite" />
+        <div style="position:absolute;inset:0;border-radius:28px;border:2px solid hsla(34,58%,52%,0.35);pointer-events:none"></div>
       </div>
 
       <!-- Brand text -->
-      <div style="
-        margin-top: 28px; text-align: center;
-        animation: splash-scale-in 0.5s 0.25s ease forwards;
-        opacity: 0;
-      ">
-        <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; font-weight: 300; background: linear-gradient(118deg, hsl(34 52% 42%), hsl(38 72% 62%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-          Mohika Art
-        </div>
-        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.45em; color: hsl(25 10% 48%); margin-top: 10px; font-family: system-ui, sans-serif;">
-          Customized Resin Crafts
-        </div>
+      <div style="margin-top:28px;text-align:center;animation:splash-in 0.5s 0.2s ease forwards;opacity:0">
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:2rem;font-weight:300;background:linear-gradient(118deg,hsl(34 52% 42%),hsl(38 72% 62%));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Mohika Art</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.45em;color:hsl(25 10% 48%);margin-top:10px;font-family:system-ui,sans-serif">Customized Resin Crafts</div>
       </div>
 
-      <!-- Percentage counter -->
-      <div id="splash-percent" style="margin-top: 32px; font-family: system-ui, sans-serif; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; color: hsl(34 52% 42%); animation: splash-scale-in 0.4s 0.35s ease forwards; opacity: 0;">
-        0%
-      </div>
+      <!-- Percentage counter (JS driven) -->
+      <div id="splash-percent" style="margin-top:32px;font-family:system-ui,sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.02em;color:hsl(34 52% 42%);opacity:0;animation:splash-in 0.3s 0.3s ease forwards">0%</div>
 
-      <!-- Progress bar -->
-      <div style="margin-top: 14px; width: 200px; height: 6px; border-radius: 9999px; background: hsl(34 28% 88%); overflow: hidden; animation: splash-scale-in 0.4s 0.4s ease forwards; opacity: 0; box-shadow: inset 0 1px 2px hsla(0,0%,0%,0.06);">
-        <div id="splash-bar" style="height: 100%; background: linear-gradient(90deg, hsl(34 58% 52%), hsl(38 65% 62%), hsl(34 58% 48%)); border-radius: 9999px; width: 0%; transition: width 0.1s linear;"></div>
+      <!-- Progress bar (CSS animation as fallback + JS sync) -->
+      <div style="margin-top:14px;width:220px;height:7px;border-radius:9999px;background:hsl(34 28% 88%);overflow:hidden;opacity:0;animation:splash-in 0.3s 0.35s ease forwards;box-shadow:inset 0 1px 3px hsla(0,0%,0%,0.08)">
+        <div id="splash-bar" style="height:100%;background:linear-gradient(90deg,hsl(34 58% 52%),hsl(38 65% 58%),hsl(34 58% 48%));border-radius:9999px;width:0%;animation:splash-fill 2.8s 0.5s ease-out forwards"></div>
       </div>
 
       <!-- Loading text -->
-      <div style="margin-top: 12px; font-size: 11px; letter-spacing: 0.12em; color: hsl(25 10% 52%); font-family: system-ui, sans-serif; animation: splash-scale-in 0.4s 0.5s ease forwards; opacity: 0;">
-        Loading your experience...
-      </div>
-
-      <!-- Counter script — animates 0→100% over ~2.5s -->
-      <script>
-        (function() {
-          var pct = 0;
-          var el = document.getElementById('splash-percent');
-          var bar = document.getElementById('splash-bar');
-          var start = Date.now();
-          var duration = 2400;
-          function tick() {
-            var elapsed = Date.now() - start;
-            pct = Math.min(100, Math.round((elapsed / duration) * 100));
-            if (el) el.textContent = pct + '%';
-            if (bar) bar.style.width = pct + '%';
-            if (pct < 100) requestAnimationFrame(tick);
-          }
-          // Start after a small delay so the scale-in animation plays first
-          setTimeout(function() { requestAnimationFrame(tick); }, 500);
-        })();
-      </script>
+      <div style="margin-top:14px;font-size:11px;letter-spacing:0.12em;color:hsl(25 10% 52%);font-family:system-ui,sans-serif;opacity:0;animation:splash-in 0.3s 0.4s ease forwards">Loading your experience...</div>
     </div>
+
+    <!-- Counter script (runs immediately, before React) -->
+    <script>
+      (function(){
+        var el=document.getElementById('splash-percent');
+        var bar=document.getElementById('splash-bar');
+        if(!el)return;
+        var start=performance.now();
+        var duration=2800;
+        var delay=500;
+        function tick(now){
+          var elapsed=now-start-delay;
+          if(elapsed<0){requestAnimationFrame(tick);return;}
+          var pct=Math.min(100,Math.round((elapsed/duration)*100));
+          el.textContent=pct+'%';
+          if(bar)bar.style.width=pct+'%';
+          if(pct<100)requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      })();
+    </script>
 
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

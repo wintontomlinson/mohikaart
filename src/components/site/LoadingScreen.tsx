@@ -1,74 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 /**
- * LoadingScreen works with the inline HTML splash in index.html.
- * It keeps the splash visible until the counter finishes (100%)
- * and the hero image is loaded, then smoothly fades it out.
- * Shows on EVERY page load (not just first visit).
+ * LoadingScreen manages the HTML splash in index.html.
+ * It waits for the counter to reach 100% (3.3s) then fades out.
+ * Shows on every page load.
  */
 const LoadingScreen = () => {
-  const [removed, setRemoved] = useState(false);
-
   useEffect(() => {
     const splash = document.getElementById("splash-loader");
-    if (!splash) {
-      setRemoved(true);
-      return;
-    }
+    if (!splash) return;
 
-    // Respect prefers-reduced-motion
-    const prefersReduced =
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) {
+    // Respect reduced motion
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       splash.remove();
-      setRemoved(true);
       return;
     }
 
+    let removed = false;
     const removeSplash = () => {
-      // Don't remove twice
-      if (!document.getElementById("splash-loader")) return;
+      if (removed) return;
+      removed = true;
       splash.classList.add("fade-out");
-      setTimeout(() => {
-        splash.remove();
-        setRemoved(true);
-      }, 600);
+      setTimeout(() => { try { splash.remove(); } catch(e) {} }, 700);
     };
 
-    // Wait for the counter to finish (2.9s = 500ms delay + 2400ms animation)
-    // Then check if hero image is loaded, otherwise wait a bit more
-    const waitForReady = () => {
-      const heroImg = document.querySelector(
-        'img[fetchpriority="high"]'
-      ) as HTMLImageElement | null;
+    // Wait 3.3s — this is 500ms delay + 2800ms counter duration
+    // So user sees full 0%→100% animation before site reveals
+    const timer = setTimeout(removeSplash, 3300);
 
-      if (!heroImg || heroImg.complete) {
-        // Hero already loaded or doesn't exist — remove immediately
-        removeSplash();
-        return;
-      }
-
-      // Wait for hero to load, but max 1.5s more
-      const heroTimeout = setTimeout(removeSplash, 1500);
-      heroImg.addEventListener(
-        "load",
-        () => {
-          clearTimeout(heroTimeout);
-          setTimeout(removeSplash, 150);
-        },
-        { once: true }
-      );
-    };
-
-    // Min time = counter duration (500ms start delay + 2400ms count = 2900ms)
-    // We add a tiny buffer → 3000ms
-    const minTimer = setTimeout(waitForReady, 3000);
-
-    // Absolute max — never keep splash longer than 5s
+    // Safety max — never block longer than 5s
     const maxTimer = setTimeout(removeSplash, 5000);
 
     return () => {
-      clearTimeout(minTimer);
+      clearTimeout(timer);
       clearTimeout(maxTimer);
     };
   }, []);
