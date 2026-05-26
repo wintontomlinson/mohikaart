@@ -7,6 +7,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/lib/cart";
 import { Monogram, Wordmark } from "@/components/site/Logo";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ── nav links ── */
 const links = [
@@ -18,17 +19,6 @@ const links = [
   { to: "/contact", label: "Contact" },
 ];
 
-const shopDropdownLinks = [
-  { to: "/shop", label: "All Products" },
-  { to: "/shop?category=keychain", label: "Name Keychains" },
-  { to: "/shop?category=frame", label: "Photo Frames" },
-  { to: "/shop?category=wedding", label: "Wedding Keepsakes" },
-  { to: "/shop?category=tray", label: "Resin Trays" },
-  { to: "/shop?category=coaster", label: "Coaster Sets" },
-  { to: "/shop?category=bookmark", label: "Bookmarks" },
-  { to: "/shop?category=hamper", label: "Gift Hampers" },
-];
-
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [scrollDir, setScrollDir] = useState<"up" | "down">("up");
@@ -37,6 +27,9 @@ const Navbar = () => {
   const [mobileShopOpen, setMobileShopOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [shopDropdownLinks, setShopDropdownLinks] = useState<{ to: string; label: string }[]>([
+    { to: "/shop", label: "All Products" },
+  ]);
   const shopRef = useRef<HTMLLIElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
@@ -65,6 +58,18 @@ const Navbar = () => {
     setMobileShopOpen(false);
     setSearchOpen(false);
   }, [pathname]);
+
+  /* fetch live categories from Supabase */
+  useEffect(() => {
+    supabase.from("categories").select("slug, name").order("sort_order").then(({ data }) => {
+      if (data && data.length > 0) {
+        setShopDropdownLinks([
+          { to: "/shop", label: "All Products" },
+          ...data.map((c: any) => ({ to: `/shop?category=${c.slug}`, label: c.name })),
+        ]);
+      }
+    });
+  }, []);
 
   /* close dropdowns on outside click */
   useEffect(() => {
@@ -137,10 +142,12 @@ const Navbar = () => {
 
               if (isShop) {
                 return (
-                  <li key={`${l.to}-${idx}`} className="relative" ref={shopRef}>
+                  <li key={`${l.to}-${idx}`} className="relative" ref={shopRef}
+                    onMouseEnter={() => setShopOpen(true)}
+                    onMouseLeave={() => setShopOpen(false)}
+                  >
                     <Link
                       to="/shop"
-                      onMouseEnter={() => setShopOpen(true)}
                       className="group relative px-[14px] py-2.5 inline-flex flex-col items-center"
                     >
                       <span
@@ -170,36 +177,46 @@ const Navbar = () => {
                     <AnimatePresence>
                       {shopOpen && (
                         <motion.div
-                          initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                          initial={{ opacity: 0, y: 12, scale: 0.95 }}
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                          className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-[220px] rounded-2xl overflow-hidden"
+                          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                          className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-[260px] rounded-2xl overflow-hidden"
                           style={{
-                            background: "rgba(255,255,255,0.98)",
-                            backdropFilter: "blur(24px)",
-                            border: "1px solid rgba(0,0,0,0.08)",
-                            boxShadow: "0 20px 60px -12px rgba(0,0,0,0.15)",
+                            background: "linear-gradient(180deg, rgba(253,249,240,0.99) 0%, rgba(255,255,255,0.99) 100%)",
+                            backdropFilter: "blur(24px) saturate(180%)",
+                            border: "1px solid rgba(201,168,76,0.15)",
+                            boxShadow: "0 24px 80px -16px rgba(26,18,8,0.2), 0 0 0 1px rgba(201,168,76,0.08)",
                           }}
-                          onMouseEnter={() => setShopOpen(true)}
-                          onMouseLeave={() => setShopOpen(false)}
                         >
-                          <div className="p-2">
+                          <div className="px-2 pt-3 pb-2">
+                            <div className="px-3 mb-2">
+                              <span className="text-[9px] uppercase tracking-[0.2em] font-semibold" style={{ color: "#c9a84c" }}>Shop by Category</span>
+                            </div>
                             {shopDropdownLinks.map((sl, i) => (
                               <motion.div
                                 key={sl.to}
-                                initial={{ opacity: 0, x: -8 }}
+                                initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.03, duration: 0.2 }}
+                                transition={{ delay: i * 0.04, duration: 0.25 }}
                               >
                                 <Link
                                   to={sl.to}
-                                  className="block px-4 py-2.5 rounded-xl text-[13px] font-medium text-foreground/65 hover:text-foreground hover:bg-amber-50/60 transition-all duration-200"
+                                  className="group/item flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 hover:bg-gradient-to-r hover:from-[#c9a84c]/8 hover:to-transparent"
+                                  style={{ color: "rgba(26,18,8,0.65)" }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.color = "#1a1208")}
+                                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(26,18,8,0.65)")}
                                 >
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#c9a84c]/40 group-hover/item:bg-[#c9a84c] group-hover/item:scale-125 transition-all duration-200" />
                                   {sl.label}
                                 </Link>
                               </motion.div>
                             ))}
+                            <div className="mt-2 pt-2 mx-3 border-t border-[#c9a84c]/10">
+                              <Link to="/shop" className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-semibold py-1.5 hover:gap-2.5 transition-all duration-200" style={{ color: "#c9a84c" }}>
+                                Browse All <ArrowRight className="w-3 h-3" />
+                              </Link>
+                            </div>
                           </div>
                         </motion.div>
                       )}

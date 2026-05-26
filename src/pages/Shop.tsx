@@ -189,9 +189,10 @@ const Shop = () => {
                   return (
                     <motion.div key={p.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-                      className="group cursor-pointer" onClick={() => setSelectedProduct(p)}
-                      style={{ transition: "transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 40px -12px rgba(26,18,8,0.15)"; }}
+                      className="group cursor-pointer rounded-2xl sm:rounded-[20px] bg-white/60 backdrop-blur-sm border border-transparent hover:border-[#c9a84c]/20 p-1.5 sm:p-2"
+                      onClick={() => setSelectedProduct(p)}
+                      style={{ transition: "transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease, border-color 0.3s ease" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.boxShadow = "0 20px 50px -12px rgba(26,18,8,0.12)"; }}
                       onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
                       <div className="relative overflow-hidden rounded-xl sm:rounded-2xl" style={{ aspectRatio: "1/1" }}>
                         <img src={resolveImage(p.image_url)} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.07]" />
@@ -220,14 +221,18 @@ const Shop = () => {
                         </div>
                       </div>
                       <div className="mt-2.5 sm:mt-3 px-0.5">
-                        <div className="text-[8px] sm:text-[9px] uppercase tracking-[0.18em] font-semibold mb-0.5 sm:mb-1" style={{ color: "#c9a84c" }}>Handmade · Customizable</div>
+                        <div className="text-[8px] sm:text-[9px] uppercase tracking-[0.18em] font-semibold mb-0.5 sm:mb-1" style={{ color: "#c9a84c" }}>
+                          {categories.find((c) => c.slug === p.category_slug)?.name || "Handmade"} · Customizable
+                        </div>
                         <h3 className="text-[12px] sm:text-[13px] md:text-sm font-medium leading-tight mb-1 sm:mb-1.5" style={{ color: "#1a1208" }}>{p.name}</h3>
                         <div className="flex items-center gap-0.5 mb-1 sm:mb-1.5">
                           {[...Array(5)].map((_, j) => <Star key={j} className="w-2.5 h-2.5 sm:w-3 sm:h-3" style={{ fill: "#c9a84c", color: "#c9a84c" }} />)}
+                          <span className="ml-1 text-[9px] text-muted-foreground">(5.0)</span>
                         </div>
                         <div className="flex items-baseline gap-1.5 sm:gap-2">
                           <span className="font-semibold text-[13px] sm:text-sm" style={{ color: "#1a1208" }}>{formatINR(p.price)}</span>
                           {p.original_price && <span className="text-[10px] sm:text-xs line-through" style={{ color: "rgba(26,18,8,0.4)" }}>{formatINR(p.original_price)}</span>}
+                          {discount > 0 && <span className="text-[9px] font-bold text-emerald-600">{discount}% off</span>}
                         </div>
                       </div>
                     </motion.div>

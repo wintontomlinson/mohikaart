@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import {
   LogOut, Package, Home, Menu, LayoutDashboard,
   ShoppingCart, Tag, Settings, Mail,
-  X, Eye, EyeOff, ShieldAlert,
+  X, Eye, EyeOff, ShieldAlert, BarChart3, FileText,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
 import { Monogram } from "@/components/site/Logo";
@@ -108,6 +108,8 @@ const navItems = [
   { to: "/admin/categories", icon: Tag, label: "Categories" },
   { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
   { to: "/admin/inquiries", icon: Mail, label: "Inquiries" },
+  { to: "/admin/cms", icon: FileText, label: "Content" },
+  { to: "/admin/analytics", icon: BarChart3, label: "Analytics" },
   { to: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -115,8 +117,8 @@ const bottomNavItems = [
   navItems[0], // Dashboard
   navItems[1], // Products
   navItems[3], // Orders
-  navItems[4], // Inquiries
-  navItems[5], // Settings
+  navItems[5], // Content
+  navItems[6], // Analytics
 ];
 
 /* ─── Admin Shell ─── */
