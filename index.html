@@ -63,9 +63,10 @@
       </div>
     </div>
 
-    <!-- Counter script runs IMMEDIATELY — no CSP issues, outside any blocked context -->
+    <!-- Counter script + auto-remove after React mounts or 2s max -->
     <script>
-    !function(){var e=document.getElementById("s-pct"),b=document.getElementById("s-bar");if(!e)return;var s=performance.now(),d=1500;!function t(n){var p=Math.min(100,Math.round((n-s)/d*100));if(p<0)p=0;e.textContent=p+"%";b.style.width=p+"%";if(p<100)requestAnimationFrame(t)}(s)}();
+    !function(){var e=document.getElementById("s-pct"),b=document.getElementById("s-bar");if(!e)return;var s=performance.now(),d=1500;!function t(n){var p=Math.min(100,Math.round((n-s)/d*100));if(p<0)p=0;e.textContent=p+"%";b.style.width=p+"%";if(p<100)requestAnimationFrame(t)}(s);
+    setTimeout(function(){var sp=document.getElementById("splash-loader");if(sp){sp.classList.add("done");setTimeout(function(){try{sp.remove()}catch(e){}},500)}},2000)}();
     </script>
 
     <div id="root"></div>
