@@ -61,11 +61,11 @@
       position: fixed; inset: 0; z-index: 99999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       background: linear-gradient(168deg, hsl(36 42% 99%) 0%, hsl(35 32% 96%) 100%);
-      transition: opacity 0.5s ease;
+      transition: opacity 0.6s ease;
     ">
       <style>
         @keyframes splash-scale-in {
-          from { transform: scale(0.7); opacity: 0; }
+          from { transform: scale(0.6); opacity: 0; }
           to { transform: scale(1); opacity: 1; }
         }
         @keyframes splash-progress {
@@ -77,41 +77,54 @@
           50% { border-radius: 60% 40% 30% 70% / 50% 60% 40% 60%; transform: scale(1.05); }
         }
         @keyframes splash-glow {
-          0%, 100% { box-shadow: 0 0 0 0 hsla(34, 58%, 52%, 0.3); }
-          50% { box-shadow: 0 0 20px 4px hsla(34, 58%, 52%, 0.15); }
+          0%, 100% { box-shadow: 0 8px 32px -8px hsla(34, 58%, 52%, 0.25); }
+          50% { box-shadow: 0 12px 48px -6px hsla(34, 58%, 52%, 0.4); }
+        }
+        @keyframes splash-pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.04); }
         }
         #splash-loader.fade-out { opacity: 0; pointer-events: none; }
       </style>
       <!-- Background blobs -->
-      <div style="position:absolute;top:25%;left:25%;width:320px;height:320px;border-radius:50%;background:hsla(348,55%,90%,0.3);filter:blur(80px);animation:splash-blob 8s ease-in-out infinite;"></div>
-      <div style="position:absolute;bottom:25%;right:25%;width:384px;height:384px;border-radius:50%;background:hsla(38,65%,91%,0.3);filter:blur(80px);animation:splash-blob 10s ease-in-out infinite 2s;"></div>
-      <!-- Logo container -->
+      <div style="position:absolute;top:20%;left:20%;width:360px;height:360px;border-radius:50%;background:hsla(348,55%,90%,0.25);filter:blur(90px);animation:splash-blob 8s ease-in-out infinite;"></div>
+      <div style="position:absolute;bottom:20%;right:20%;width:400px;height:400px;border-radius:50%;background:hsla(38,65%,91%,0.25);filter:blur(90px);animation:splash-blob 10s ease-in-out infinite 2s;"></div>
+
+      <!-- Logo container — uses high-res brand mark -->
       <div style="
-        width: 96px; height: 96px; border-radius: 24px;
+        width: 120px; height: 120px; border-radius: 28px;
         background: white; display: flex; align-items: center; justify-content: center;
         box-shadow: 0 20px 60px -15px hsla(348,28%,28%,0.2);
-        animation: splash-scale-in 0.6s ease forwards, splash-glow 2s ease-in-out infinite;
+        animation: splash-scale-in 0.5s ease forwards, splash-glow 2.5s 0.5s ease-in-out infinite;
         position: relative;
+        overflow: hidden;
       ">
-        <img src="/favicon.png" alt="" width="64" height="64" style="object-fit:contain;" />
-        <div style="position:absolute;inset:0;border-radius:24px;border:2px solid hsla(34,58%,52%,0.4);"></div>
+        <img src="/mohika-mark.png" alt="Mohika Art" width="88" height="88" style="object-fit:contain; animation: splash-pulse 3s 1s ease-in-out infinite;" />
+        <div style="position:absolute;inset:0;border-radius:28px;border:2px solid hsla(34,58%,52%,0.35);pointer-events:none;"></div>
       </div>
+
       <!-- Brand text -->
       <div style="
-        margin-top: 32px; text-align: center;
-        animation: splash-scale-in 0.6s 0.3s ease forwards;
+        margin-top: 28px; text-align: center;
+        animation: splash-scale-in 0.5s 0.25s ease forwards;
         opacity: 0;
       ">
-        <div style="font-family: 'Playfair Display', serif; font-size: 1.875rem; font-weight: 300; background: linear-gradient(118deg, hsl(34 52% 42%), hsl(38 72% 62%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; font-weight: 300; background: linear-gradient(118deg, hsl(34 52% 42%), hsl(38 72% 62%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
           Mohika Art
         </div>
-        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5em; color: hsl(25 10% 50%); margin-top: 8px;">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.45em; color: hsl(25 10% 48%); margin-top: 10px; font-family: system-ui, sans-serif;">
           Customized Resin Crafts
         </div>
       </div>
+
       <!-- Progress bar -->
-      <div style="margin-top: 40px; width: 192px; height: 4px; border-radius: 9999px; background: hsl(34 28% 90%); overflow: hidden;">
-        <div style="height: 100%; background: linear-gradient(90deg, hsl(34 58% 52%), hsl(38 65% 68%)); border-radius: 9999px; animation: splash-progress 2s 0.2s ease-in-out forwards; width: 0%;"></div>
+      <div style="margin-top: 36px; width: 180px; height: 3px; border-radius: 9999px; background: hsl(34 28% 90%); overflow: hidden; animation: splash-scale-in 0.4s 0.4s ease forwards; opacity: 0;">
+        <div style="height: 100%; background: linear-gradient(90deg, hsl(34 58% 52%), hsl(38 65% 68%), hsl(34 58% 52%)); background-size: 200% 100%; border-radius: 9999px; animation: splash-progress 2.2s 0.6s ease-in-out forwards; width: 0%;"></div>
+      </div>
+
+      <!-- Loading text -->
+      <div style="margin-top: 16px; font-size: 11px; letter-spacing: 0.15em; color: hsl(25 10% 55%); font-family: system-ui, sans-serif; animation: splash-scale-in 0.4s 0.6s ease forwards; opacity: 0;">
+        Loading...
       </div>
     </div>
 
