@@ -10,8 +10,8 @@ const CustomOrderBanner = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="relative overflow-hidden rounded-3xl px-8 py-14 md:py-16 text-center"
           style={{
             background: "linear-gradient(135deg, #3D2B1F 0%, #5a3d2e 50%, #3D2B1F 100%)",

@@ -31,8 +31,8 @@ const Newsletter = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="relative overflow-hidden rounded-3xl px-6 py-12 md:px-12 md:py-14"
           style={{
             background: "linear-gradient(135deg, #fdf8f3 0%, #fef5ee 50%, #fdf8f3 100%)",

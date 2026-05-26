@@ -1,7 +1,6 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
 import galleryWorkspace from "@/assets/gallery-workspace.jpg";
 
 const stats = [
@@ -11,30 +10,22 @@ const stats = [
 ];
 
 const AboutSnippet = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-  const imageY = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
-
   return (
-    <section ref={sectionRef} className="py-16 md:py-20" style={{ background: "#FAF7F4" }}>
+    <section className="py-16 md:py-20" style={{ background: "#FAF7F4" }}>
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* Left: Image with parallax */}
+          {/* Left: Image */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="relative overflow-hidden rounded-3xl aspect-[4/5] md:aspect-[3/4]"
           >
-            <motion.img
+            <img
               src={galleryWorkspace}
               alt="Mohika Art craft process"
-              className="w-full h-full object-cover scale-110"
-              style={{ y: imageY }}
+              className="w-full h-full object-cover"
               loading="lazy"
             />
             <div
@@ -45,10 +36,10 @@ const AboutSnippet = () => {
 
           {/* Right: Text content */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           >
             <p
               className="font-semibold uppercase mb-3"
