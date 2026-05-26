@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Fonts loaded via <link> in index.html for non-blocking render */
 
 @tailwind base;
 @tailwind components;
@@ -387,11 +387,11 @@ main {
 
 /* ── Global Page Fade-In ── */
 @keyframes page-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 body {
-  animation: page-fade-in 0.4s ease-out;
+  animation: page-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* ── Subtle Animated Grain Texture ── */

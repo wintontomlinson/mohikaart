@@ -121,8 +121,8 @@ const Hero = () => {
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 3 }}
         />
 
-        {/* Gold dust particles — cinematic shimmer */}
-        {!reduceMotion && [...Array(10)].map((_, i) => (
+        {/* Gold dust particles — cinematic shimmer (reduced for performance) */}
+        {!reduceMotion && [...Array(5)].map((_, i) => (
           <motion.span
             key={i}
             className="absolute rounded-full"
@@ -154,35 +154,9 @@ const Hero = () => {
           />
         ))}
 
-        {/* Decorative concentric rings */}
-        {[20, 14, 8].map((size, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-[14%] right-[8%] rounded-full hidden lg:block"
-            style={{
-              width: `${size}rem`,
-              height: `${size}rem`,
-              border: `1px solid hsl(34 58% 52%/${0.08 + i * 0.04})`,
-              marginLeft: `-${size / 2}rem`,
-              marginTop: `-${size / 2}rem`,
-            }}
-            animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-            transition={{ duration: 35 + i * 10, repeat: Infinity, ease: "linear" }}
-          />
-        ))}
+        {/* Decorative concentric rings — hidden for perf, shown after interaction */}
 
-        {/* Light reflection sweep — cinematic ambient shimmer */}
-        {!reduceMotion && (
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(135deg, transparent 40%, hsl(38 65% 90%/0.05) 50%, transparent 60%)",
-              backgroundSize: "300% 300%",
-            }}
-            animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          />
-        )}
+        {/* Light reflection removed for faster paint */}
       </div>
 
       {/* ── MAIN LAYOUT ── */}
@@ -474,6 +448,9 @@ const Hero = () => {
                   className="h-full w-full object-cover"
                   fetchPriority="high"
                   decoding="async"
+                  width={800}
+                  height={800}
+                  style={{ backgroundColor: "hsl(36 30% 92%)" }}
                 />
               </motion.div>
 
@@ -557,8 +534,10 @@ const Hero = () => {
                     src={bookmark}
                     alt="Floral resin bookmark"
                     loading="lazy"
+                    width={200}
+                    height={140}
                     className="w-full rounded-xl object-cover"
-                    style={{ height: "clamp(82px, 9vw, 118px)" }}
+                    style={{ height: "clamp(82px, 9vw, 118px)", backgroundColor: "hsl(36 30% 94%)" }}
                   />
                   <div className="px-1.5 pb-1.5 pt-2">
                     <div
@@ -597,8 +576,10 @@ const Hero = () => {
                     src={keychain}
                     alt="Personalised name keychain"
                     loading="lazy"
+                    width={200}
+                    height={150}
                     className="w-full rounded-xl object-cover"
-                    style={{ height: "clamp(88px, 10vw, 128px)" }}
+                    style={{ height: "clamp(88px, 10vw, 128px)", backgroundColor: "hsl(36 30% 94%)" }}
                   />
                   <div className="px-1.5 pb-1.5 pt-2">
                     <div
@@ -616,20 +597,7 @@ const Hero = () => {
               </TiltCard>
             </motion.div>
 
-            {/* Decorative orbit rings */}
-            {[{ size: 36, opacity: 0.18, dur: 28 }, { size: 24, opacity: 0.1, dur: 20 }].map((ring, i) => (
-              <motion.div
-                key={i}
-                className="pointer-events-none absolute -bottom-6 -right-6 hidden rounded-full md:block"
-                style={{
-                  width: `${ring.size * 4}px`,
-                  height: `${ring.size * 4}px`,
-                  border: `1.5px solid hsl(34 58% 52%/${ring.opacity})`,
-                }}
-                animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-                transition={{ duration: ring.dur, repeat: Infinity, ease: "linear" }}
-              />
-            ))}
+            {/* Orbit rings removed for performance */}
           </motion.div>
         </div>
       </div>

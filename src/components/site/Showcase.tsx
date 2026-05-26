@@ -109,7 +109,7 @@ const Showcase = () => {
             >
               {/* Image */}
               <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1", boxShadow: "0 4px 12px -6px rgba(26,18,8,0.06)" }}>
-                <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover transition-all duration-[1s] ease-out group-hover:scale-[1.08] group-hover:brightness-[1.02]" />
+                <img src={p.image} alt={p.name} loading="lazy" decoding="async" width={400} height={400} className="w-full h-full object-cover transition-all duration-[1s] ease-out group-hover:scale-[1.08] group-hover:brightness-[1.02]" style={{ backgroundColor: "hsl(36 30% 94%)" }} />
 
                 {/* Glassmorphism overlay on hover */}
                 <div
