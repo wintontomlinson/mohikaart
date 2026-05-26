@@ -18,25 +18,20 @@ const ScrollTop = () => {
 };
 
 const SiteLayout = () => {
-  const [ready, setReady] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
-    // Wait for splash to finish (3.3s) then reveal site with smooth fade
-    const timer = setTimeout(() => setReady(true), 3400);
-    return () => clearTimeout(timer);
+    // Tiny delay so browser paints first frame, then trigger CSS transitions
+    requestAnimationFrame(() => {
+      setTimeout(() => setRevealed(true), 50);
+    });
   }, []);
 
   return (
     <CartProvider>
       <WishlistProvider>
         <LoadingScreen />
-        <div
-          style={{
-            opacity: ready ? 1 : 0,
-            transform: ready ? "none" : "translateY(10px)",
-            transition: "opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)",
-          }}
-        >
+        <div className={`site-reveal ${revealed ? "site-revealed" : ""}`}>
           <CursorSpotlight />
           <ScrollProgress />
           <ScrollTop />
