@@ -9,7 +9,7 @@ import CursorSpotlight from "@/components/site/CursorSpotlight";
 import ScrollProgress from "@/components/site/ScrollProgress";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const ScrollTop = () => {
   const { pathname } = useLocation();
@@ -17,36 +17,23 @@ const ScrollTop = () => {
   return null;
 };
 
-const SiteLayout = () => {
-  const [revealed, setRevealed] = useState(false);
-
-  useEffect(() => {
-    // Tiny delay so browser paints first frame, then trigger CSS transitions
-    requestAnimationFrame(() => {
-      setTimeout(() => setRevealed(true), 50);
-    });
-  }, []);
-
-  return (
-    <CartProvider>
-      <WishlistProvider>
-        <LoadingScreen />
-        <div className={`site-reveal ${revealed ? "site-revealed" : ""}`}>
-          <CursorSpotlight />
-          <ScrollProgress />
-          <ScrollTop />
-          <Navbar />
-          <main className="relative">
-            <Outlet />
-          </main>
-          <Footer />
-          <WhatsAppFab />
-          <BackToTop />
-          <CartDrawer />
-        </div>
-      </WishlistProvider>
-    </CartProvider>
-  );
-};
+const SiteLayout = () => (
+  <CartProvider>
+    <WishlistProvider>
+      <LoadingScreen />
+      <CursorSpotlight />
+      <ScrollProgress />
+      <ScrollTop />
+      <Navbar />
+      <main className="relative">
+        <Outlet />
+      </main>
+      <Footer />
+      <WhatsAppFab />
+      <BackToTop />
+      <CartDrawer />
+    </WishlistProvider>
+  </CartProvider>
+);
 
 export default SiteLayout;
