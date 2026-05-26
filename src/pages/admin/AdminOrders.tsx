@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/site";
-import { Search, X, Download, ShoppingCart, ChevronRight, Package, Printer, StickyNote, Save, Loader2, Calendar } from "lucide-react";
+import { Search, X, Download, ShoppingCart, ChevronRight, Package, Printer, StickyNote, Save, Loader2, Calendar, Truck, Copy, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { TableRowSkeleton } from "@/components/admin/Skeleton";
 import EmptyState from "@/components/admin/EmptyState";
@@ -26,6 +26,7 @@ type Order = {
 };
 
 const STATUSES = ["All", "pending", "confirmed", "shipped", "delivered", "cancelled"];
+const COURIERS = ["Delhivery", "BlueDart", "DTDC", "India Post", "Other"];
 
 
 const statusColor = (s: string) => {
@@ -49,6 +50,9 @@ const AdminOrders = () => {
   const [savingNotes, setSavingNotes] = useState(false);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [trackingCourier, setTrackingCourier] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [savingTracking, setSavingTracking] = useState(false);
 
   const load = async () => {
     try {
@@ -79,6 +83,63 @@ const AdminOrders = () => {
     setOrders((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, notes: notesDraft } : o));
     setSelectedOrder({ ...selectedOrder, notes: notesDraft });
     setEditingNotes(false);
+  };
+
+  const parseTracking = (notes: string | null): { courier: string; number: string } | null => {
+    if (!notes) return null;
+    const match = notes.match(/\[TRACKING:(.*?)\]/);
+    if (!match) return null;
+    try { return JSON.parse(match[1]); } catch { return null; }
+  };
+
+  const saveTracking = async () => {
+    if (!selectedOrder) return;
+    setSavingTracking(true);
+    const trackingJson = JSON.stringify({ courier: trackingCourier, number: trackingNumber });
+    const prefix = `[TRACKING:${trackingJson}]`;
+    // Remove existing tracking prefix if any
+    const cleanNotes = (selectedOrder.notes || "").replace(/\[TRACKING:.*?\]\s*/g, "").trim();
+    const newNotes = trackingNumber ? `${prefix} ${cleanNotes}`.trim() : cleanNotes;
+
+    const { error } = await supabase.from("orders").update({ notes: newNotes }).eq("id", selectedOrder.id);
+    setSavingTracking(false);
+    if (error) return toast.error(error.message);
+    toast.success("Tracking info saved");
+    setOrders((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, notes: newNotes } : o));
+    setSelectedOrder({ ...selectedOrder, notes: newNotes });
+    setNotesDraft(newNotes);
+  };
+
+  const copyTracking = (tracking: { courier: string; number: string }) => {
+    navigator.clipboard.writeText(`${tracking.courier}: ${tracking.number}`);
+    toast.success("Tracking copied to clipboard");
+  };
+
+  const sendWhatsApp = (order: Order) => {
+    if (!order.customer_phone) {
+      toast.error("No phone number available");
+      return;
+    }
+    const phone = order.customer_phone.replace(/[^0-9]/g, "");
+    const phoneFormatted = phone.startsWith("91") ? phone : `91${phone}`;
+    const tracking = parseTracking(order.notes);
+    let message = "";
+
+    switch (order.status) {
+      case "confirmed":
+        message = `Hi ${order.customer_name}! Your order #${order.order_number} has been confirmed. We're preparing it with love and will notify you once it ships. Thank you for choosing Mohika Art! 🎨`;
+        break;
+      case "shipped":
+        message = `Hi ${order.customer_name}! Your order #${order.order_number} has been shipped.${tracking ? ` Tracking: ${tracking.courier} - ${tracking.number}` : ""} You'll receive it soon! 📦`;
+        break;
+      case "delivered":
+        message = `Hi ${order.customer_name}! Your order #${order.order_number} has been delivered. We hope you love your handcrafted piece! Thank you for shopping with Mohika Art! ❤️`;
+        break;
+      default:
+        message = `Hi ${order.customer_name}! This is an update regarding your order #${order.order_number}. Current status: ${order.status}. Please reach out if you have any questions!`;
+    }
+
+    window.open(`https://wa.me/${phoneFormatted}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const filtered = orders.filter((o) => {
@@ -232,7 +293,7 @@ ${order.notes ? `<div style="margin-top:24px;padding:12px;background:#fdf9f0;bor
           </div>
           {/* Rows */}
           {filtered.map((o) => (
-            <div key={o.id} onClick={() => { setSelectedOrder(o); setNotesDraft(o.notes || ""); setEditingNotes(false); }}
+            <div key={o.id} onClick={() => { setSelectedOrder(o); setNotesDraft(o.notes || ""); setEditingNotes(false); const t = parseTracking(o.notes); setTrackingCourier(t?.courier || ""); setTrackingNumber(t?.number || ""); }}
               className="grid grid-cols-1 sm:grid-cols-[1fr_1.2fr_0.8fr_0.8fr_0.8fr_40px] gap-2 sm:gap-4 px-5 py-3.5 border-b border-[#e5e0d8]/30 hover:bg-[#f8f5f0] cursor-pointer transition-colors items-center">
               <div className="font-medium text-sm" style={{ color: "#1a1208" }}>#{o.order_number}</div>
               <div>
@@ -247,6 +308,11 @@ ${order.notes ? `<div style="margin-top:24px;padding:12px;background:#fdf9f0;bor
                   className={`text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full border outline-none cursor-pointer ${statusColor(o.status)}`}>
                   {STATUSES.filter((s) => s !== "All").map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
+                {parseTracking(o.notes) && (
+                  <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-semibold bg-blue-50 text-blue-600 border border-blue-200">
+                    <Truck className="w-2.5 h-2.5" /> Tracked
+                  </div>
+                )}
               </div>
               <ChevronRight className="w-4 h-4 text-muted-foreground/30 hidden sm:block" />
             </div>
@@ -346,6 +412,75 @@ ${order.notes ? `<div style="margin-top:24px;padding:12px;background:#fdf9f0;bor
                   </div>
                 </div>
               )}
+
+              {/* Shipping Tracking */}
+              <div className="bg-white rounded-xl border border-[#e5e0d8]/60 p-4">
+                <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                  <Truck className="w-3.5 h-3.5" /> Shipping Tracking
+                </h3>
+                {(() => {
+                  const tracking = parseTracking(selectedOrder.notes);
+                  return (
+                    <div className="space-y-3">
+                      {tracking && (
+                        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-blue-50 border border-blue-200">
+                          <div className="flex-1">
+                            <div className="text-xs font-semibold text-blue-700">{tracking.courier}</div>
+                            <div className="text-sm font-mono text-blue-900">{tracking.number}</div>
+                          </div>
+                          <button
+                            onClick={() => copyTracking(tracking)}
+                            className="w-8 h-8 rounded-lg bg-white border border-blue-200 flex items-center justify-center hover:bg-blue-100 transition-colors"
+                            title="Copy Tracking"
+                          >
+                            <Copy className="w-3.5 h-3.5 text-blue-600" />
+                          </button>
+                        </div>
+                      )}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest mb-1 text-muted-foreground">Courier</label>
+                          <select
+                            value={trackingCourier}
+                            onChange={(e) => setTrackingCourier(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg bg-[#f8f5f0] border border-[#e5e0d8] focus:border-[#c9a84c] outline-none text-xs"
+                          >
+                            <option value="">Select courier</option>
+                            {COURIERS.map((c) => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-widest mb-1 text-muted-foreground">Tracking #</label>
+                          <input
+                            type="text"
+                            value={trackingNumber}
+                            onChange={(e) => setTrackingNumber(e.target.value)}
+                            placeholder="Enter tracking number"
+                            className="w-full px-3 py-2 rounded-lg bg-[#f8f5f0] border border-[#e5e0d8] focus:border-[#c9a84c] outline-none text-xs"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        onClick={saveTracking}
+                        disabled={savingTracking || (!trackingCourier && !trackingNumber)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
+                        style={{ background: "#1a1208" }}
+                      >
+                        {savingTracking ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                        Save Tracking
+                      </button>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* WhatsApp Update */}
+              <button
+                onClick={() => sendWhatsApp(selectedOrder)}
+                className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100"
+              >
+                <MessageCircle className="w-4 h-4" /> Send WhatsApp Update
+              </button>
 
 
               {/* Notes - Editable */}

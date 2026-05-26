@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage, formatINR } from "@/lib/site";
-import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Save, ImagePlus, Star, Search, Copy, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "./ImageUpload";
 import ConfirmModal from "@/components/admin/ConfirmModal";
@@ -22,13 +22,14 @@ type Product = {
   badge: string | null;
   featured: boolean;
   in_stock: boolean;
+  stock_qty: number;
   sort_order: number;
 };
 
 const empty: Product = {
   name: "", slug: "", short_description: "", description: "",
   price: 0, original_price: null, category_slug: null, image_url: null,
-  gallery: [], badge: null, featured: false, in_stock: true, sort_order: 0,
+  gallery: [], badge: null, featured: false, in_stock: true, stock_qty: 0, sort_order: 0,
 };
 
 const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -62,7 +63,7 @@ const AdminProducts = () => {
   const load = async () => {
     try {
       const { data } = await supabase.from("products").select("*").order("sort_order");
-      setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [] })) as Product[]);
+      setProducts((data ?? []).map((p: any) => ({ ...p, gallery: Array.isArray(p.gallery) ? p.gallery : [], stock_qty: p.stock_qty ?? 0 })) as Product[]);
     } catch {}
     setLoading(false);
     setSelected(new Set());
@@ -180,6 +181,30 @@ const AdminProducts = () => {
         </div>
       </div>
 
+      {/* Low Stock Alert */}
+      {!loading && products.filter((p) => (p.stock_qty ?? 0) <= 5 && p.in_stock).length > 0 && (
+        <div className="mb-6 bg-amber-50/80 backdrop-blur-xl rounded-2xl border border-amber-200/60 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <h3 className="text-xs uppercase tracking-wider font-semibold text-amber-700">Low Stock Alert</h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {products
+              .filter((p) => (p.stock_qty ?? 0) <= 5 && p.in_stock)
+              .map((p) => (
+                <div key={p.id} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-amber-200 text-xs">
+                  <span className="font-medium" style={{ color: "#1a1208" }}>{p.name}</span>
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                    (p.stock_qty ?? 0) <= 0 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
+                  }`}>
+                    {(p.stock_qty ?? 0) <= 0 ? "Out of Stock" : `${p.stock_qty} left`}
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* Product Grid — SAME STYLE AS FRONTEND */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -233,6 +258,18 @@ const AdminProducts = () => {
                 {!p.in_stock && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <span className="px-3 py-1 rounded-full bg-white/90 text-xs font-semibold" style={{ color: "#1a1208" }}>Out of Stock</span>
+                  </div>
+                )}
+                {/* Stock qty badge */}
+                {p.in_stock && (
+                  <div className={`absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                    (p.stock_qty ?? 0) <= 0
+                      ? "bg-red-500 text-white"
+                      : (p.stock_qty ?? 0) <= 5
+                      ? "bg-amber-500 text-white"
+                      : "bg-emerald-500/90 text-white"
+                  }`}>
+                    {(p.stock_qty ?? 0) <= 0 ? "0 qty" : `${p.stock_qty} qty`}
                   </div>
                 )}
                 {/* Hover actions */}
@@ -334,6 +371,9 @@ const AdminProducts = () => {
                 <Field label="Price (₹)"><input type="number" value={editing.price} onChange={(e) => setEditing({ ...editing, price: Number(e.target.value) })} className={inp} /></Field>
                 <Field label="Original Price"><input type="number" value={editing.original_price ?? ""} onChange={(e) => setEditing({ ...editing, original_price: e.target.value ? Number(e.target.value) : null })} className={inp} /></Field>
                 <Field label="Sort Order"><input type="number" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} className={inp} /></Field>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field label="Stock Quantity"><input type="number" value={editing.stock_qty ?? 0} onChange={(e) => setEditing({ ...editing, stock_qty: Number(e.target.value) })} className={inp} placeholder="0" /></Field>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Field label="Category"><select value={editing.category_slug ?? ""} onChange={(e) => setEditing({ ...editing, category_slug: e.target.value || null })} className={inp}>
