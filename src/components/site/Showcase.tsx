@@ -126,26 +126,25 @@ const Showcase = () => {
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-12">
           <motion.div
-            initial={{ opacity: 0, y: 30, rotateX: 8 }}
-            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: LUXURY_EASE }}
-            style={{ perspective: "800px" }}
+            transition={{ duration: 0.7, ease: LUXURY_EASE }}
           >
             <p className="font-semibold uppercase mb-3" style={{ fontSize: "11px", color: "#c9a84c", letterSpacing: "0.25em" }}>
               Best Sellers
             </p>
             <h2 className="font-display" style={{ fontWeight: 400, fontSize: "clamp(1.85rem, 3.8vw, 2.6rem)", lineHeight: 1.1, letterSpacing: "-0.02em", color: "#1a1208" }}>
               Loved by{" "}
-              <em className="font-serif italic shimmer-text" style={{ fontWeight: 400 }}>everyone.</em>
+              <em className="font-serif italic" style={{ color: "#c9a84c", fontWeight: 400 }}>everyone.</em>
             </h2>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 30, filter: "blur(4px)" }}
-            whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.15, ease: LUXURY_EASE }}
+            transition={{ duration: 0.7, delay: 0.15, ease: LUXURY_EASE }}
           >
             <Magnetic strength={0.2}>
               <Link
@@ -172,14 +171,12 @@ const Showcase = () => {
             <motion.div
               key={p.id}
               variants={{
-                hidden: { opacity: 0, y: 50, scale: 0.9, rotateX: 12, filter: "blur(6px)" },
+                hidden: { opacity: 0, y: 40, scale: 0.95 },
                 visible: {
                   opacity: 1,
                   y: 0,
                   scale: 1,
-                  rotateX: 0,
-                  filter: "blur(0px)",
-                  transition: { duration: 0.8, delay: i * 0.08, ease: LUXURY_EASE },
+                  transition: { duration: 0.6, delay: i * 0.08, ease: LUXURY_EASE },
                 },
               }}
               style={{ perspective: "1000px" }}

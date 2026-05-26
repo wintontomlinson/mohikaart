@@ -17,23 +17,23 @@ export const SPRING_GENTLE = { stiffness: 180, damping: 35, mass: 1 };
    SCROLL REVEAL VARIANTS
    ══════════════════════════════════════════════════════════ */
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 60, filter: "blur(8px)" },
-  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.9, ease: LUXURY_EASE } },
+  hidden: { opacity: 0, y: 60 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: LUXURY_EASE } },
 };
 
 export const fadeUpScale: Variants = {
-  hidden: { opacity: 0, y: 50, scale: 0.92, filter: "blur(6px)" },
-  visible: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transition: { duration: 1, ease: LUXURY_EASE } },
+  hidden: { opacity: 0, y: 50, scale: 0.92 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 1, ease: LUXURY_EASE } },
 };
 
 export const fadeLeft: Variants = {
-  hidden: { opacity: 0, x: -60, filter: "blur(6px)" },
-  visible: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.9, ease: LUXURY_EASE } },
+  hidden: { opacity: 0, x: -60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.9, ease: LUXURY_EASE } },
 };
 
 export const fadeRight: Variants = {
-  hidden: { opacity: 0, x: 60, filter: "blur(6px)" },
-  visible: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.9, ease: LUXURY_EASE } },
+  hidden: { opacity: 0, x: 60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.9, ease: LUXURY_EASE } },
 };
 
 export const scaleIn: Variants = {

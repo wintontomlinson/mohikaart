@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useReducedMotion, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useReducedMotion } from "framer-motion";
 import { ArrowRight, Sparkles, Star, Package2, Truck, ChevronRight, Instagram, Heart, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import { safePath } from "@/lib/validation";
 import { useHeroContent } from "@/lib/cms";
-import { Magnetic, LUXURY_EASE, SPRING_SMOOTH } from "@/lib/animations";
+import { Magnetic } from "@/lib/animations";
 import heroFallback from "@/assets/hero-resin-tray.jpg";
 import keychain from "@/assets/cat-keychain.jpg";
 import bookmark from "@/assets/cat-bookmark.jpg";
@@ -64,11 +64,8 @@ const Hero = () => {
   const reduceMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const yRight = useTransform(scrollYProgress, [0, 1], [0, -50]);
-  const yImage = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.96]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0.7]);
-  const rotateXScroll = useTransform(scrollYProgress, [0, 0.3], [0, 3]);
+  const yRight = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const yImage = useTransform(scrollYProgress, [0, 1], [0, 50]);
 
   useEffect(() => {
     supabase
@@ -170,10 +167,9 @@ const Hero = () => {
 
         {/* ══ LEFT (45%) ══ */}
         <motion.div
-          initial={{ opacity: 0, y: 40, rotateX: 8 }}
-          animate={{ opacity: 1, y: 0, rotateX: 0 }}
-          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          style={{ scale: heroScale, opacity: heroOpacity, transformStyle: "preserve-3d", perspective: "1200px" }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           className="flex w-full flex-col justify-center pb-6 md:w-[45%] md:pb-0 md:pr-10 lg:pr-16 xl:pr-20"
         >
           {/* Eyebrow breadcrumb */}
@@ -196,8 +192,8 @@ const Hero = () => {
 
           {/* Brand pill */}
           <motion.div
-            initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.08 }}
             className="mb-7 inline-flex w-fit items-center gap-2.5 rounded-full"
             style={{
@@ -225,11 +221,11 @@ const Hero = () => {
           </motion.div>
 
           {/* ── HEADLINE ── */}
-          <div className="overflow-hidden" style={{ perspective: "1000px" }}>
+          <div className="overflow-hidden">
             <motion.h1
-              initial={{ opacity: 0, y: 50, rotateX: 15, transformOrigin: "bottom center" }}
-              animate={{ opacity: 1, y: 0, rotateX: 0 }}
-              transition={{ duration: 1.2, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 36 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
               className="font-display"
               style={{
                 fontWeight: 300,
@@ -298,8 +294,8 @@ const Hero = () => {
 
           {/* ── CTA BUTTONS ── */}
           <motion.div
-            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.5 }}
             className="mt-9 flex flex-wrap items-center gap-3"
           >
@@ -436,8 +432,8 @@ const Hero = () => {
         </motion.div>
 
         {/* ══ RIGHT (55%) ══ */}
-        <div className="relative w-full md:w-[55%]" style={{ height: "clamp(380px, 56vh, 620px)", perspective: "1200px" }}>
-          <motion.div style={{ y: yRight, rotateX: rotateXScroll }} className="absolute inset-0" >
+        <div className="relative w-full md:w-[55%]" style={{ height: "clamp(380px, 56vh, 620px)" }}>
+          <motion.div style={{ y: yRight }} className="absolute inset-0" >
 
             {/* ── MAIN HERO IMAGE ── */}
             <TiltCard

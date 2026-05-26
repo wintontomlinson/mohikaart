@@ -1,23 +1,18 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
 import { LUXURY_EASE, Magnetic } from "@/lib/animations";
 
 const CustomOrderBanner = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const scale = useTransform(scrollYProgress, [0, 0.4, 1], [0.92, 1, 1]);
-  const rotateX = useTransform(scrollYProgress, [0, 0.4], [6, 0]);
-  const opacity = useTransform(scrollYProgress, [0, 0.3], [0.5, 1]);
-
   return (
-    <section ref={sectionRef} className="py-4 md:py-6" style={{ perspective: "1200px" }}>
+    <section className="py-4 md:py-6">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         <motion.div
-          style={{ scale, rotateX, opacity }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: LUXURY_EASE }}
           className="relative overflow-hidden rounded-3xl px-8 py-14 md:py-16 text-center"
-          whileHover={{ scale: 1.01, transition: { duration: 0.4 } }}
         >
           <div
             className="absolute inset-0 rounded-3xl"
@@ -53,10 +48,10 @@ const CustomOrderBanner = () => {
           {/* Content */}
           <div className="relative z-10">
             <motion.h2
-              initial={{ opacity: 0, y: 20, rotateX: 10 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.8, ease: LUXURY_EASE }}
+              transition={{ delay: 0.1, duration: 0.7, ease: LUXURY_EASE }}
               className="font-display mb-3"
               style={{
                 fontWeight: 400,
@@ -64,7 +59,6 @@ const CustomOrderBanner = () => {
                 lineHeight: 1.2,
                 letterSpacing: "-0.02em",
                 color: "#FAF7F4",
-                perspective: "800px",
               }}
             >
               Want Something Truly{" "}
@@ -74,8 +68,8 @@ const CustomOrderBanner = () => {
             </motion.h2>
 
             <motion.p
-              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.25, duration: 0.7, ease: LUXURY_EASE }}
               className="mb-7 mx-auto max-w-md"

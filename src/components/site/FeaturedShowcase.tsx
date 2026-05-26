@@ -1,8 +1,8 @@
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
-import { useRef, useCallback } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { LUXURY_EASE, SPRING_SMOOTH, staggerContainer, Magnetic } from "@/lib/animations";
+import { LUXURY_EASE, staggerContainer, Magnetic } from "@/lib/animations";
 
 import catKeychain from "@/assets/cat-keychain.jpg";
 import catWedding from "@/assets/cat-wedding.jpg";
@@ -75,12 +75,11 @@ const FeaturedShowcase = () => {
       <div className="max-w-[1360px] mx-auto px-5 md:px-10 relative z-10">
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 30, rotateX: 8 }}
-          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: EASE }}
+          transition={{ duration: 0.8, ease: EASE }}
           className="text-center mb-14 md:mb-18"
-          style={{ perspective: "800px" }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -140,19 +139,16 @@ const FeaturedShowcase = () => {
             <motion.div
               key={item.title}
               variants={{
-                hidden: { opacity: 0, y: 50, scale: 0.9, rotateX: 10, filter: "blur(6px)" },
+                hidden: { opacity: 0, y: 40, scale: 0.95 },
                 visible: {
                   opacity: 1,
                   y: 0,
                   scale: 1,
-                  rotateX: 0,
-                  filter: "blur(0px)",
-                  transition: { duration: 0.9, delay: i * 0.12, ease: EASE },
+                  transition: { duration: 0.7, delay: i * 0.12, ease: EASE },
                 },
               }}
               whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.4, ease: EASE } }}
               className={`group relative ${i === 0 ? "col-span-2 row-span-2" : ""}`}
-              style={{ perspective: "1000px" }}
             >
               <Link
                 to={item.link}

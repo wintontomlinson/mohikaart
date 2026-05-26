@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Mail, MessageCircle, ArrowRight } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
@@ -9,10 +9,6 @@ const Newsletter = () => {
   const [email, setEmail] = useState("");
   const { phone } = useStoreSettings();
   const phoneDigits = (phone || "").replace(/\D/g, "");
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const scale = useTransform(scrollYProgress, [0, 0.4], [0.92, 1]);
-  const rotateX = useTransform(scrollYProgress, [0, 0.4], [5, 0]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,14 +27,13 @@ const Newsletter = () => {
   };
 
   return (
-    <section ref={sectionRef} className="py-16 md:py-20" style={{ perspective: "1200px" }}>
+    <section className="py-16 md:py-20">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         <motion.div
-          style={{ scale, rotateX }}
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: LUXURY_EASE }}
+          transition={{ duration: 0.8, ease: LUXURY_EASE }}
           className="relative overflow-hidden rounded-3xl px-6 py-12 md:px-12 md:py-14"
         >
           <div
@@ -62,11 +57,10 @@ const Newsletter = () => {
             {/* Heading */}
             <motion.div
               className="text-center mb-8"
-              initial={{ opacity: 0, y: 20, rotateX: 8 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1, ease: LUXURY_EASE }}
-              style={{ perspective: "800px" }}
+              transition={{ duration: 0.7, delay: 0.1, ease: LUXURY_EASE }}
             >
               <h2
                 className="font-display mb-2"
@@ -88,10 +82,10 @@ const Newsletter = () => {
             {/* Two options side by side */}
             <motion.div
               className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto"
-              initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.25, ease: LUXURY_EASE }}
+              transition={{ duration: 0.7, delay: 0.2, ease: LUXURY_EASE }}
             >
               {/* Email subscribe */}
               <form onSubmit={handleSubmit} className="flex items-center gap-2 flex-1 w-full sm:w-auto">

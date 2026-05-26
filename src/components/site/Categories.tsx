@@ -1,4 +1,4 @@
-import { motion, useMotionValue, useSpring, useTransform, useScroll } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
@@ -96,9 +96,6 @@ function TiltCard({ children, className = "" }: { children: React.ReactNode; cla
 
 const Categories = ({ heading = true }: { heading?: boolean }) => {
   const [cats, setCats] = useState<Cat[]>([]);
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
-  const sectionScale = useTransform(scrollYProgress, [0, 0.3], [0.94, 1]);
 
   useEffect(() => {
     supabase
@@ -111,16 +108,15 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
   const display = cats.length > 0 ? cats : FALLBACK_CATEGORIES;
 
   return (
-    <section ref={sectionRef} className="py-14 md:py-18" style={{ perspective: "1200px" }}>
-      <motion.div style={{ scale: sectionScale }} className="max-w-[1280px] mx-auto px-6 lg:px-8">
+    <section className="py-14 md:py-18">
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         {heading && (
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-12">
             <motion.div
-              initial={{ opacity: 0, y: 30, rotateX: 8 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.9, ease: LUXURY_EASE }}
-              style={{ perspective: "800px" }}
+              transition={{ duration: 0.7, ease: LUXURY_EASE }}
             >
               <p
                 className="font-semibold uppercase mb-3"
@@ -146,10 +142,10 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 30, filter: "blur(4px)" }}
-              whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1, ease: LUXURY_EASE }}
+              transition={{ duration: 0.7, delay: 0.1, ease: LUXURY_EASE }}
             >
               <Magnetic strength={0.2}>
                 <Link
@@ -187,18 +183,15 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
             <motion.div
               key={c.id}
               variants={{
-                hidden: { opacity: 0, y: 40, scale: 0.9, rotateX: 12, filter: "blur(5px)" },
+                hidden: { opacity: 0, y: 30, scale: 0.95 },
                 visible: {
                   opacity: 1,
                   y: 0,
                   scale: 1,
-                  rotateX: 0,
-                  filter: "blur(0px)",
-                  transition: { duration: 0.8, delay: (i % 3) * 0.1, ease: LUXURY_EASE },
+                  transition: { duration: 0.6, delay: (i % 3) * 0.1, ease: LUXURY_EASE },
                 },
               }}
               className="group relative"
-              style={{ perspective: "1000px" }}
             >
               <TiltCard className="relative overflow-hidden rounded-2xl bg-white border border-[#e5e0d8]">
                 <Link to={`/category/${c.slug}`} className="block">
@@ -254,7 +247,7 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
             </motion.div>
           ))}
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 };
