@@ -2,13 +2,14 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { LUXURY_EASE, staggerContainer, Magnetic } from "@/lib/animations";
 
 import catKeychain from "@/assets/cat-keychain.jpg";
 import catWedding from "@/assets/cat-wedding.jpg";
 import catTray from "@/assets/cat-tray.jpg";
 import catFrame from "@/assets/cat-frame.jpg";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
+const EASE = LUXURY_EASE;
 
 const FEATURED = [
   {
@@ -126,15 +127,27 @@ const FeaturedShowcase = () => {
           </p>
         </motion.div>
 
-        {/* Editorial grid — asymmetric luxury layout */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        {/* Editorial grid — asymmetric luxury layout with 3D stagger */}
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={staggerContainer}
+        >
           {FEATURED.map((item, i) => (
             <motion.div
               key={item.title}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.7, delay: i * 0.12, ease: EASE }}
+              variants={{
+                hidden: { opacity: 0, y: 40, scale: 0.95 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  transition: { duration: 0.7, delay: i * 0.12, ease: EASE },
+                },
+              }}
+              whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.4, ease: EASE } }}
               className={`group relative ${i === 0 ? "col-span-2 row-span-2" : ""}`}
             >
               <Link
@@ -224,7 +237,7 @@ const FeaturedShowcase = () => {
               </Link>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* View all link */}
         <motion.div
@@ -234,14 +247,16 @@ const FeaturedShowcase = () => {
           transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
           className="text-center mt-10"
         >
-          <Link
-            to="/shop"
-            className="group inline-flex items-center gap-2.5 text-[11px] tracking-[0.12em] uppercase font-semibold transition-all duration-400 hover:gap-3.5"
-            style={{ color: "#3D2B1F", paddingBottom: "4px", borderBottom: "1px solid #c9a84c" }}
-          >
-            View Full Collection
-            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
+          <Magnetic strength={0.2}>
+            <Link
+              to="/shop"
+              className="group inline-flex items-center gap-2.5 text-[11px] tracking-[0.12em] uppercase font-semibold transition-all duration-400 hover:gap-3.5"
+              style={{ color: "#3D2B1F", paddingBottom: "4px", borderBottom: "1px solid #c9a84c" }}
+            >
+              View Full Collection
+              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+          </Magnetic>
         </motion.div>
       </div>
     </section>

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import { safePath } from "@/lib/validation";
 import { useHeroContent } from "@/lib/cms";
+import { Magnetic } from "@/lib/animations";
 import heroFallback from "@/assets/hero-resin-tray.jpg";
 import keychain from "@/assets/cat-keychain.jpg";
 import bookmark from "@/assets/cat-bookmark.jpg";
@@ -166,9 +167,9 @@ const Hero = () => {
 
         {/* ══ LEFT (45%) ══ */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           className="flex w-full flex-col justify-center pb-6 md:w-[45%] md:pb-0 md:pr-10 lg:pr-16 xl:pr-20"
         >
           {/* Eyebrow breadcrumb */}
@@ -191,8 +192,8 @@ const Hero = () => {
 
           {/* Brand pill */}
           <motion.div
-            initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.08 }}
             className="mb-7 inline-flex w-fit items-center gap-2.5 rounded-full"
             style={{
@@ -224,7 +225,7 @@ const Hero = () => {
             <motion.h1
               initial={{ opacity: 0, y: 36 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.05, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 1, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
               className="font-display"
               style={{
                 fontWeight: 300,
@@ -293,14 +294,15 @@ const Hero = () => {
 
           {/* ── CTA BUTTONS ── */}
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            transition={{ duration: 0.9, delay: 0.5 }}
             className="mt-9 flex flex-wrap items-center gap-3"
           >
-            <Link
-              to={ctaPrimary}
-              className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full"
+            <Magnetic strength={0.15}>
+              <Link
+                to={ctaPrimary}
+                className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full"
               style={{
                 padding: "0.92rem 2.3rem",
                 fontSize: "0.78rem",
@@ -331,7 +333,9 @@ const Hero = () => {
                 <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
               </span>
             </Link>
+            </Magnetic>
 
+            <Magnetic strength={0.12}>
             <Link
               to={ctaSecondary}
               className="group inline-flex items-center gap-2 rounded-full transition-all duration-400"
@@ -362,6 +366,7 @@ const Hero = () => {
             >
               {content.cta_secondary_label}
             </Link>
+            </Magnetic>
           </motion.div>
 
           {/* ── STATS ROW ── */}
@@ -428,7 +433,7 @@ const Hero = () => {
 
         {/* ══ RIGHT (55%) ══ */}
         <div className="relative w-full md:w-[55%]" style={{ height: "clamp(380px, 56vh, 620px)" }}>
-          <motion.div style={{ y: yRight }} className="absolute inset-0">
+          <motion.div style={{ y: yRight }} className="absolute inset-0" >
 
             {/* ── MAIN HERO IMAGE ── */}
             <TiltCard
@@ -438,7 +443,8 @@ const Hero = () => {
                 boxShadow:
                   "0 60px 140px -40px hsl(348 28% 28%/0.32), " +
                   "0 0 0 1px hsl(36 38% 88%/0.5), " +
-                  "inset 0 1px 0 hsl(36 50% 100%/0.65)",
+                  "inset 0 1px 0 hsl(36 50% 100%/0.65)," +
+                  "0 0 80px -20px hsl(34 58% 52%/0.15)",
               }}
             >
               <motion.div className="absolute inset-0 scale-[1.08]" style={{ y: yImage }}>

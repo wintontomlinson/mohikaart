@@ -2,6 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
+import { LUXURY_EASE, Magnetic } from "@/lib/animations";
 import galleryWorkspace from "@/assets/gallery-workspace.jpg";
 
 const stats = [
@@ -22,33 +23,43 @@ const AboutSnippet = () => {
     <section ref={sectionRef} className="py-16 md:py-20" style={{ background: "#FAF7F4" }}>
       <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* Left: Image with parallax */}
+          {/* Left: Image with parallax + 3D tilt on scroll */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.9, ease: LUXURY_EASE }}
             className="relative overflow-hidden rounded-3xl aspect-[4/5] md:aspect-[3/4]"
+            style={{
+              boxShadow: "0 40px 100px -30px rgba(61,43,31,0.25), 0 0 0 1px rgba(201,150,74,0.1)",
+            }}
           >
             <motion.img
               src={galleryWorkspace}
               alt="Mohika Art craft process"
-              className="w-full h-full object-cover scale-110"
+              className="w-full h-full object-cover scale-[1.12]"
               style={{ y: imageY }}
               loading="lazy"
             />
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{ background: "linear-gradient(to top, rgba(61,43,31,0.2) 0%, transparent 40%)" }}
+              style={{ background: "linear-gradient(to top, rgba(61,43,31,0.25) 0%, transparent 40%)" }}
+            />
+            {/* Animated shine */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%)" }}
+              animate={{ x: ["-100%", "200%"] }}
+              transition={{ duration: 4, repeat: Infinity, repeatDelay: 8, ease: "easeInOut" }}
             />
           </motion.div>
 
           {/* Right: Text content */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.9, delay: 0.1, ease: LUXURY_EASE }}
           >
             <p
               className="font-semibold uppercase mb-3"
@@ -115,14 +126,16 @@ const AboutSnippet = () => {
             </div>
 
             {/* Read Our Story link */}
-            <Link
-              to="/about"
-              className="inline-flex items-center gap-2 text-[12px] tracking-[0.12em] uppercase font-semibold transition-colors duration-300 hover:text-[#C9964A]"
-              style={{ color: "#3D2B1F", paddingBottom: "4px", borderBottom: "1px solid #C9964A" }}
-            >
-              Read Our Story
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            <Magnetic strength={0.2}>
+              <Link
+                to="/about"
+                className="inline-flex items-center gap-2 text-[12px] tracking-[0.12em] uppercase font-semibold transition-colors duration-300 hover:text-[#C9964A]"
+                style={{ color: "#3D2B1F", paddingBottom: "4px", borderBottom: "1px solid #C9964A" }}
+              >
+                Read Our Story
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </Magnetic>
           </motion.div>
         </div>
       </div>

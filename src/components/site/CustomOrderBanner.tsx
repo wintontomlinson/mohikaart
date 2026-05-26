@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { LUXURY_EASE, Magnetic } from "@/lib/animations";
 
 const CustomOrderBanner = () => {
   return (
@@ -10,12 +11,13 @@ const CustomOrderBanner = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.7, ease: LUXURY_EASE }}
           className="relative overflow-hidden rounded-3xl px-8 py-14 md:py-16 text-center"
-          style={{
-            background: "linear-gradient(135deg, #3D2B1F 0%, #5a3d2e 50%, #3D2B1F 100%)",
-          }}
         >
+          <div
+            className="absolute inset-0 rounded-3xl"
+            style={{ background: "linear-gradient(135deg, #3D2B1F 0%, #5a3d2e 50%, #3D2B1F 100%)" }}
+          />
           {/* Shimmer animated bg */}
           <motion.div
             className="absolute inset-0 pointer-events-none"
@@ -46,10 +48,10 @@ const CustomOrderBanner = () => {
           {/* Content */}
           <div className="relative z-10">
             <motion.h2
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.6 }}
+              transition={{ delay: 0.1, duration: 0.7, ease: LUXURY_EASE }}
               className="font-display mb-3"
               style={{
                 fontWeight: 400,
@@ -60,16 +62,16 @@ const CustomOrderBanner = () => {
               }}
             >
               Want Something Truly{" "}
-              <em className="font-serif italic" style={{ color: "#C9964A" }}>
+              <em className="font-serif italic shimmer-text" style={{ fontWeight: 400 }}>
                 One-of-a-Kind?
               </em>
             </motion.h2>
 
             <motion.p
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.6 }}
+              transition={{ delay: 0.25, duration: 0.7, ease: LUXURY_EASE }}
               className="mb-7 mx-auto max-w-md"
               style={{ fontSize: "15px", lineHeight: 1.6, color: "rgba(250,247,244,0.7)" }}
             >
@@ -77,20 +79,21 @@ const CustomOrderBanner = () => {
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 16, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+              transition={{ delay: 0.4, duration: 0.7, ease: LUXURY_EASE }}
             >
-              <Link
-                to="/custom-order"
-                className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-[11px] tracking-[0.12em] uppercase font-semibold overflow-hidden transition-all duration-300 hover:scale-105"
-                style={{
-                  background: "#C9964A",
-                  color: "#3D2B1F",
-                  boxShadow: "0 4px 20px -4px rgba(201,150,74,0.5)",
-                }}
-              >
+              <Magnetic strength={0.15}>
+                <Link
+                  to="/custom-order"
+                  className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-[11px] tracking-[0.12em] uppercase font-semibold overflow-hidden transition-all duration-300 hover:scale-105"
+                  style={{
+                    background: "#C9964A",
+                    color: "#3D2B1F",
+                    boxShadow: "0 4px 20px -4px rgba(201,150,74,0.5), 0 0 40px -10px rgba(201,150,74,0.3)",
+                  }}
+                >
                 {/* Shine sweep on hover */}
                 <span
                   className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
@@ -101,6 +104,7 @@ const CustomOrderBanner = () => {
                   <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
               </Link>
+              </Magnetic>
             </motion.div>
           </div>
         </motion.div>

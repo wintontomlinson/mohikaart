@@ -9,11 +9,10 @@ const LoadingScreen = () => {
     const splash = document.getElementById("splash-loader");
     if (!splash) return;
 
-    // Wait for counter to finish (1.5s) + tiny buffer, then fade out
-    const timer = setTimeout(() => {
-      splash.classList.add("done");
-      setTimeout(() => { try { splash.remove(); } catch (e) {} }, 500);
-    }, 1600);
+    // Remove splash as soon as React renders (page is ready)
+    // No need to wait for the artificial counter — user sees content instantly
+    splash.classList.add("done");
+    const timer = setTimeout(() => { try { splash.remove(); } catch (e) {} }, 400);
 
     return () => clearTimeout(timer);
   }, []);
