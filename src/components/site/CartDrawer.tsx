@@ -10,7 +10,7 @@ const CartDrawer = () => {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="w-full sm:max-w-md flex flex-col bg-background p-0">
+      <SheetContent className="w-full sm:max-w-md flex flex-col p-0" style={{ background: "#ffffff", borderLeft: "1px solid rgba(26,18,8,0.1)" }}>
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-border/60">
           <SheetTitle className="font-display text-3xl mb-0.5">Your Cart</SheetTitle>
