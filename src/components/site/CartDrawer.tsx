@@ -51,7 +51,8 @@ const CartDrawer = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
                     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex gap-4 p-3 rounded-2xl bg-card-grad shadow-soft"
+                    className="flex gap-4 p-3 rounded-2xl shadow-soft"
+                    style={{ background: "hsl(36 45% 99%)" }}
                   >
                     <Link to={`/product/${it.slug}`} onClick={() => setOpen(false)} className="shrink-0">
                       <img

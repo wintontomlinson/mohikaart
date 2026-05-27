@@ -124,6 +124,14 @@ const Shop = () => {
       {/* Sticky Filter Bar */}
       <div className="sticky top-0 z-40" style={{ background: "rgba(253,249,240,0.97)", backdropFilter: "blur(20px) saturate(180%)", boxShadow: "0 1px 0 rgba(26,18,8,0.06)" }}>
         <div className="max-w-[1280px] mx-auto px-6 lg:px-8 py-3">
+          {searchFromUrl && (
+            <div className="flex items-center gap-2 mb-2 px-3 py-2 rounded-lg bg-gold/8 border border-gold/15">
+              <span className="text-xs text-gold/80">Searching: <strong>"{searchFromUrl}"</strong></span>
+              <Link to="/shop" className="ml-auto flex items-center gap-1 text-[10px] uppercase tracking-wider font-semibold text-foreground/60 hover:text-foreground transition-colors">
+                <X className="w-3 h-3" /> Clear
+              </Link>
+            </div>
+          )}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
             {allCategories.map((c) => {
               const isActive = activeCategory === c.slug;
