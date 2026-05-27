@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
+import { staggerContainer, staggerItem } from "./animations";
 import catWedding from "@/assets/cat-wedding.jpg";
 import catTray from "@/assets/cat-tray.jpg";
 import catCouple from "@/assets/cat-couple.jpg";
@@ -133,14 +134,17 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
         )}
 
         {/* 3x2 grid, centered */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 lg:gap-5 max-w-[960px] mx-auto">
-          {display.slice(0, 6).map((c, i) => (
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 lg:gap-5 max-w-[960px] mx-auto"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-40px" }}
+        >
+          {display.slice(0, 6).map((c) => (
             <motion.div
               key={c.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.65, delay: (i % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              variants={staggerItem}
               className="group relative"
             >
               <TiltCard className="relative overflow-hidden rounded-2xl bg-white border border-[#e5e0d8]">
@@ -196,7 +200,7 @@ const Categories = ({ heading = true }: { heading?: boolean }) => {
               </TiltCard>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

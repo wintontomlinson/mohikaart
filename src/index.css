@@ -474,3 +474,85 @@ section {
 .img-cinema:hover {
   transform: scale(1.06);
 }
+
+
+
+/* ── Premium Animation CSS (Performance-first) ── */
+
+/* Product card hover lift — CSS only, no framer-motion spring */
+.product-card-hover {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.product-card-hover:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 28px 56px -16px rgba(26, 18, 8, 0.16),
+              0 0 0 1px rgba(201, 168, 76, 0.08);
+}
+
+/* Gold border glow on product card hover */
+.product-card-glow {
+  position: relative;
+}
+.product-card-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  pointer-events: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.group:hover .product-card-glow::after {
+  border-color: rgba(201, 150, 74, 0.35);
+  box-shadow: 0 0 20px -4px rgba(201, 150, 74, 0.2);
+}
+
+/* Testimonial card hover scale */
+.testimonial-card-hover {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.testimonial-card-hover:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 32px -8px rgba(26, 18, 8, 0.12);
+}
+
+/* Shimmer sweep on CTA buttons */
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-sweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer-sweep-anim 3s ease-in-out infinite;
+  animation-delay: 2s;
+  pointer-events: none;
+}
+@keyframes shimmer-sweep-anim {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Disable 3D tilt + shimmer on touch/mobile for perf */
+@media (pointer: coarse) {
+  .product-card-hover:hover {
+    transform: translateY(-4px);
+  }
+  .shimmer-sweep {
+    animation: none;
+    display: none;
+  }
+  .testimonial-card-hover:hover {
+    transform: none;
+  }
+}

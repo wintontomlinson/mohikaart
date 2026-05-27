@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveImage } from "@/lib/site";
 import { safePath } from "@/lib/validation";
 import { useHeroContent } from "@/lib/cms";
+import { Magnetic } from "./animations";
 import heroFallback from "@/assets/hero-resin-tray.jpg";
 import keychain from "@/assets/cat-keychain.jpg";
 import bookmark from "@/assets/cat-bookmark.jpg";
@@ -191,9 +192,9 @@ const Hero = () => {
 
           {/* Brand pill */}
           <motion.div
-            initial={{ opacity: 0, y: 12, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.8, delay: 0.08 }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.08 }}
             className="mb-7 inline-flex w-fit items-center gap-2.5 rounded-full"
             style={{
               padding: "0.45rem 1.1rem 0.45rem 0.65rem",
@@ -222,9 +223,9 @@ const Hero = () => {
           {/* ── HEADLINE ── */}
           <div className="overflow-hidden">
             <motion.h1
-              initial={{ opacity: 0, y: 36 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.05, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
               className="font-display"
               style={{
                 fontWeight: 300,
@@ -278,7 +279,7 @@ const Hero = () => {
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.35 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
             style={{
               marginTop: "1.5rem",
               color: "hsl(25 10% 40%)",
@@ -298,39 +299,38 @@ const Hero = () => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mt-9 flex flex-wrap items-center gap-3"
           >
-            <Link
-              to={ctaPrimary}
-              className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full"
-              style={{
-                padding: "0.92rem 2.3rem",
-                fontSize: "0.78rem",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                fontWeight: 600,
-                background: "hsl(var(--foreground))",
-                color: "hsl(var(--background))",
-                boxShadow: "0 12px 36px -10px hsl(34 58% 38%/0.55), 0 2px 0 hsl(var(--foreground)/0.08) inset",
-                transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 22px 50px -12px hsl(34 58% 38%/0.65), 0 2px 0 hsl(var(--foreground)/0.08) inset";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.transform = "";
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 36px -10px hsl(34 58% 38%/0.55), 0 2px 0 hsl(var(--foreground)/0.08) inset";
-              }}
-            >
-              <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/12 to-transparent"
-                animate={{ x: ["-120%", "120%"] }}
-                transition={{ duration: 3, repeat: Infinity, repeatDelay: 6, ease: "easeInOut" }}
-              />
-              <span className="relative z-10 flex items-center gap-2.5">
-                {content.cta_primary_label}
-                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
-              </span>
-            </Link>
+            <Magnetic strength={5}>
+              <Link
+                to={ctaPrimary}
+                className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full shimmer-btn"
+                style={{
+                  padding: "0.92rem 2.3rem",
+                  fontSize: "0.78rem",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                  background: "hsl(var(--foreground))",
+                  color: "hsl(var(--background))",
+                  boxShadow: "0 12px 36px -10px hsl(34 58% 38%/0.55), 0 2px 0 hsl(var(--foreground)/0.08) inset",
+                  transition: "transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s cubic-bezier(0.22,1,0.36,1)",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 22px 50px -12px hsl(34 58% 38%/0.65), 0 2px 0 hsl(var(--foreground)/0.08) inset";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.transform = "";
+                  (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 36px -10px hsl(34 58% 38%/0.55), 0 2px 0 hsl(var(--foreground)/0.08) inset";
+                }}
+              >
+                {/* Shimmer sweep */}
+                <span className="shimmer-sweep" />
+                <span className="relative z-10 flex items-center gap-2.5">
+                  {content.cta_primary_label}
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1.5" />
+                </span>
+              </Link>
+            </Magnetic>
 
             <Link
               to={ctaSecondary}

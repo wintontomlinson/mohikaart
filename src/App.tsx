@@ -18,6 +18,7 @@ import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
 import CustomOrderPage from "./pages/CustomOrderPage";
 import Checkout from "./pages/Checkout";
+import WishlistPage from "./pages/WishlistPage";
 import NotFound from "./pages/NotFound";
 
 // Rarely-visited storefront pages → lazy
@@ -27,16 +28,16 @@ const CareGuidePage  = lazy(() => import("./pages/CareGuidePage"));
 const FAQPage        = lazy(() => import("./pages/FAQPage"));
 const ShippingPage   = lazy(() => import("./pages/ShippingPage"));
 
-// Admin → entirely lazy so storefront visitors never download recharts
-const AdminLayout     = lazy(() => import("./pages/admin/AdminLayout"));
-const AdminDashboard  = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminProducts   = lazy(() => import("./pages/admin/AdminProducts"));
-const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
-const AdminOrders     = lazy(() => import("./pages/admin/AdminOrders"));
-const AdminInquiries  = lazy(() => import("./pages/admin/AdminInquiries"));
-const AdminCMS        = lazy(() => import("./pages/admin/AdminCMS"));
-const AdminAnalytics  = lazy(() => import("./pages/admin/AdminAnalytics"));
-const AdminSettings   = lazy(() => import("./pages/admin/AdminSettings"));
+// Admin — eager import so it loads without network dependency on lazy chunks
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminInquiries from "./pages/admin/AdminInquiries";
+import AdminCMS from "./pages/admin/AdminCMS";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/custom-order" element={<CustomOrderPage />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/wedding" element={<WeddingPage />} />
               <Route path="/corporate" element={<CorporatePage />} />
               <Route path="/care-guide" element={<CareGuidePage />} />

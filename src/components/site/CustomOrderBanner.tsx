@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Magnetic } from "./animations";
 
 const CustomOrderBanner = () => {
   return (
@@ -9,8 +10,8 @@ const CustomOrderBanner = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="relative overflow-hidden rounded-3xl px-8 py-14 md:py-16 text-center"
           style={{
             background: "linear-gradient(135deg, #3D2B1F 0%, #5a3d2e 50%, #3D2B1F 100%)",
@@ -82,25 +83,24 @@ const CustomOrderBanner = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <Link
-                to="/custom-order"
-                className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-[11px] tracking-[0.12em] uppercase font-semibold overflow-hidden transition-all duration-300 hover:scale-105"
-                style={{
-                  background: "#C9964A",
-                  color: "#3D2B1F",
-                  boxShadow: "0 4px 20px -4px rgba(201,150,74,0.5)",
-                }}
-              >
-                {/* Shine sweep on hover */}
-                <span
-                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
-                  style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)" }}
-                />
-                <span className="relative z-10 flex items-center gap-2">
-                  Request Custom Order
-                  <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </span>
-              </Link>
+              <Magnetic strength={5}>
+                <Link
+                  to="/custom-order"
+                  className="group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-[11px] tracking-[0.12em] uppercase font-semibold overflow-hidden transition-all duration-300 hover:scale-105 shimmer-btn"
+                  style={{
+                    background: "#C9964A",
+                    color: "#3D2B1F",
+                    boxShadow: "0 4px 20px -4px rgba(201,150,74,0.5)",
+                  }}
+                >
+                  {/* Shine sweep on hover */}
+                  <span className="shimmer-sweep" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    Request Custom Order
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              </Magnetic>
             </motion.div>
           </div>
         </motion.div>

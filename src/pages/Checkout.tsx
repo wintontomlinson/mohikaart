@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import PageHeader from "@/components/site/PageHeader";
 import { useCart } from "@/lib/cart";
 import { resolveImage, formatINR } from "@/lib/site";
-import { Minus, Plus, Trash2, CreditCard, MessageCircle, CheckCircle2, Package } from "lucide-react";
+import { Minus, Plus, Trash2, CreditCard, MessageCircle, CheckCircle2, Package, Tag, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useStoreSettings } from "@/lib/settings";
 import { EMAIL_RE, PHONE_RE, PINCODE_RE, LIMITS, clamp } from "@/lib/validation";
+import { canSubmit } from "@/lib/throttle";
+import { fetchSetting, Coupon, DEFAULT_COUPONS } from "@/lib/cms";
 
 declare global {
   interface Window { Razorpay: any; }
@@ -38,6 +40,36 @@ const CheckoutPage = () => {
   const [razorpayKeyId, setRazorpayKeyId] = useState<string>("");
   const [orderNumber, setOrderNumber] = useState<string>("");
   const { phone } = useStoreSettings();
+
+  // ── Coupon state ──
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const discount = appliedCoupon
+    ? appliedCoupon.type === "percent"
+      ? Math.round(total * appliedCoupon.value / 100)
+      : appliedCoupon.value
+    : 0;
+  const finalTotal = Math.max(0, total - discount);
+
+  const applyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) { toast.error("Enter a coupon code"); return; }
+    setCouponLoading(true);
+    try {
+      const coupons = await fetchSetting<Coupon[]>("coupons", DEFAULT_COUPONS);
+      const match = coupons.find(c => c.code.toUpperCase() === code && c.active);
+      if (!match) { toast.error("Invalid or expired coupon"); setCouponLoading(false); return; }
+      if (match.expires_at && new Date(match.expires_at) < new Date()) { toast.error("This coupon has expired"); setCouponLoading(false); return; }
+      if (total < match.min_order) { toast.error(`Minimum order ₹${match.min_order} required`); setCouponLoading(false); return; }
+      setAppliedCoupon(match);
+      toast.success(`Coupon "${match.code}" applied! You save ${match.type === "percent" ? match.value + "%" : "₹" + match.value}`);
+    } catch { toast.error("Failed to validate coupon"); }
+    setCouponLoading(false);
+  };
+
+  const removeCoupon = () => { setAppliedCoupon(null); setCouponCode(""); };
 
   useEffect(() => {
     supabase.from("app_settings").select("value").eq("key", "razorpay").maybeSingle()
@@ -108,6 +140,10 @@ const CheckoutPage = () => {
 
   const onWhatsApp = async () => {
     if (!validate()) return;
+    if (!canSubmit("checkout", 8000)) {
+      toast.error("Please wait a few seconds before trying again");
+      return;
+    }
     setProcessing(true);
     try {
       const order = await saveOrder("whatsapp");
@@ -133,6 +169,10 @@ const CheckoutPage = () => {
 
   const onCOD = async () => {
     if (!validate()) return;
+    if (!canSubmit("checkout", 8000)) {
+      toast.error("Please wait a few seconds before trying again");
+      return;
+    }
     setProcessing(true);
     try {
       const order = await saveOrder("cod");
@@ -149,6 +189,10 @@ const CheckoutPage = () => {
 
   const onRazorpay = async () => {
     if (!validate()) return;
+    if (!canSubmit("checkout", 8000)) {
+      toast.error("Please wait a few seconds before trying again");
+      return;
+    }
     if (!razorpayKeyId) {
       toast.error("Online payments are not configured yet. Please order via WhatsApp.");
       return;
@@ -350,10 +394,52 @@ const CheckoutPage = () => {
                       <span>Shipping</span>
                       <span className="text-gold">Free Pan India</span>
                     </div>
+
+                    {/* Coupon input */}
+                    <div className="pt-2">
+                      {appliedCoupon ? (
+                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                          <div className="flex items-center gap-2">
+                            <Tag className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="text-xs font-semibold text-emerald-700">{appliedCoupon.code}</span>
+                            <span className="text-xs text-emerald-600">(-{appliedCoupon.type === "percent" ? appliedCoupon.value + "%" : "₹" + appliedCoupon.value})</span>
+                          </div>
+                          <button onClick={removeCoupon} className="text-emerald-500 hover:text-red-500 transition-colors">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex gap-2">
+                          <input
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                            placeholder="Coupon code"
+                            maxLength={20}
+                            className="flex-1 px-3 py-2 rounded-lg border border-border text-xs uppercase tracking-wide focus:border-gold outline-none transition-colors"
+                            onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+                          />
+                          <button
+                            onClick={applyCoupon}
+                            disabled={couponLoading || !couponCode.trim()}
+                            className="px-4 py-2 rounded-lg text-xs font-semibold bg-foreground text-background disabled:opacity-40 transition-opacity"
+                          >
+                            {couponLoading ? "..." : "Apply"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {discount > 0 && (
+                      <div className="flex justify-between text-emerald-600 font-medium">
+                        <span>Discount</span>
+                        <span>-{formatINR(discount)}</span>
+                      </div>
+                    )}
+
                     <div className="gold-divider my-3" />
                     <div className="flex justify-between font-display text-2xl">
                       <span>Total</span>
-                      <span className="text-gold-grad">{formatINR(total)}</span>
+                      <span className="text-gold-grad">{formatINR(finalTotal)}</span>
                     </div>
                   </div>
 

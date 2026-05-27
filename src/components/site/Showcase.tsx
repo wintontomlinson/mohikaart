@@ -4,6 +4,7 @@ import { ArrowRight, Star, Heart, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
+import { staggerContainer, staggerItemScale } from "./animations";
 
 import catKeychain from "@/assets/cat-keychain.jpg";
 import catFrame from "@/assets/cat-frame.jpg";
@@ -64,8 +65,8 @@ const Showcase = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="font-semibold uppercase mb-3" style={{ fontSize: "11px", color: "#c9a84c", letterSpacing: "0.25em" }}>
               Best Sellers
@@ -94,21 +95,21 @@ const Showcase = () => {
         </div>
 
         {/* Product grid — premium luxury cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5">
-          {PRODUCTS.map((p, i) => (
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-5"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          {PRODUCTS.map((p) => (
             <motion.div
               key={p.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="group cursor-pointer"
-              style={{ transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1), box-shadow 0.5s cubic-bezier(0.22,1,0.36,1)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-10px) scale(1.01)"; e.currentTarget.style.boxShadow = "0 28px 56px -16px rgba(26,18,8,0.16), 0 0 0 1px rgba(201,168,76,0.06)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0) scale(1)"; e.currentTarget.style.boxShadow = "0 4px 12px -6px rgba(26,18,8,0.06)"; }}
+              variants={staggerItemScale}
+              className="group cursor-pointer product-card-hover"
             >
               {/* Image */}
-              <div className="relative overflow-hidden rounded-2xl" style={{ aspectRatio: "1/1", boxShadow: "0 4px 12px -6px rgba(26,18,8,0.06)" }}>
+              <div className="relative overflow-hidden rounded-2xl product-card-glow" style={{ aspectRatio: "1/1", boxShadow: "0 4px 12px -6px rgba(26,18,8,0.06)" }}>
                 <img src={p.image} alt={p.name} loading="lazy" decoding="async" width={400} height={400} className="w-full h-full object-cover transition-all duration-[1s] ease-out group-hover:scale-[1.08] group-hover:brightness-[1.02]" style={{ backgroundColor: "hsl(36 30% 94%)" }} />
 
                 {/* Glassmorphism overlay on hover */}
@@ -169,7 +170,7 @@ const Showcase = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

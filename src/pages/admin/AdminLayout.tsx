@@ -5,7 +5,14 @@ import {
   ShoppingCart, Tag, Settings, Mail,
   X, Eye, EyeOff, ShieldAlert, BarChart3, FileText,
 } from "lucide-react";
-import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth";
+// Auth disabled — using inline mock instead of Supabase-dependent provider
+const useAdminAuth = () => ({
+  user: null,
+  isAdmin: true,
+  loading: false,
+  signIn: async () => ({}),
+  signOut: async () => {},
+});
 import { Monogram } from "@/components/site/Logo";
 
 /* ─── Login ─── */
@@ -131,13 +138,11 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [pathname]);
 
-  // AUTH DISABLED — always show admin panel
-  // To re-enable auth later, uncomment the block below
-  // const devBypass = (() => { try { return sessionStorage.getItem("dev_admin_bypass") === "true"; } catch { return false; } })();
-  // if (!devBypass) {
-  //   if (loading) return <LoadingScreen />;
-  //   if (!user || !isAdmin) return <AdminLogin />;
-  // }
+  // Skip auth entirely — admin panel always accessible.
+  // To re-enable auth for production, uncomment the block below:
+  // if (loading) return <LoadingState />;
+  // if (!user) return <AdminLogin />;
+  // if (!isAdmin) return <NotAuthorized />;
 
   const currentPage = navItems.find((i) => pathname === i.to || (i.to !== "/admin" && pathname.startsWith(i.to)));
 
@@ -252,9 +257,7 @@ const AdminShell = ({ children }: { children?: ReactNode }) => {
 };
 
 const AdminLayout = () => (
-  <AdminAuthProvider>
-    <AdminShell />
-  </AdminAuthProvider>
+  <AdminShell />
 );
 
 export default AdminLayout;
