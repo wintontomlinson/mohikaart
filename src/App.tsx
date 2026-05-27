@@ -18,6 +18,7 @@ import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
 import CustomOrderPage from "./pages/CustomOrderPage";
 import Checkout from "./pages/Checkout";
+import WishlistPage from "./pages/WishlistPage";
 import NotFound from "./pages/NotFound";
 
 // Rarely-visited storefront pages → lazy
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/custom-order" element={<CustomOrderPage />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/wedding" element={<WeddingPage />} />
               <Route path="/corporate" element={<CorporatePage />} />
               <Route path="/care-guide" element={<CareGuidePage />} />
